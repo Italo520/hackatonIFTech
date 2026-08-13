@@ -36,23 +36,105 @@ class DatabaseSeeder extends Seeder
         
         $admin = User::where('role', 'gestor_conteudo')->first();
 
-        // 2. Municipio Real: Bonito-MS
-        $municipio = Municipio::create([
+        // 2. Municípios Reais
+        $municipioBonito = Municipio::create([
             'nome' => 'Bonito',
             'uf' => 'MS',
             'tema_visual' => 'default',
         ]);
 
-        // 3. Categorias Realistas
-        $catAventura = Categoria::create(['nome' => 'Aventura', 'slug' => 'aventura', 'icone' => 'bi-bicycle', 'tipo' => 'atrativo']);
-        $catAgua = Categoria::create(['nome' => 'Rios e Nascentes', 'slug' => 'rios', 'icone' => 'bi-water', 'tipo' => 'atrativo']);
-        $catGrutas = Categoria::create(['nome' => 'Grutas', 'slug' => 'grutas', 'icone' => 'bi-geo', 'tipo' => 'atrativo']);
-        $catGastronomia = Categoria::create(['nome' => 'Gastronomia', 'slug' => 'gastronomia', 'icone' => 'bi-cup-hot', 'tipo' => 'servico']);
-        $catHospedagem = Categoria::create(['nome' => 'Hospedagem', 'slug' => 'hospedagem', 'icone' => 'bi-house-heart', 'tipo' => 'servico']);
+        $municipioJampa = Municipio::create([
+            'nome' => 'João Pessoa',
+            'uf' => 'PB',
+            'tema_visual' => 'praia',
+        ]);
 
-        // 4. Atrativos Realistas
+        // 3. Categorias Realistas
+        $catAventura = Categoria::create(['nome' => 'Aventura & Trilhas', 'slug' => 'aventura', 'icone' => 'bi-bicycle', 'tipo' => 'atrativo']);
+        $catAgua = Categoria::create(['nome' => 'Praias, Rios e Piscinas', 'slug' => 'rios', 'icone' => 'bi-water', 'tipo' => 'atrativo']);
+        $catGrutas = Categoria::create(['nome' => 'Monumentos & Natureza', 'slug' => 'grutas', 'icone' => 'bi-geo', 'tipo' => 'atrativo']);
+        $catGastronomia = Categoria::create(['nome' => 'Gastronomia Regional', 'slug' => 'gastronomia', 'icone' => 'bi-cup-hot', 'tipo' => 'servico']);
+        $catHospedagem = Categoria::create(['nome' => 'Hospedagem', 'slug' => 'hospedagem', 'icone' => 'bi-house-heart', 'tipo' => 'servico']);
+        $catCultura = Categoria::create(['nome' => 'História & Cultura', 'slug' => 'cultura', 'icone' => 'bi-bank', 'tipo' => 'atrativo']);
+
+        // 4. Atrativos Realistas com Coordenadas GPS
         $atrativosData = [
+            // João Pessoa - PB
             [
+                'municipio' => $municipioJampa,
+                'categoria' => $catAgua,
+                'nome' => 'Praia de Tambaú',
+                'descricao' => 'Uma das praias urbanas mais famosas de João Pessoa, com águas mornas, calçadão movimentado, feirinha de artesanato e passeios de catamarã.',
+                'historia' => 'O coração turístico da capital paraibana, ponto de partida para as piscinas de Picãozinho.',
+                'endereco' => 'Av. Almirante Tamandaré, Tambaú, João Pessoa - PB',
+                'tempo' => 180,
+                'acessibilidade' => ['cadeirante', 'deficiencia_auditiva'],
+                'lat' => -7.1147,
+                'lng' => -34.8239,
+            ],
+            [
+                'municipio' => $municipioJampa,
+                'categoria' => $catGrutas,
+                'nome' => 'Farol do Cabo Branco',
+                'descricao' => 'O ponto mais oriental das Américas continentais onde o sol nasce primeiro. Vista panorâmica espetacular do oceano atlântico e falésias.',
+                'historia' => 'Inaugurado em 1972 com formato triangular único que simboliza uma planta de sisal.',
+                'endereco' => 'Ponta do Seixas, Cabo Branco, João Pessoa - PB',
+                'tempo' => 60,
+                'acessibilidade' => ['cadeirante'],
+                'lat' => -7.1477,
+                'lng' => -34.7963,
+            ],
+            [
+                'municipio' => $municipioJampa,
+                'categoria' => $catAgua,
+                'nome' => 'Piscinas Naturais dos Seixas',
+                'descricao' => 'Aquários naturais formados por corais na maré baixa com águas cristalinas repletas de peixes coloridos, ideal para mergulho livre.',
+                'historia' => 'Formação de recifes de corais protegida acessível por embarcações credenciadas.',
+                'endereco' => 'Praia dos Seixas, João Pessoa - PB',
+                'tempo' => 150,
+                'acessibilidade' => ['deficiencia_auditiva'],
+                'lat' => -7.1597,
+                'lng' => -34.7877,
+            ],
+            [
+                'municipio' => $municipioJampa,
+                'categoria' => $catCultura,
+                'nome' => 'Centro Cultural São Francisco',
+                'descricao' => 'Um dos mais importantes complexos barrocos do Brasil, com igreja, convento, claustro e rico acervo de arte sacra.',
+                'historia' => 'Construído a partir de 1589 pela Ordem Franciscana, tombado pelo IPHAN.',
+                'endereco' => 'Praça São Francisco, Centro Histórico, João Pessoa - PB',
+                'tempo' => 90,
+                'acessibilidade' => ['cadeirante'],
+                'lat' => -7.1155,
+                'lng' => -34.8864,
+            ],
+            [
+                'municipio' => $municipioJampa,
+                'categoria' => $catGastronomia,
+                'nome' => 'Mangai João Pessoa',
+                'descricao' => 'Templo da culinária nordestina, famoso pelo buffet com dezenas de pratos típicos como carne de sol na nata, baião de dois e queijo coalho.',
+                'historia' => 'Fundado na Paraíba, tornou-se referência nacional em gastronomia regional.',
+                'endereco' => 'Av. Edson Ramalho, 696, Manaíra, João Pessoa - PB',
+                'tempo' => 90,
+                'acessibilidade' => ['cadeirante', 'deficiencia_auditiva'],
+                'lat' => -7.1067,
+                'lng' => -34.8315,
+            ],
+            [
+                'municipio' => $municipioJampa,
+                'categoria' => $catGastronomia,
+                'nome' => 'Nau Frutos do Mar',
+                'descricao' => 'Restaurante contemporâneo especializado em frutos do mar com arquitetura arrojada e pratos premiados com camarões e peixes nobres.',
+                'historia' => 'Nascido em João Pessoa e expandido para várias capitais do país.',
+                'endereco' => 'R. Lupércio Branco, 130, Manaíra, João Pessoa - PB',
+                'tempo' => 90,
+                'acessibilidade' => ['cadeirante'],
+                'lat' => -7.1189,
+                'lng' => -34.8302,
+            ],
+            // Bonito - MS
+            [
+                'municipio' => $municipioBonito,
                 'categoria' => $catAgua,
                 'nome' => 'Flutuação no Rio Sucuri',
                 'descricao' => 'Uma das águas mais cristalinas do mundo. Flutuação tranquila em meio a muita vida subaquática e vegetação exuberante.',
@@ -64,6 +146,7 @@ class DatabaseSeeder extends Seeder
                 'lng' => -56.5516,
             ],
             [
+                'municipio' => $municipioBonito,
                 'categoria' => $catGrutas,
                 'nome' => 'Gruta do Lago Azul',
                 'descricao' => 'Cartão postal de Bonito, uma caverna com um lago subterrâneo de coloração azul intensa.',
@@ -75,6 +158,7 @@ class DatabaseSeeder extends Seeder
                 'lng' => -56.5861,
             ],
             [
+                'municipio' => $municipioBonito,
                 'categoria' => $catAventura,
                 'nome' => 'Bóia Cross no Rio Formoso',
                 'descricao' => 'Aventura em bóias individuais por corredeiras refrescantes no Rio Formoso.',
@@ -86,6 +170,7 @@ class DatabaseSeeder extends Seeder
                 'lng' => -56.4523,
             ],
             [
+                'municipio' => $municipioBonito,
                 'categoria' => $catGastronomia,
                 'nome' => 'Casa do João',
                 'descricao' => 'Um dos restaurantes mais famosos da região, conhecido por seus pratos com peixes locais como Pintado e Pacu.',
@@ -101,18 +186,19 @@ class DatabaseSeeder extends Seeder
         $atrativosCriados = [];
         foreach ($atrativosData as $data) {
             $atrativo = Atrativo::create([
-                'municipio_id' => $municipio->id,
+                'municipio_id' => $data['municipio']->id,
                 'categoria_id' => $data['categoria']->id,
                 'nome' => $data['nome'],
                 'descricao' => $data['descricao'],
                 'historia' => $data['historia'],
                 'endereco' => $data['endereco'],
+                'lat' => $data['lat'],
+                'lng' => $data['lng'],
                 'tempo_medio_visita' => $data['tempo'],
                 'status' => 'ativo',
                 'acessibilidade' => $data['acessibilidade'],
                 'validado_por' => $admin->id,
                 'validado_em' => now(),
-                // Geo is simulated for Leaflet map logic in frontend as metadata json or simple columns
             ]);
             $atrativosCriados[] = $atrativo;
             
@@ -122,6 +208,7 @@ class DatabaseSeeder extends Seeder
                 'hash_code' => Str::random(10),
             ]);
         }
+
 
         // 5. Eventos
         Evento::create([

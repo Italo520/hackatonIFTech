@@ -268,6 +268,69 @@ export const LocationService = {
     },
 
     /**
+     * Calcula a distância entre duas coordenadas GPS em km (Fórmula Haversine)
+     */
+    calculateDistanceKm(lat1, lon1, lat2, lon2) {
+        if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+        const R = 6371; // Raio da Terra em km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return parseFloat((R * c).toFixed(2));
+    },
+
+    /**
+     * Formata distância amigável para exibição
+     */
+    formatDistance(distKm) {
+        if (distKm === null || distKm === undefined || isNaN(distKm)) return '';
+        if (distKm < 1) {
+            return `${Math.round(distKm * 1000)} m`;
+        }
+        return `${distKm.toFixed(1).replace('.', ',')} km`;
+    },
+
+    /**
+     * Gera URL de navegação/rota para o destino usando a localização GPS real do usuário
+     */
+    getDirectionsUrl(destLat, destLng, provider = 'google', destName = '') {
+        const saved = this.getSavedLocation();
+        const startLat = saved?.lat;
+        const startLng = saved?.lng;
+
+        if (provider === 'waze') {
+            return `https://waze.com/ul?ll=${destLat},${destLng}&navigate=yes`;
+        }
+        if (provider === 'osm' || provider === 'openstreetmap') {
+            if (startLat && startLng) {
+                return `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${startLat}%2C${startLng}%3B${destLat}%2C${destLng}`;
+            }
+            return `https://www.openstreetmap.org/?mlat=${destLat}&mlon=${destLng}#map=16/${destLat}/${destLng}`;
+        }
+        if (provider === 'apple') {
+            return `https://maps.apple.com/?daddr=${destLat},${destLng}&saddr=${startLat || ''},${startLng || ''}`;
+        }
+
+        // Padrão Google Maps
+        if (startLat && startLng) {
+            return `https://www.google.com/maps/dir/?api=1&origin=${startLat},${startLng}&destination=${destLat},${destLng}&travelmode=driving`;
+        }
+        return `https://maps.google.com/?q=${destLat},${destLng}${destName ? `(${encodeURIComponent(destName)})` : ''}`;
+    },
+
+    /**
+     * Abre a melhor rota disponível
+     */
+    openDirections(destLat, destLng, destName = '') {
+        const url = this.getDirectionsUrl(destLat, destLng, 'google', destName);
+        window.open(url, '_blank');
+    },
+
+    /**
      * Define manualmente uma localização (ex: clicando em um atalho ou busca)
      */
     setLocationManual(city, uf, lat, lng, displayName = null) {
@@ -284,6 +347,7 @@ export const LocationService = {
         this.saveLocation(data);
         return data;
     },
+
 
     /**
      * Controla o spinner de carregamento no cabeçalho e modal
