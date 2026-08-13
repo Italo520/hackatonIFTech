@@ -6,6 +6,18 @@
     <meta name="theme-color" content="#005f73">
     <title>{{ config('app.name', 'Bonito MS') }}</title>
 
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Turismo PWA">
+    <meta name="application-name" content="Turismo PWA">
+    
+    <!-- PWA Manifest & Icons -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,600,700,800|work-sans:400,500,600&display=swap" rel="stylesheet" />
@@ -19,6 +31,7 @@
 
     <!-- Vite JS only (disabled CSS to avoid Tailwind conflict) -->
     @vite(['resources/js/app.js'])
+
     
     <style>
         :root {
@@ -98,9 +111,15 @@
                 <span id="location-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status" style="width: 0.85rem; height: 0.85rem;"></span>
                 <i class="bi bi-chevron-down text-muted" style="font-size: 0.75rem;"></i>
             </button>
-            <button class="btn btn-light rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 44px; height: 44px; border: none; background: rgba(0,0,0,0.05);" data-bs-toggle="modal" data-bs-target="#locationModal" title="Ver localização">
-                <i class="bi bi-compass fs-5 text-primary"></i>
-            </button>
+            <div class="d-flex align-items-center gap-2">
+                <button id="btn-header-install" type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 fw-bold d-none d-flex align-items-center gap-1 shadow-sm btn-trigger-pwa-install" title="Instalar Aplicativo" style="font-size: 0.8rem; min-height: 36px;">
+                    <i class="bi bi-download"></i>
+                    <span>Instalar</span>
+                </button>
+                <button class="btn btn-light rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 44px; height: 44px; border: none; background: rgba(0,0,0,0.05);" data-bs-toggle="modal" data-bs-target="#locationModal" title="Ver localização">
+                    <i class="bi bi-compass fs-5 text-primary"></i>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -179,6 +198,93 @@
         </div>
     </div>
 
+    <!-- Floating PWA Install Prompt Banner -->
+    <div id="pwa-install-banner" class="position-fixed start-50 translate-middle-x w-100 px-3 z-3 d-none" style="bottom: 76px; max-width: 460px; z-index: 1050;">
+        <div class="card border-0 rounded-4 shadow-lg p-3 text-white overflow-hidden position-relative" style="background: linear-gradient(135deg, #005f73, #0a9396); border: 1px solid rgba(255,255,255,0.2) !important; backdrop-filter: blur(10px);">
+            <button type="button" id="btn-dismiss-install-banner" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 shadow-none" style="font-size: 0.75rem;" aria-label="Dispensar"></button>
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-4 bg-white p-2 shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                    <img src="/icons/icon-192x192.png" alt="App Icon" style="width: 34px; height: 34px;" class="rounded-3">
+                </div>
+                <div class="flex-grow-1 pe-4">
+                    <div class="fw-bold fs-6 mb-0 text-white">Instalar Turismo App</div>
+                    <div class="text-white-50 small" style="font-size: 0.75rem;">Acesso rápido com mapas e roteiros offline</div>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-3 pt-2 border-top border-white border-opacity-15">
+                <button type="button" class="btn btn-light text-primary fw-bold rounded-pill flex-grow-1 btn-trigger-pwa-install py-2 shadow-sm" id="btn-install-banner" style="font-size: 0.9rem;">
+                    <i class="bi bi-download me-1"></i> Instalar Aplicativo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Instruções iOS Safari -->
+    <div class="modal fade" id="pwaIosInstallModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg p-3">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Instalar no iPhone / iPad</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-3">
+                    <div class="rounded-circle d-inline-flex p-3 bg-light text-primary mb-3">
+                        <i class="bi bi-apple fs-1"></i>
+                    </div>
+                    <p class="text-secondary small mb-4">Siga estes passos no Safari para ter o app na tela inicial:</p>
+                    <div class="text-start bg-light rounded-3 p-3 small d-flex flex-column gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary rounded-circle">1</span>
+                            <span>Toque no botão <strong>Compartilhar</strong> <i class="bi bi-box-arrow-up text-primary fs-6"></i> no Safari.</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary rounded-circle">2</span>
+                            <span>Role para baixo e selecione <strong>"Adicionar à Tela de Início"</strong> <i class="bi bi-plus-square text-primary fs-6"></i>.</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary rounded-circle">3</span>
+                            <span>Toque em <strong>Adicionar</strong> no topo direito.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-primary w-100 rounded-pill py-2 fw-bold" data-bs-dismiss="modal">Entendi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Instalação Manual (Desktop / Outros Navegadores) -->
+    <div class="modal fade" id="pwaManualInstallModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg p-3">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Instalar o Aplicativo</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-3">
+                    <div class="rounded-4 bg-light d-inline-flex p-3 text-primary mb-3">
+                        <i class="bi bi-phone fs-1"></i>
+                    </div>
+                    <p class="text-secondary small mb-3">Instale diretamente pelo menu do seu navegador:</p>
+                    <div class="text-start bg-light rounded-3 p-3 small d-flex flex-column gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-three-dots-vertical text-primary fs-5"></i>
+                            <span>Clique no menu do navegador (três pontinhos no topo).</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-download text-primary fs-5"></i>
+                            <span>Selecione <strong>"Instalar Aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-primary w-100 rounded-pill py-2 fw-bold" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content Area -->
     <main class="flex-grow-1 overflow-auto no-scrollbar pt-5 pb-5 mt-3 safe-area-pb">
         @yield('content')
@@ -218,6 +324,7 @@
     
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmxc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
 
     <!-- Location Modal & Controller Handlers -->
     <script>
