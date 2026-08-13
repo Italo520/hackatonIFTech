@@ -92,14 +92,92 @@
     <!-- Topbar -->
     <header class="glass-nav fixed-top w-100 z-3 safe-area-pt">
         <div class="container-fluid px-3 py-2 d-flex justify-content-between align-items-center" style="min-height: 56px;">
-            <a href="{{ route('pwa.home') }}" class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2 m-0 fs-5">
-                <i class="bi bi-geo-alt-fill"></i> Bonito MS
-            </a>
-            <button class="btn btn-light rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 44px; height: 44px; border: none; background: rgba(0,0,0,0.05);">
-                <i class="bi bi-bell fs-5 text-secondary"></i>
+            <button type="button" class="btn p-0 border-0 bg-transparent navbar-brand fw-bold text-primary d-flex align-items-center gap-2 m-0 fs-5 text-start shadow-none" data-bs-toggle="modal" data-bs-target="#locationModal" title="Alterar ou atualizar localização">
+                <i class="bi bi-geo-alt-fill text-primary" id="location-pin-icon"></i>
+                <span id="current-location-display">Bonito MS</span>
+                <span id="location-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status" style="width: 0.85rem; height: 0.85rem;"></span>
+                <i class="bi bi-chevron-down text-muted" style="font-size: 0.75rem;"></i>
+            </button>
+            <button class="btn btn-light rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 44px; height: 44px; border: none; background: rgba(0,0,0,0.05);" data-bs-toggle="modal" data-bs-target="#locationModal" title="Ver localização">
+                <i class="bi bi-compass fs-5 text-primary"></i>
             </button>
         </div>
     </header>
+
+    <!-- Modal de Seleção de Localização (OpenStreetMap) -->
+    <div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(0, 95, 115, 0.1); color: var(--bs-primary);">
+                            <i class="bi bi-geo-alt-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold m-0" id="locationModalLabel">Sua Localização</h5>
+                            <span class="text-secondary small">Alimentado por OpenStreetMap</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Localização Atual Ativa -->
+                    <div class="p-3 rounded-4 mb-3 border d-flex justify-content-between align-items-center bg-light">
+                        <div>
+                            <div class="text-muted fw-semibold small" style="font-size: 0.7rem; text-transform: uppercase;">Cidade Atual</div>
+                            <div class="fw-bold text-dark fs-6" id="modal-current-location-name">Carregando...</div>
+                            <div class="text-muted small" id="modal-current-coords" style="font-size: 0.75rem;"></div>
+                        </div>
+                        <span class="badge bg-primary rounded-pill px-3 py-2 fw-semibold">Ativo</span>
+                    </div>
+
+                    <!-- Botão GPS em tempo real -->
+                    <button type="button" id="btn-modal-detect-gps" class="btn btn-primary w-100 rounded-4 py-3 fw-bold d-flex align-items-center justify-content-center gap-2 mb-4 shadow-sm">
+                        <i class="bi bi-crosshair fs-5"></i>
+                        <span>Detectar Meu GPS Real</span>
+                    </button>
+
+                    <!-- Busca com OpenStreetMap -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-secondary">Buscar outra cidade</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 ps-3">
+                                <i class="bi bi-search text-secondary"></i>
+                            </span>
+                            <input type="text" id="osm-city-search-input" class="form-control bg-light border-0 py-2 shadow-none" placeholder="Ex: João Pessoa, Recife, Bonito..." autocomplete="off">
+                            <button class="btn btn-outline-secondary border-0 bg-light" type="button" id="osm-search-btn">
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                        <!-- Lista de sugestões da busca OSM -->
+                        <div id="osm-search-results" class="list-group mt-2 border-0 shadow-sm rounded-3 d-none" style="max-height: 180px; overflow-y: auto;"></div>
+                    </div>
+
+                    <!-- Destinos Populares / Atalhos rápidos -->
+                    <div>
+                        <div class="text-muted fw-semibold small mb-2" style="font-size: 0.75rem; text-transform: uppercase;">Cidades em Destaque</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-outline-primary rounded-pill btn-sm px-3 fw-semibold btn-quick-location" data-city="João Pessoa" data-uf="PB" data-lat="-7.1153" data-lng="-34.8641">
+                                📍 João Pessoa - PB
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary rounded-pill btn-sm px-3 fw-semibold btn-quick-location" data-city="Bonito" data-uf="MS" data-lat="-21.1275" data-lng="-56.4831">
+                                Bonito - MS
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary rounded-pill btn-sm px-3 fw-semibold btn-quick-location" data-city="Recife" data-uf="PE" data-lat="-8.0476" data-lng="-34.8770">
+                                Recife - PE
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary rounded-pill btn-sm px-3 fw-semibold btn-quick-location" data-city="Natal" data-uf="RN" data-lat="-5.7945" data-lng="-35.2110">
+                                Natal - RN
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary rounded-pill btn-sm px-3 fw-semibold btn-quick-location" data-city="São Paulo" data-uf="SP" data-lat="-23.5505" data-lng="-46.6333">
+                                São Paulo - SP
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Main Content Area -->
     <main class="flex-grow-1 overflow-auto no-scrollbar pt-5 pb-5 mt-3 safe-area-pb">
@@ -140,6 +218,142 @@
     
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmxc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- Location Modal & Controller Handlers -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const detectGpsBtn = document.getElementById('btn-modal-detect-gps');
+            const searchInput = document.getElementById('osm-city-search-input');
+            const searchBtn = document.getElementById('osm-search-btn');
+            const searchResults = document.getElementById('osm-search-results');
+            const quickButtons = document.querySelectorAll('.btn-quick-location');
+            const locationModalEl = document.getElementById('locationModal');
+
+            function getModalInstance() {
+                if (typeof bootstrap !== 'undefined' && locationModalEl) {
+                    return bootstrap.Modal.getInstance(locationModalEl) || new bootstrap.Modal(locationModalEl);
+                }
+                return null;
+            }
+
+            // GPS Click Handler
+            if (detectGpsBtn) {
+                detectGpsBtn.addEventListener('click', function() {
+                    const originalHtml = detectGpsBtn.innerHTML;
+                    detectGpsBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Detectando no OpenStreetMap...';
+                    detectGpsBtn.disabled = true;
+
+                    if (window.LocationService) {
+                        window.LocationService.detectGPS({
+                            showLoading: true,
+                            onSuccess: function(data) {
+                                detectGpsBtn.innerHTML = '<i class="bi bi-check2-circle fs-5"></i> Localização Atualizada!';
+                                setTimeout(() => {
+                                    detectGpsBtn.innerHTML = originalHtml;
+                                    detectGpsBtn.disabled = false;
+                                    const modal = getModalInstance();
+                                    if (modal) modal.hide();
+                                }, 800);
+                            },
+                            onError: function(err) {
+                                detectGpsBtn.innerHTML = '<i class="bi bi-exclamation-triangle"></i> ' + (err.message || 'Erro ao obter GPS');
+                                setTimeout(() => {
+                                    detectGpsBtn.innerHTML = originalHtml;
+                                    detectGpsBtn.disabled = false;
+                                }, 3000);
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Quick location buttons
+            quickButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const city = this.getAttribute('data-city');
+                    const uf = this.getAttribute('data-uf');
+                    const lat = parseFloat(this.getAttribute('data-lat'));
+                    const lng = parseFloat(this.getAttribute('data-lng'));
+
+                    if (window.LocationService) {
+                        window.LocationService.setLocationManual(city, uf, lat, lng);
+                    }
+                    const modal = getModalInstance();
+                    if (modal) modal.hide();
+                });
+            });
+
+            // OpenStreetMap Search Handler
+            let searchTimeout = null;
+            async function performSearch() {
+                const q = (searchInput?.value || '').trim();
+                if (q.length < 2) {
+                    if (searchResults) searchResults.classList.add('d-none');
+                    return;
+                }
+
+                if (searchResults) {
+                    searchResults.innerHTML = '<div class="p-3 text-center text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Buscando no OpenStreetMap...</div>';
+                    searchResults.classList.remove('d-none');
+                }
+
+                if (window.LocationService) {
+                    const results = await window.LocationService.searchCities(q);
+                    if (!searchResults) return;
+
+                    if (results && results.length > 0) {
+                        searchResults.innerHTML = results.map(item => `
+                            <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3 osm-result-item" 
+                                data-city="${item.city}" data-uf="${item.uf || ''}" data-lat="${item.lat}" data-lng="${item.lng}">
+                                <div>
+                                    <div class="fw-bold small">${item.display}</div>
+                                    <div class="text-muted text-truncate" style="font-size: 0.68rem; max-width: 260px;">${item.display_name || ''}</div>
+                                </div>
+                                <i class="bi bi-chevron-right text-muted small"></i>
+                            </button>
+                        `).join('');
+
+                        searchResults.querySelectorAll('.osm-result-item').forEach(itemBtn => {
+                            itemBtn.addEventListener('click', function() {
+                                const city = this.getAttribute('data-city');
+                                const uf = this.getAttribute('data-uf');
+                                const lat = parseFloat(this.getAttribute('data-lat'));
+                                const lng = parseFloat(this.getAttribute('data-lng'));
+
+                                if (window.LocationService) {
+                                    window.LocationService.setLocationManual(city, uf, lat, lng);
+                                }
+                                searchResults.classList.add('d-none');
+                                if (searchInput) searchInput.value = '';
+                                const modal = getModalInstance();
+                                if (modal) modal.hide();
+                            });
+                        });
+                    } else {
+                        searchResults.innerHTML = '<div class="p-3 text-center text-muted small">Nenhuma cidade encontrada no OpenStreetMap.</div>';
+                    }
+                }
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(performSearch, 400);
+                });
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        performSearch();
+                    }
+                });
+            }
+
+            if (searchBtn) {
+                searchBtn.addEventListener('click', performSearch);
+            }
+        });
+    </script>
+
     
     @stack('scripts')
 </body>

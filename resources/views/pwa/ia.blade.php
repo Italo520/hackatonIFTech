@@ -9,7 +9,7 @@
                 <i class="bi bi-robot fs-4"></i>
             </div>
             <div>
-                <h1 class="fw-bold fs-5 mb-0" style="letter-spacing: -0.01em;">Guia Bonito IA</h1>
+                <h1 class="fw-bold fs-5 mb-0" style="letter-spacing: -0.01em;">Guia <span class="current-city-name">Turismo</span> IA</h1>
                 <span class="small text-white-50">Sempre online para ajudar</span>
             </div>
         </div>
@@ -33,11 +33,11 @@
                 <i class="bi bi-robot small"></i>
             </div>
             <div class="bg-white p-3 shadow-sm border text-dark" style="border-radius: 16px; border-top-left-radius: 4px; font-size: 0.9rem;">
-                Olá! Sou seu guia virtual com IA de Bonito-MS. Você pode me perguntar sobre:
+                Olá! Sou seu guia virtual com IA para <span class="current-city-name fw-bold text-primary">sua localização</span>. Você pode me perguntar sobre:
                 <ul class="mb-0 mt-2 text-primary fw-medium" style="padding-left: 1.2rem;">
-                    <li>Onde comer peixe hoje?</li>
-                    <li>O que fazer com crianças?</li>
-                    <li>Qual a diferença entre a Gruta Azul e São Miguel?</li>
+                    <li>Onde comer peixe ou pratos típicos hoje?</li>
+                    <li>O que fazer com crianças na cidade?</li>
+                    <li>Quais as melhores praias ou passeios por perto?</li>
                 </ul>
             </div>
         </div>

@@ -5,7 +5,7 @@
     <!-- Saudação -->
     <div class="mb-4">
         <h1 class="fw-bold text-dark fs-1 mb-1" style="letter-spacing: -0.02em;">Bom dia, Turista!</h1>
-        <p class="text-secondary small mt-1">O que vamos descobrir hoje em Bonito?</p>
+        <p class="text-secondary small mt-1">O que vamos descobrir hoje em <span class="current-city-name fw-semibold text-primary">sua viagem</span>?</p>
     </div>
 
     <!-- Search Bar (Fake) -->

@@ -36,7 +36,13 @@ Route::prefix('v1')->group(function () {
 Route::prefix('v1')->group(function () {
     Route::post('analytics', [App\Http\Controllers\Api\AnalyticsController::class, 'store']);
 });
+Route::prefix('v1/location')->group(function () {
+    Route::get('/reverse', [App\Http\Controllers\Api\LocationController::class, 'reverse']);
+    Route::get('/search', [App\Http\Controllers\Api\LocationController::class, 'search']);
+});
+
 Route::middleware('auth:sanctum')->prefix('v1/privacidade')->group(function () {
     Route::get('/exportar', [App\Http\Controllers\Api\LGPDController::class, 'exportData']);
     Route::post('/excluir', [App\Http\Controllers\Api\LGPDController::class, 'deleteData']);
 });
+
