@@ -1,0 +1,54 @@
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: '${DB_DATABASE:-destino_inteligente}'
+      POSTGRES_USER: '${DB_USERNAME:-postgres}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD:-postgres}'
+    volumes:
+      - 'destino_inteligente_pgsql:/var/lib/postgresql/data'
+      - './docker/postgres/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+      - './docker/postgres/extensions.sql:/docker-entrypoint-initdb.d/20-extensions.sql'
+    networks:
+      - sail
+    healthcheck:
+      test:
+        - CMD
+        - pg_isready
+        - '-q'
+        - '-d'
+        - '${DB_DATABASE:-destino_inteligente}'
+        - '-U'
+        - '${DB_USERNAME:-postgres}'
+      retries: 3
+      timeout: 5s
+
+  redis:
+    image: 'redis:alpine'
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'destino_inteligente_redis:/data'
+    networks:
+      - sail
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      retries: 3
+      timeout: 5s
+
+networks:
+  sail:
+    driver: bridge
+
+volumes:
+  destino_inteligente_pgsql:
+    driver: local
+  destino_inteligente_redis:
+    driver: local
