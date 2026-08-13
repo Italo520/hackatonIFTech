@@ -143,15 +143,15 @@ A ordem é crítica devido às chaves estrangeiras.
 - [x] T-017: Galeria de mídia otimizada
 
 **Sprint 2 — Roteiros, IA e offline**
-- [ ] T-020: CRUD roteiros oficiais
-- [ ] T-021: Módulo IA (pgvector ingestão)
-- [ ] T-022: Assistente virtual RAG (chat)
-- [ ] T-023: Busca linguagem natural
-- [ ] T-024: Gerador de roteiro (IA)
-- [ ] T-025: "Baixar para offline" (IndexedDB + tiles)
-- [ ] T-026: Fila de escrita offline (Background Sync)
-- [ ] T-027: QR Code in loco
-- [ ] T-028: Banner offline/status
+- [x] T-020: CRUD roteiros oficiais
+- [x] T-021: Módulo IA (pgvector ingestão)
+- [x] T-022: Assistente virtual RAG (chat)
+- [x] T-023: Busca linguagem natural
+- [x] T-024: Gerador de roteiro (IA)
+- [x] T-025: "Baixar para offline" (IndexedDB + tiles)
+- [x] T-026: Fila de escrita offline (Background Sync)
+- [x] T-027: QR Code in loco
+- [x] T-028: Banner offline/status
 
 **Sprint 3 — Empreendedor, moderação e painel**
 - [ ] T-030: Wizard de cadastro do empreendedor

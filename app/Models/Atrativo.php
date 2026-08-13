@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 class Atrativo extends Model
+    use \OwenIt\Auditing\Auditable;
 {
     use HasFactory;
 
