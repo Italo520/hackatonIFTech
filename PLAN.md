@@ -164,13 +164,13 @@ A ordem é crítica devido às chaves estrangeiras.
 - [x] T-037: Gestão RBAC
 
 **Sprint 4 — Inteligência e relatórios**
-- [ ] T-040: Analytics própria (privacy-first)
-- [ ] T-041: Dashboard executivo
-- [ ] T-042: Mapa de calor (LGPD compliant)
-- [ ] T-043: Indicadores de IA
-- [ ] T-044: Indicadores econômicos/ESG
-- [ ] T-045: Relatórios PDF/CSV
-- [ ] T-046: Alertas operacionais
+- [x] T-040: Analytics própria (privacy-first)
+- [x] T-041: Dashboard executivo
+- [x] T-042: Mapa de calor (LGPD compliant)
+- [x] T-043: Indicadores de IA
+- [x] T-044: Indicadores econômicos/ESG
+- [x] T-045: Relatórios PDF/CSV
+- [x] T-046: Alertas operacionais
 
 **Sprint 5 — Hardening, acessibilidade e entrega**
 - [ ] T-050: Auditoria WCAG
