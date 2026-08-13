@@ -1,0 +1,5 @@
+2026_08_13_094652_create_roteiro_items_table.php
+2026_08_13_104848_create_audits_table.php
+2026_08_13_123951_create_ocorrencias_table.php
+2026_08_13_123951_create_prestadors_table.php
+2026_08_13_123952_create_alertas_table.php

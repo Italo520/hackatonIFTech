@@ -154,14 +154,14 @@ A ordem é crítica devido às chaves estrangeiras.
 - [x] T-028: Banner offline/status
 
 **Sprint 3 — Empreendedor, moderação e painel**
-- [ ] T-030: Wizard de cadastro do empreendedor
-- [ ] T-031: Fila de validação de cadastros
-- [ ] T-032: Autogestão do prestador
-- [ ] T-033: Avaliações (submissão, moderação)
-- [ ] T-034: Ocorrências
-- [ ] T-035: Alertas emergenciais
-- [ ] T-036: CMS completo no Tabler
-- [ ] T-037: Gestão RBAC
+- [x] T-030: Wizard de cadastro do empreendedor
+- [x] T-031: Fila de validação de cadastros
+- [x] T-032: Autogestão do prestador
+- [x] T-033: Avaliações (submissão, moderação)
+- [x] T-034: Ocorrências
+- [x] T-035: Alertas emergenciais
+- [x] T-036: CMS completo no Tabler
+- [x] T-037: Gestão RBAC
 
 **Sprint 4 — Inteligência e relatórios**
 - [ ] T-040: Analytics própria (privacy-first)

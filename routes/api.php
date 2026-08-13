@@ -30,3 +30,6 @@ Route::prefix('v1')->group(function () {
     Route::post('sync/avaliacoes', [App\Http\Controllers\Api\SyncController::class, 'syncAvaliacoes']);
     Route::get('qr/{hash}', [App\Http\Controllers\Api\QrCodeController::class, 'scan']);
 });
+Route::prefix('v1')->group(function () {
+    Route::post('ocorrencias', [App\Http\Controllers\Api\OcorrenciaController::class, 'store']);
+});
