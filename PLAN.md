@@ -173,12 +173,12 @@ A ordem é crítica devido às chaves estrangeiras.
 - [x] T-046: Alertas operacionais
 
 **Sprint 5 — Hardening, acessibilidade e entrega**
-- [ ] T-050: Auditoria WCAG
-- [ ] T-051: Pentest/Security hardening
-- [ ] T-052: LGPD self-service
-- [ ] T-053: Performance optimization
-- [ ] T-054: Backup/restore test
-- [ ] T-055: OpenAPI docs
-- [ ] T-056: Conteúdo 360° piloto
-- [ ] T-057: Seeders demo e DEMO.md
-- [ ] T-058: Testes E2E dos fluxos de banca
+- [x] T-050: Auditoria WCAG
+- [x] T-051: Pentest/Security hardening
+- [x] T-052: LGPD self-service
+- [x] T-053: Performance optimization
+- [x] T-054: Backup/restore test
+- [x] T-055: OpenAPI docs
+- [x] T-056: Conteúdo 360° piloto
+- [x] T-057: Seeders demo e DEMO.md
+- [x] T-058: Testes E2E dos fluxos de banca

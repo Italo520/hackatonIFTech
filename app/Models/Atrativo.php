@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 
 class Atrativo extends Model
-    use \OwenIt\Auditing\Auditable;
+
 {
     use HasFactory;
+    use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
         'municipio_id',
