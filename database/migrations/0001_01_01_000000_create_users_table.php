@@ -17,7 +17,15 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', [
+                'super_admin', 'prefeito', 'secretario', 'gestor_conteudo',
+                'gestor_cadastros', 'atendente', 'empreendedor', 'turista'
+            ])->default('turista');
+            $table->string('2fa_secret')->nullable();
+            $table->string('idioma')->default('pt-BR');
+            $table->json('consentimentos')->nullable();
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 
