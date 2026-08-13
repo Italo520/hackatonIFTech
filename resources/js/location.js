@@ -367,28 +367,47 @@ export const LocationService = {
      * Inicializa o serviço no carregamento da página
      */
     init() {
-        const saved = this.getSavedLocation();
-        if (saved) {
-            this.updateDOM(saved);
+        const defaultLocation = {
+            city: 'João Pessoa',
+            uf: 'PB',
+            display: 'João Pessoa PB',
+            lat: -7.1153,
+            lng: -34.8641,
+            isGPS: false
+        };
+
+        const saved = this.getSavedLocation() || defaultLocation;
+        this.updateDOM(saved);
+
+        // Controla banner de permissão de GPS
+        const banner = document.getElementById('location-permission-banner');
+        if (banner && !saved.isGPS) {
+            banner.classList.remove('d-none');
         }
 
-        // Tenta detectar automaticamente se não houver ou se for GPS
-        if (navigator.geolocation) {
-            navigator.permissions?.query({ name: 'geolocation' }).then(permissionStatus => {
-                if (permissionStatus.state === 'granted') {
-                    // Se já tiver permissão concedida, atualiza discretamente em background
-                    this.detectGPS({ showLoading: !saved });
-                } else if (!saved) {
-                    // Primeira vez: tenta detectar
-                    this.detectGPS({ showLoading: true }).catch(() => {
-                        // Se falhar a permissão, define fallback suave
-                    });
-                }
-            }).catch(() => {
-                if (!saved) {
-                    this.detectGPS({ showLoading: true }).catch(() => {});
+        // Listener para botão de ativar GPS na Home
+        document.getElementById('btn-enable-gps-home')?.addEventListener('click', () => {
+            this.detectGPS({
+                showLoading: true,
+                onSuccess: () => {
+                    banner?.classList.add('d-none');
                 }
             });
+        });
+
+        // Solicita GPS imediatamente no carregamento da página
+        if (navigator.geolocation) {
+            // Chamada direta para disparar o prompt nativo do navegador
+            this.detectGPS({ showLoading: true })
+                .then(() => {
+                    banner?.classList.add('d-none');
+                })
+                .catch(() => {
+                    // Mantém João Pessoa como fallback caso o usuário negue
+                    if (!this.getSavedLocation()) {
+                        this.saveLocation(defaultLocation);
+                    }
+                });
         }
     }
 };
@@ -396,9 +415,14 @@ export const LocationService = {
 // Auto inicializar no DOM
 if (typeof window !== 'undefined') {
     window.LocationService = LocationService;
-    document.addEventListener('DOMContentLoaded', () => {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            LocationService.init();
+        });
+    } else {
         LocationService.init();
-    });
+    }
 }
+
 
 export default LocationService;

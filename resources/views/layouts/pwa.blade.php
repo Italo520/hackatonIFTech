@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#005f73">
-    <title>{{ config('app.name', 'Bonito MS') }}</title>
+    <title>Turismo Inteligente</title>
 
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -107,10 +107,11 @@
         <div class="container-fluid px-3 py-2 d-flex justify-content-between align-items-center" style="min-height: 56px;">
             <button type="button" class="btn p-0 border-0 bg-transparent navbar-brand fw-bold text-primary d-flex align-items-center gap-2 m-0 fs-5 text-start shadow-none" data-bs-toggle="modal" data-bs-target="#locationModal" title="Alterar ou atualizar localização">
                 <i class="bi bi-geo-alt-fill text-primary" id="location-pin-icon"></i>
-                <span id="current-location-display">Bonito MS</span>
+                <span id="current-location-display">João Pessoa PB</span>
                 <span id="location-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status" style="width: 0.85rem; height: 0.85rem;"></span>
                 <i class="bi bi-chevron-down text-muted" style="font-size: 0.75rem;"></i>
             </button>
+
             <div class="d-flex align-items-center gap-2">
                 <button id="btn-header-install" type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 fw-bold d-none d-flex align-items-center gap-1 shadow-sm btn-trigger-pwa-install" title="Instalar Aplicativo" style="font-size: 0.8rem; min-height: 36px;">
                     <i class="bi bi-download"></i>
