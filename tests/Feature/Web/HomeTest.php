@@ -11,8 +11,8 @@ class HomeTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('O que fazer');
-        $response->assertSee('Guia Turístico');
+        $response->assertSee('Bom dia, Turista!');
+        $response->assertSee('Roteiros Recomendados');
     }
     
     public function test_mapa_page_loads_correctly(): void
@@ -20,7 +20,7 @@ class HomeTest extends TestCase
         $response = $this->get('/mapa');
 
         $response->assertStatus(200);
-        $response->assertSee('map-container');
+        $response->assertSee('pwa-map');
         $response->assertSee('leaflet');
     }
 }
