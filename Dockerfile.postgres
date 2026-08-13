@@ -1,0 +1,12 @@
+FROM ankane/pgvector:v0.7.0
+
+USER root
+
+RUN apt-get update \
+    && apt-cache showpkg postgresql-16-postgis-3 || true \
+    && apt-get install -y --no-install-recommends \
+       postgresql-16-postgis-3 \
+       postgresql-16-postgis-3-scripts \
+    && rm -rf /var/lib/apt/lists/*
+
+USER postgres
