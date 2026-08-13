@@ -1,36 +1,25 @@
 FROM php:8.2-fpm-alpine
 
-# Install system dependencies & build tools
+# Install system dependencies
 RUN apk add --no-cache \
     nginx \
     curl \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    libzip-dev \
-    zip \
-    unzip \
     nodejs \
     npm \
-    sqlite \
-    sqlite-dev \
-    postgresql-dev \
-    oniguruma-dev \
-    icu-dev
+    sqlite
 
-# Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        pdo \
-        pdo_mysql \
-        pdo_sqlite \
-        pdo_pgsql \
-        bcmath \
-        gd \
-        intl \
-        mbstring \
-        opcache \
-        zip
+# Install PHP extension installer helper & extensions
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions \
+    pdo_mysql \
+    pdo_sqlite \
+    pdo_pgsql \
+    bcmath \
+    gd \
+    intl \
+    mbstring \
+    opcache \
+    zip
 
 # Copy Composer
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
