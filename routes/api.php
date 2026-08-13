@@ -33,3 +33,6 @@ Route::prefix('v1')->group(function () {
 Route::prefix('v1')->group(function () {
     Route::post('ocorrencias', [App\Http\Controllers\Api\OcorrenciaController::class, 'store']);
 });
+Route::prefix('v1')->group(function () {
+    Route::post('analytics', [App\Http\Controllers\Api\AnalyticsController::class, 'store']);
+});

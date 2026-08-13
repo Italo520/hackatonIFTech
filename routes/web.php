@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\EmpreendedorController;
 use App\Http\Controllers\Web\AdminController;
 use App\Http\Controllers\Web\Admin\PrestadorValidationController;
 use App\Http\Controllers\Web\Admin\AlertaController;
+use App\Http\Controllers\Web\Admin\RelatorioController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/mapa', [HomeController::class, 'mapa'])->name('mapa');
@@ -22,6 +23,8 @@ Route::middleware(['auth', 'role:empreendedor'])->prefix('parceiro')->group(func
 
 Route::middleware(['auth', 'role:gestor_cadastros,gestor_conteudo,secretario,prefeito'])->prefix('admin')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/heatmap-data', [AdminController::class, 'heatmapData'])->name('admin.heatmap');
+    Route::get('/relatorios/exportar', [RelatorioController::class, 'exportCsv'])->name('admin.relatorios.exportar');
     Route::get('/atrativos', [AdminController::class, 'atrativos'])->name('admin.atrativos');
 
     Route::get('/prestadores/fila', [PrestadorValidationController::class, 'index'])->name('admin.prestadores.fila');
