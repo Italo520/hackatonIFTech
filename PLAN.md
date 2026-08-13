@@ -123,24 +123,24 @@ A ordem é crítica devido às chaves estrangeiras.
 ### D. Checklist de Tasks (Ordem de Execução por Sprint)
 
 **Sprint 0 — Fundação (setup)**
-- [ ] T-001: Repo Git + CI (GitHub Actions: Pint, Larastan, Pest, composer audit)
-- [ ] T-002: Laravel 11 + PostgreSQL 16 (PostGIS + pgvector) + Redis via Docker Compose
-- [ ] T-003: Auth: Sanctum + sessão, RBAC (8 roles), 2FA TOTP, policies
-- [ ] T-004: Base Tabler (layout vertical) integrada ao Blade + tema visual
-- [ ] T-005: PWA shell: manifest, Service Worker (Workbox), precache
-- [ ] T-006: Migrations iniciais (seção 8) + seeders de demo realistas
-- [ ] T-007: Auditoria (spatie/laravel-auditing) + logs
-- [ ] T-008: i18n pt/en/es (lang files + middleware)
+- [x] T-001: Repo Git + CI (GitHub Actions: Pint, Larastan, Pest, composer audit)
+- [x] T-002: Laravel 11 + PostgreSQL 16 (PostGIS + pgvector) + Redis via Docker Compose
+- [x] T-003: Auth: Sanctum + sessão, RBAC (8 roles), 2FA TOTP, policies
+- [x] T-004: Base Tabler (layout vertical) integrada ao Blade + tema visual
+- [x] T-005: PWA shell: manifest, Service Worker (Workbox), precache
+- [x] T-006: Migrations iniciais (seção 8) + seeders de demo realistas
+- [x] T-007: Auditoria (spatie/laravel-auditing) + logs
+- [x] T-008: i18n pt/en/es (lang files + middleware)
 
 **Sprint 1 — Turista: descoberta**
-- [ ] T-010: Home mobile-first
-- [ ] T-011: CRUD API + páginas de atrativos (tsvector, GiST)
-- [ ] T-012: Busca com filtros combináveis
-- [ ] T-013: Agenda de eventos
-- [ ] T-014: Mapa Leaflet básico
-- [ ] T-015: Campos de acessibilidade estruturados
-- [ ] T-016: Utilidade pública/emergência + precache offline
-- [ ] T-017: Galeria de mídia otimizada
+- [x] T-010: Home mobile-first
+- [x] T-011: CRUD API + páginas de atrativos (tsvector, GiST)
+- [x] T-012: Busca com filtros combináveis
+- [x] T-013: Agenda de eventos
+- [x] T-014: Mapa Leaflet básico
+- [x] T-015: Campos de acessibilidade estruturados
+- [x] T-016: Utilidade pública/emergência + precache offline
+- [x] T-017: Galeria de mídia otimizada
 
 **Sprint 2 — Roteiros, IA e offline**
 - [ ] T-020: CRUD roteiros oficiais
