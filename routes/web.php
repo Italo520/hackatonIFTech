@@ -3,6 +3,12 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\ExplorarController;
 use App\Http\Controllers\Web\AtrativoWebController;
+use App\Http\Controllers\Web\AdminController;
+use App\Http\Controllers\Web\EmpreendedorController;
+use App\Http\Controllers\Web\Admin\AlertaController;
+use App\Http\Controllers\Web\Admin\PrestadorValidationController;
+use App\Http\Controllers\Web\Admin\RelatorioController;
+use App\Http\Controllers\QrCodeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,7 +21,6 @@ Route::get('/', function () {
 })->name('pwa.home');
 
 Route::get('/explorar', [ExplorarController::class, 'index'])->name('pwa.explorar');
-
 Route::get('/atrativo/{id}', [AtrativoWebController::class, 'show'])->name('pwa.atrativo');
 
 Route::get('/eventos', function () {
@@ -42,56 +47,49 @@ Route::get('/ia', function () {
     return view('pwa.ia');
 })->name('pwa.ia');
 
-use App\Http\Controllers\QrCodeController;
-
 // QR Code Redirecionamento
 Route::get('/qr/{hash}', [QrCodeController::class, 'resolve'])->name('qr.resolve');
 
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
-    
-    // Dashboard principal
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
-    // Gestor (role: gestor_conteudo, gestor_cadastros)
-    Route::middleware(['role:gestor_conteudo,gestor_cadastros,super_admin'])->group(function () {
-        Route::get('/atrativos', function() { return view('admin.atrativos.index'); })->name('atrativos.index');
-        Route::get('/eventos', function() { return view('admin.eventos.index'); })->name('eventos.index');
-        Route::get('/roteiros', function() { return view('admin.roteiros.index'); })->name('roteiros.index');
-        Route::get('/alertas', function() { return view('admin.alertas.index'); })->name('alertas.index');
-        Route::get('/auditoria', function() { return view('admin.auditoria.index'); })->name('auditoria.index');
-    });
-
-    // Empreendedor (role: empreendedor)
-    Route::middleware(['role:empreendedor,super_admin'])->group(function () {
-        Route::get('/meus-negocios', function() { return view('empreendedor.index'); })->name('empreendedor.index');
-    });
-});
-
-use App\Http\Controllers\Web\AdminController;
-use App\Http\Controllers\Web\EmpreendedorController;
-use App\Http\Controllers\Web\Admin\AlertaController;
-use App\Http\Controllers\Web\Admin\PrestadorValidationController;
-use App\Http\Controllers\Web\Admin\RelatorioController;
-
-// Parceiro / Empreendedor
+/*
+|--------------------------------------------------------------------------
+| Parceiro / Empreendedor
+|--------------------------------------------------------------------------
+*/
 Route::get('/parceiro/cadastro', [EmpreendedorController::class, 'create'])->name('empreendedor.create');
 Route::post('/parceiro/cadastro', [EmpreendedorController::class, 'store'])->name('empreendedor.store');
 Route::get('/parceiro/painel', [EmpreendedorController::class, 'dashboard'])->name('empreendedor.dashboard');
 
-// Admin Public / Action Endpoints
+/*
+|--------------------------------------------------------------------------
+| Painel de Gestão & Administração (Bootstrap 5)
+|--------------------------------------------------------------------------
+*/
+Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.index');
-Route::get('/admin/heatmap-data', [AdminController::class, 'heatmapData'])->name('admin.heatmap');
-Route::get('/admin/relatorios/exportar', [RelatorioController::class, 'exportCsv'])->name('admin.relatorios.export');
+Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+// Módulos de Gestão
+Route::get('/admin/atrativos', [AdminController::class, 'atrativos'])->name('admin.atrativos.index');
+Route::get('/admin/eventos', [AdminController::class, 'eventos'])->name('admin.eventos.index');
+Route::get('/admin/roteiros', [AdminController::class, 'roteiros'])->name('admin.roteiros.index');
+Route::get('/admin/alertas', [AlertaController::class, 'index'])->name('admin.alertas.index');
 Route::post('/admin/alertas', [AlertaController::class, 'store'])->name('admin.alertas.store');
+Route::get('/admin/auditoria', [AdminController::class, 'auditoria'])->name('admin.auditoria.index');
+Route::get('/admin/prestadores', [PrestadorValidationController::class, 'index'])->name('admin.prestadores.index');
 Route::put('/admin/prestadores/{id}', [PrestadorValidationController::class, 'update'])->name('admin.prestadores.update');
 
+// Relatórios & Heatmap
+Route::get('/admin/heatmap-data', [AdminController::class, 'heatmapData'])->name('admin.heatmap');
+Route::get('/admin/relatorios/exportar', [RelatorioController::class, 'exportCsv'])->name('admin.relatorios.export');
+
+// Empreendedor / Negócios
+Route::get('/admin/meus-negocios', [EmpreendedorController::class, 'dashboard'])->name('admin.meus-negocios');
+
+/*
+|--------------------------------------------------------------------------
+| Perfil do Usuário
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

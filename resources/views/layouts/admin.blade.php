@@ -1,98 +1,323 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-bs-theme="light">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Painel Gestor - Destino Inteligente</title>
-    <!-- CSS files -->
-    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler-flags.min.css" rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler-payments.min.css" rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler-vendors.min.css" rel="stylesheet"/>
+    <title>@yield('title', 'Painel de Gestão') - Destino Inteligente</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,600,700,800|work-sans:400,500,600&display=swap" rel="stylesheet" />
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+    @stack('styles')
+
+    <style>
+        :root {
+            --bs-primary: #005f73;
+            --bs-secondary: #0a9396;
+            --bs-font-sans-serif: 'Work Sans', sans-serif;
+            --bs-heading-font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        body {
+            font-family: var(--bs-font-sans-serif);
+            background-color: #f4f6f8;
+            color: #2b2d42;
+        }
+        h1, h2, h3, h4, h5, h6, .brand-title {
+            font-family: var(--bs-heading-font-family);
+        }
+        .admin-sidebar {
+            width: 260px;
+            background: #003844;
+            color: #ffffff;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            z-index: 1040;
+        }
+        .admin-sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            font-weight: 500;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            margin: 0.2rem 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        .admin-sidebar .nav-link i {
+            font-size: 1.15rem;
+        }
+        .admin-sidebar .nav-link:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .admin-sidebar .nav-link.active {
+            color: #ffffff;
+            background: var(--bs-secondary);
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(10, 147, 150, 0.3);
+        }
+        .admin-sidebar .sidebar-heading {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: rgba(255, 255, 255, 0.4);
+            padding: 0.75rem 1.25rem 0.25rem;
+            font-weight: 700;
+        }
+        .admin-topbar {
+            background: #ffffff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            height: 64px;
+        }
+        .card {
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 1rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+        }
+        .btn-primary {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+        }
+        .btn-primary:hover {
+            background-color: #004b5c;
+            border-color: #004b5c;
+        }
+        @media (max-width: 991.98px) {
+            .admin-sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: -260px;
+            }
+            .admin-sidebar.show {
+                left: 0;
+            }
+            .sidebar-backdrop {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1030;
+                display: none;
+            }
+            .sidebar-backdrop.show {
+                display: block;
+            }
+        }
+    </style>
 </head>
-<body class=" layout-fluid">
-    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/demo-theme.min.js"></script>
-    <div class="page">
-        <!-- Sidebar -->
-        <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
-            <div class="container-fluid">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <h1 class="navbar-brand navbar-brand-autodark">
-                    <a href="#">
-                        Painel Gestor
+<body class="d-flex">
+    <!-- Backdrop for mobile sidebar -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar d-flex flex-column flex-shrink-0" id="adminSidebar">
+        <!-- Logo -->
+        <div class="d-flex align-items-center justify-content-between px-3 py-3 border-bottom border-white border-opacity-10" style="height: 64px;">
+            <a href="{{ url('/admin') }}" class="d-flex align-items-center gap-2 text-white text-decoration-none">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: rgba(255, 255, 255, 0.15);">
+                    <i class="bi bi-shield-check fs-5 text-warning"></i>
+                </div>
+                <div class="d-flex flex-column">
+                    <span class="fw-bold fs-6 brand-title lh-1">Destino Inteligente</span>
+                    <span class="text-white-50 small" style="font-size: 0.68rem;">Painel de Gestão</span>
+                </div>
+            </a>
+            <button type="button" class="btn btn-sm text-white d-lg-none p-0" id="btnToggleSidebarClose">
+                <i class="bi bi-x fs-4"></i>
+            </button>
+        </div>
+
+        <!-- Links de Navegação -->
+        <div class="flex-grow-1 overflow-auto py-2">
+            <div class="sidebar-heading">Visão Geral</div>
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a href="{{ url('/admin') }}" class="nav-link {{ request()->is('admin') || request()->is('dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard & KPIs</span>
                     </a>
-                </h1>
-                <div class="collapse navbar-collapse" id="sidebar-menu">
-                    <ul class="navbar-nav pt-lg-3">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin">
-                                <span class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/home -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>
-                                </span>
-                                <span class="nav-link-title">
-                                    Dashboard
-                                </span>
+                </li>
+            </ul>
+
+            <div class="sidebar-heading mt-2">Gestão Turística</div>
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a href="{{ route('admin.atrativos.index') }}" class="nav-link {{ request()->is('admin/atrativos*') ? 'active' : '' }}">
+                        <i class="bi bi-geo-alt-fill text-info"></i>
+                        <span>Atrativos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.eventos.index') }}" class="nav-link {{ request()->is('admin/eventos*') ? 'active' : '' }}">
+                        <i class="bi bi-calendar-event text-warning"></i>
+                        <span>Eventos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.roteiros.index') }}" class="nav-link {{ request()->is('admin/roteiros*') ? 'active' : '' }}">
+                        <i class="bi bi-map-fill text-success"></i>
+                        <span>Roteiros</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url('/admin/prestadores') }}" class="nav-link {{ request()->is('admin/prestadores*') ? 'active' : '' }}">
+                        <i class="bi bi-shop text-primary-subtle"></i>
+                        <span>Validação Parceiros</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-heading mt-2">Segurança & Operação</div>
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a href="{{ route('admin.alertas.index') }}" class="nav-link {{ request()->is('admin/alertas*') ? 'active' : '' }}">
+                        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                        <span>Alertas & Defesa Civil</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.auditoria.index') }}" class="nav-link {{ request()->is('admin/auditoria*') ? 'active' : '' }}">
+                        <i class="bi bi-shield-lock"></i>
+                        <span>Auditoria & Logs</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.relatorios.export') }}" class="nav-link">
+                        <i class="bi bi-file-earmark-arrow-down text-light"></i>
+                        <span>Exportar Relatórios</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Rodapé do Sidebar -->
+        <div class="p-3 border-top border-white border-opacity-10">
+            <a href="{{ route('pwa.home') }}" class="btn btn-outline-light btn-sm w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" target="_blank">
+                <i class="bi bi-phone"></i>
+                <span>Ver App do Turista</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="d-flex flex-column flex-grow-1 w-100 min-vh-100">
+        <!-- Topbar -->
+        <header class="admin-topbar d-flex align-items-center justify-content-between px-3 px-lg-4 sticky-top">
+            <div class="d-flex align-items-center gap-3">
+                <button type="button" class="btn btn-light d-lg-none rounded-circle p-2" id="btnToggleSidebarOpen">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <h5 class="fw-bold mb-0 text-dark d-none d-sm-block">@yield('title', 'Painel de Gestão')</h5>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <!-- Status da Cidade -->
+                <span class="badge bg-success-subtle text-success border rounded-pill px-3 py-2 fw-semibold d-none d-md-inline-flex align-items-center gap-1">
+                    <span class="rounded-circle bg-success d-inline-block" style="width: 6px; height: 6px;"></span>
+                    Sistema Online
+                </span>
+
+                <!-- Dropdown do Usuário -->
+                <div class="dropdown">
+                    <button class="btn btn-light border-0 rounded-pill px-3 py-1.5 d-flex align-items-center gap-2 bg-light" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold small" style="width: 32px; height: 32px;">
+                            {{ strtoupper(substr(auth()->user()?->name ?? 'A', 0, 1)) }}
+                        </div>
+                        <div class="d-none d-sm-flex flex-column text-start">
+                            <span class="fw-bold small text-dark lh-1">{{ auth()->user()?->name ?? 'Gestor Público' }}</span>
+                            <span class="text-muted" style="font-size: 0.68rem;">{{ auth()->user()?->role ?? 'Administrador' }}</span>
+                        </div>
+                        <i class="bi bi-chevron-down small text-muted"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2">
+                        <li>
+                            <div class="px-3 py-2 border-bottom">
+                                <div class="fw-bold small">{{ auth()->user()?->name ?? 'Gestor' }}</div>
+                                <div class="text-muted small" style="font-size: 0.72rem;">{{ auth()->user()?->email ?? 'gestor@demo.com' }}</div>
+                            </div>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2 small" href="{{ route('pwa.home') }}">
+                                <i class="bi bi-phone text-primary"></i> App do Turista
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/atrativos">
-                                <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z" /></svg>
-                                </span>
-                                <span class="nav-link-title">
-                                    Atrativos
-                                </span>
-                            </a>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger small">
+                                    <i class="bi bi-box-arrow-right"></i> Sair do Painel
+                                </button>
+                            </form>
                         </li>
                     </ul>
                 </div>
             </div>
-        </aside>
-        
-        <div class="page-wrapper">
-            <!-- Page header -->
-            <div class="page-header d-print-none">
-                <div class="container-xl">
-                    <div class="row g-2 align-items-center">
-                        <div class="col">
-                            <!-- Page pre-title -->
-                            <div class="page-pretitle">
-                                Overview
-                            </div>
-                            <h2 class="page-title">
-                                @yield('title', 'Dashboard')
-                            </h2>
-                        </div>
-                    </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-grow-1 p-3 p-lg-4">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                 </div>
-            </div>
-            
-            <!-- Page body -->
-            <div class="page-body">
-                <div class="container-xl">
-                    @yield('content')
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                 </div>
-            </div>
-            
-            <footer class="footer footer-transparent d-print-none">
-                <div class="container-xl">
-                    <div class="row text-center align-items-center flex-row-reverse">
-                        <div class="col-12 col-lg-auto mt-3 mt-lg-0">
-                            <ul class="list-inline list-inline-dots mb-0">
-                                <li class="list-inline-item">
-                                    Copyright &copy; 2026
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-        </div>
+            @endif
+
+            @yield('content')
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-top py-3 px-4 text-center text-muted small">
+            Destino Inteligente &copy; {{ date('Y') }} — Plataforma de Gestão e Inteligência Turística Municipal
+        </footer>
     </div>
-    <!-- Libs JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js" defer></script>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmxc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <!-- Sidebar Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('adminSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            const btnOpen = document.getElementById('btnToggleSidebarOpen');
+            const btnClose = document.getElementById('btnToggleSidebarClose');
+
+            function toggleSidebar(open) {
+                if (open) {
+                    sidebar.classList.add('show');
+                    backdrop.classList.add('show');
+                } else {
+                    sidebar.classList.remove('show');
+                    backdrop.classList.remove('show');
+                }
+            }
+
+            btnOpen?.addEventListener('click', () => toggleSidebar(true));
+            btnClose?.addEventListener('click', () => toggleSidebar(false));
+            backdrop?.addEventListener('click', () => toggleSidebar(false));
+        });
+    </script>
+
+    @stack('scripts')
 </body>
 </html>
