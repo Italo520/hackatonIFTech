@@ -99,6 +99,8 @@
 @endsection
 
 @push('scripts')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -334,13 +336,8 @@
                             <h4 class="fw-bold fs-6 mb-1 text-dark"><i class="bi bi-map-fill text-primary me-1"></i> ${data.titulo}</h4>
                             <p class="small text-secondary mb-2">Duração: ${data.duracao} min | <i class="bi bi-cash"></i> Orçamento: R$ ${data.orcamento}</p>
                             
-                            <!-- Mock de Mapa (Leaflet Placeholder) -->
-                            <div class="w-100 bg-light border rounded-3 mt-3 d-flex flex-column align-items-center justify-content-center text-secondary position-relative shadow-inner" style="height: 180px; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 15px 15px; overflow: hidden;">
-                                <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.9));"></div>
-                                <i class="bi bi-pin-map-fill fs-2 mb-1 text-primary opacity-75" style="z-index: 2;"></i>
-                                <span class="small fw-bold text-dark" style="z-index: 2;">Integração Leaflet/Mapbox</span>
-                                <span class="text-muted text-center px-2" style="font-size: 0.65rem; z-index: 2;">(Seu amigo inserirá o código do mapa interativo aqui)</span>
-                            </div>
+                            <!-- Mapa Leaflet Real -->
+                            <div id="mapa-roteiro-ia" class="w-100 bg-light border rounded-3 mt-3 shadow-inner" style="height: 200px; z-index: 1;"></div>
 
                             <hr class="my-3 opacity-25">
                             <div class="d-flex flex-column gap-2 mt-2">
@@ -349,6 +346,37 @@
                             <a href="/roteiros" class="btn btn-primary w-100 rounded-pill btn-sm mt-3 fw-bold shadow-sm">Salvar e Iniciar Roteiro</a>
                         </div>
                     `;
+
+                    // Inicializar o Leaflet Map se houver coordenadas
+                    setTimeout(() => {
+                        const mapContainer = document.getElementById('mapa-roteiro-ia');
+                        if (mapContainer && data.itens && data.itens.length > 0) {
+                            // Encontra a primeira coordenada válida
+                            const firstItem = data.itens.find(i => i.lat && i.lng);
+                            const center = firstItem ? [firstItem.lat, firstItem.lng] : [-7.1153, -34.8641];
+                            
+                            const map = L.map('mapa-roteiro-ia').setView(center, 13);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                maxZoom: 19,
+                                attribution: '© OpenStreetMap'
+                            }).addTo(map);
+
+                            // Adicionar Marcadores
+                            const bounds = [];
+                            data.itens.forEach((item, index) => {
+                                if (item.lat && item.lng) {
+                                    bounds.push([item.lat, item.lng]);
+                                    L.marker([item.lat, item.lng])
+                                     .bindPopup(`<b>${index + 1}. ${item.nome}</b><br>${item.tempo_estimado} min`)
+                                     .addTo(map);
+                                }
+                            });
+                            
+                            if (bounds.length > 1) {
+                                map.fitBounds(bounds, { padding: [20, 20] });
+                            }
+                        }
+                    }, 200);
                 }
             } catch (err) {
                 btn.disabled = false;
