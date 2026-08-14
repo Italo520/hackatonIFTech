@@ -191,89 +191,99 @@ class DatabaseSeeder extends Seeder
 
         $atrativosCriados = [];
         foreach ($atrativosData as $data) {
-            $atrativo = Atrativo::create([
-                'municipio_id' => $data['municipio']->id,
-                'categoria_id' => $data['categoria']->id,
-                'nome' => $data['nome'],
-                'descricao' => $data['descricao'],
-                'historia' => $data['historia'],
-                'endereco' => $data['endereco'],
-                'lat' => $data['lat'],
-                'lng' => $data['lng'],
-                'tempo_medio_visita' => $data['tempo'],
-                'status' => 'ativo',
-                'acessibilidade' => $data['acessibilidade'],
-                'validado_por' => $admin->id,
-                'validado_em' => now(),
-            ]);
+            $atrativo = Atrativo::firstOrCreate(
+                ['nome' => $data['nome'], 'municipio_id' => $data['municipio']->id],
+                [
+                    'categoria_id' => $data['categoria']->id,
+                    'descricao' => $data['descricao'],
+                    'historia' => $data['historia'],
+                    'endereco' => $data['endereco'],
+                    'lat' => $data['lat'],
+                    'lng' => $data['lng'],
+                    'tempo_medio_visita' => $data['tempo'],
+                    'status' => 'ativo',
+                    'acessibilidade' => $data['acessibilidade'],
+                    'validado_por' => $admin ? $admin->id : null,
+                    'validado_em' => now(),
+                ]
+            );
             $atrativosCriados[] = $atrativo;
             
             // Generate QR Code
-            QrCode::create([
-                'atrativo_id' => $atrativo->id,
-                'hash_code' => Str::random(10),
-            ]);
+            QrCode::firstOrCreate(
+                ['atrativo_id' => $atrativo->id],
+                ['hash_code' => Str::random(10)]
+            );
         }
 
-
         // 5. Eventos
-        Evento::create([
-            'nome' => 'Festival de Inverno de Bonito',
-            'descricao' => 'Festival anual com música, teatro, dança e artes visuais em praça pública.',
-            'inicio' => now()->addDays(5),
-            'fim' => now()->addDays(8),
-            'gratuito' => true,
-            'status' => 'ativo',
-        ]);
-        Evento::create([
-            'nome' => 'Feira do Produtor Rural',
-            'descricao' => 'Feira tradicional de produtos locais, artesanato e gastronomia típica.',
-            'inicio' => now()->addDays(2),
-            'fim' => now()->addDays(2)->addHours(4),
-            'gratuito' => true,
-            'status' => 'ativo',
-        ]);
+        Evento::firstOrCreate(
+            ['nome' => 'Festival de Inverno de Bonito'],
+            [
+                'descricao' => 'Festival anual com música, teatro, dança e artes visuais em praça pública.',
+                'inicio' => now()->addDays(5),
+                'fim' => now()->addDays(8),
+                'gratuito' => true,
+                'status' => 'ativo',
+            ]
+        );
+        Evento::firstOrCreate(
+            ['nome' => 'Feira do Produtor Rural'],
+            [
+                'descricao' => 'Feira tradicional de produtos locais, artesanato e gastronomia típica.',
+                'inicio' => now()->addDays(2),
+                'fim' => now()->addDays(2)->addHours(4),
+                'gratuito' => true,
+                'status' => 'ativo',
+            ]
+        );
 
         // 6. Roteiro Fixo
-        $roteiro = Roteiro::create([
-            'titulo' => 'Bonito Essencial: 1 Dia',
-            'tema' => 'Natureza e Cartões Postais',
-            'duracao' => 8, // horas
-            'dificuldade' => 'Media',
-            'transporte' => 'Carro',
-            'orcamento' => 150.00,
-            'perfil' => 'Familia',
-            'origem' => 'oficial',
-        ]);
+        $roteiro = Roteiro::firstOrCreate(
+            ['titulo' => 'Bonito Essencial: 1 Dia'],
+            [
+                'tema' => 'Natureza e Cartões Postais',
+                'duracao' => 8, // horas
+                'dificuldade' => 'Media',
+                'transporte' => 'Carro',
+                'orcamento' => 150.00,
+                'perfil' => 'Familia',
+                'origem' => 'oficial',
+            ]
+        );
 
-        RoteiroItem::create(['roteiro_id' => $roteiro->id, 'atrativo_id' => $atrativosCriados[1]->id, 'ordem' => 1, 'tempo_estimado' => 90]);
-        RoteiroItem::create(['roteiro_id' => $roteiro->id, 'atrativo_id' => $atrativosCriados[0]->id, 'ordem' => 2, 'tempo_estimado' => 120]);
-        RoteiroItem::create(['roteiro_id' => $roteiro->id, 'atrativo_id' => $atrativosCriados[3]->id, 'ordem' => 3, 'tempo_estimado' => 120]);
+        if (isset($atrativosCriados[1]) && isset($atrativosCriados[0]) && isset($atrativosCriados[3])) {
+            RoteiroItem::firstOrCreate(['roteiro_id' => $roteiro->id, 'atrativo_id' => $atrativosCriados[1]->id], ['ordem' => 1, 'tempo_estimado' => 90]);
+            RoteiroItem::firstOrCreate(['roteiro_id' => $roteiro->id, 'atrativo_id' => $atrativosCriados[0]->id], ['ordem' => 2, 'tempo_estimado' => 120]);
+            RoteiroItem::firstOrCreate(['roteiro_id' => $roteiro->id, 'atrativo_id' => $atrativosCriados[3]->id], ['ordem' => 3, 'tempo_estimado' => 120]);
+        }
 
         // 7. Utilidade Pública
-        UtilidadePublica::create(['nome' => 'Polícia Militar', 'telefone' => '190', 'ordem' => 1]);
-        UtilidadePublica::create(['nome' => 'SAMU', 'telefone' => '192', 'ordem' => 2]);
-        UtilidadePublica::create(['nome' => 'Corpo de Bombeiros', 'telefone' => '193', 'ordem' => 3]);
-        UtilidadePublica::create(['nome' => 'Hospital Municipal Darci João Bigaton', 'telefone' => '(67) 3255-1100', 'ordem' => 4]);
-        UtilidadePublica::create(['nome' => 'Centro de Atendimento ao Turista (CAT)', 'telefone' => '(67) 3255-2160', 'ordem' => 5]);
+        UtilidadePublica::firstOrCreate(['nome' => 'Polícia Militar'], ['telefone' => '190', 'ordem' => 1]);
+        UtilidadePublica::firstOrCreate(['nome' => 'SAMU'], ['telefone' => '192', 'ordem' => 2]);
+        UtilidadePublica::firstOrCreate(['nome' => 'Corpo de Bombeiros'], ['telefone' => '193', 'ordem' => 3]);
+        UtilidadePublica::firstOrCreate(['nome' => 'Hospital Municipal Darci João Bigaton'], ['telefone' => '(67) 3255-1100', 'ordem' => 4]);
+        UtilidadePublica::firstOrCreate(['nome' => 'Centro de Atendimento ao Turista (CAT)'], ['telefone' => '(67) 3255-2160', 'ordem' => 5]);
 
         // 8. Prestadores / Empreendedores Demo
         $userEmpreendedor = User::where('email', 'empreendedor@demo.com')->first();
         if ($userEmpreendedor) {
-            \App\Models\Prestador::create([
-                'user_id' => $userEmpreendedor->id,
-                'tipo' => 'hospedagem',
-                'dados' => [
-                    'nome_negocio' => 'Pousada Encanto das Águas',
-                    'telefone' => '(83) 98888-7766',
-                    'endereco' => 'Av. Beira Mar, 450, Cabo Branco, João Pessoa - PB',
-                    'municipio_id' => $municipioJampa->id,
-                ],
-                'documentos' => ['doc' => 'CNPJ 12.345.678/0001-90 | Cadastur 15.001.234/2026'],
-                'status' => 'pendente',
-                'selo_validado' => false,
-                'ultima_atualizacao' => now(),
-            ]);
+            \App\Models\Prestador::firstOrCreate(
+                ['user_id' => $userEmpreendedor->id],
+                [
+                    'tipo' => 'hospedagem',
+                    'dados' => [
+                        'nome_negocio' => 'Pousada Encanto das Águas',
+                        'telefone' => '(83) 98888-7766',
+                        'endereco' => 'Av. Beira Mar, 450, Cabo Branco, João Pessoa - PB',
+                        'municipio_id' => $municipioJampa->id,
+                    ],
+                    'documentos' => ['doc' => 'CNPJ 12.345.678/0001-90 | Cadastur 15.001.234/2026'],
+                    'status' => 'pendente',
+                    'selo_validado' => false,
+                    'ultima_atualizacao' => now(),
+                ]
+            );
         }
     }
 }
