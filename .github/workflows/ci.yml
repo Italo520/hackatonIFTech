@@ -51,7 +51,15 @@ jobs:
         run: php artisan migrate --force
 
       - name: Execute tests (Unit and Feature tests) via PHPUnit
-        run: php artisan test --without-tty
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          php artisan test --without-tty 2>&1 | tee test_run.log || true
+          gh issue create --title "CI Test Run Report" --body-file test_run.log || true
+          if grep -q "FAILED" test_run.log || grep -q "FAILURES" test_run.log || grep -q "ERRORS" test_run.log || grep -q "FAIL" test_run.log; then
+            cat test_run.log
+            exit 1
+          fi
 
       - name: Execute Composer Audit
         run: composer audit || true
