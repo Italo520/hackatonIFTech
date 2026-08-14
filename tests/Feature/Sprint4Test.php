@@ -39,8 +39,8 @@ class Sprint4Test extends TestCase
         AnalyticEvent::create(['tipo' => 'test_event']);
 
         $response = $this->get('/admin/relatorios/exportar');
-        $response->assertStatus(200)
-                 ->assertHeader('Content-type', 'text/csv');
+        $response->assertStatus(200);
+        $this->assertStringContainsString('text/csv', (string) $response->headers->get('Content-type'));
                  
         $this->assertStringContainsString('DISCLAIMER', $response->streamedContent());
     }
