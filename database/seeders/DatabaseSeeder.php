@@ -26,36 +26,42 @@ class DatabaseSeeder extends Seeder
         ];
         
         foreach ($roles as $role) {
-            User::factory()->create([
-                'name' => 'Demo ' . ucfirst($role),
-                'email' => $role . '@demo.com',
-                'password' => Hash::make('password'),
-                'role' => $role,
-            ]);
+            User::updateOrCreate(
+                ['email' => $role . '@demo.com'],
+                [
+                    'name' => 'Demo ' . ucfirst(str_replace('_', ' ', $role)),
+                    'password' => Hash::make('password'),
+                    'role' => $role,
+                ]
+            );
         }
         
         $admin = User::where('role', 'gestor_conteudo')->first();
 
         // 2. Municípios Reais
-        $municipioBonito = Municipio::create([
-            'nome' => 'Bonito',
-            'uf' => 'MS',
-            'tema_visual' => 'default',
-        ]);
+        $municipioBonito = Municipio::firstOrCreate(
+            ['nome' => 'Bonito'],
+            [
+                'uf' => 'MS',
+                'tema_visual' => 'default',
+            ]
+        );
 
-        $municipioJampa = Municipio::create([
-            'nome' => 'João Pessoa',
-            'uf' => 'PB',
-            'tema_visual' => 'praia',
-        ]);
+        $municipioJampa = Municipio::firstOrCreate(
+            ['nome' => 'João Pessoa'],
+            [
+                'uf' => 'PB',
+                'tema_visual' => 'praia',
+            ]
+        );
 
         // 3. Categorias Realistas
-        $catAventura = Categoria::create(['nome' => 'Aventura & Trilhas', 'slug' => 'aventura', 'icone' => 'bi-bicycle', 'tipo' => 'atrativo']);
-        $catAgua = Categoria::create(['nome' => 'Praias, Rios e Piscinas', 'slug' => 'rios', 'icone' => 'bi-water', 'tipo' => 'atrativo']);
-        $catGrutas = Categoria::create(['nome' => 'Monumentos & Natureza', 'slug' => 'grutas', 'icone' => 'bi-geo', 'tipo' => 'atrativo']);
-        $catGastronomia = Categoria::create(['nome' => 'Gastronomia Regional', 'slug' => 'gastronomia', 'icone' => 'bi-cup-hot', 'tipo' => 'servico']);
-        $catHospedagem = Categoria::create(['nome' => 'Hospedagem', 'slug' => 'hospedagem', 'icone' => 'bi-house-heart', 'tipo' => 'servico']);
-        $catCultura = Categoria::create(['nome' => 'História & Cultura', 'slug' => 'cultura', 'icone' => 'bi-bank', 'tipo' => 'atrativo']);
+        $catAventura = Categoria::firstOrCreate(['slug' => 'aventura'], ['nome' => 'Aventura & Trilhas', 'icone' => 'bi-bicycle', 'tipo' => 'atrativo']);
+        $catAgua = Categoria::firstOrCreate(['slug' => 'rios'], ['nome' => 'Praias, Rios e Piscinas', 'icone' => 'bi-water', 'tipo' => 'atrativo']);
+        $catGrutas = Categoria::firstOrCreate(['slug' => 'grutas'], ['nome' => 'Monumentos & Natureza', 'icone' => 'bi-geo', 'tipo' => 'atrativo']);
+        $catGastronomia = Categoria::firstOrCreate(['slug' => 'gastronomia'], ['nome' => 'Gastronomia Regional', 'icone' => 'bi-cup-hot', 'tipo' => 'servico']);
+        $catHospedagem = Categoria::firstOrCreate(['slug' => 'hospedagem'], ['nome' => 'Hospedagem', 'icone' => 'bi-house-heart', 'tipo' => 'servico']);
+        $catCultura = Categoria::firstOrCreate(['slug' => 'cultura'], ['nome' => 'História & Cultura', 'icone' => 'bi-bank', 'tipo' => 'atrativo']);
 
         // 4. Atrativos Realistas com Coordenadas GPS
         $atrativosData = [

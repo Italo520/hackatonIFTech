@@ -27,6 +27,7 @@ export const PWAInstaller = {
                 navigator.serviceWorker.register('/sw.js')
                     .then((reg) => {
                         console.log('✅ PWA Service Worker registrado com escopo:', reg.scope);
+                        reg.update();
                     })
                     .catch((err) => {
                         console.warn('⚠️ Falha ao registrar Service Worker:', err);

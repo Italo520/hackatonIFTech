@@ -1,4 +1,4 @@
-const CACHE_NAME = 'turismo-pwa-v1';
+const CACHE_NAME = 'turismo-pwa-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/explorar',
