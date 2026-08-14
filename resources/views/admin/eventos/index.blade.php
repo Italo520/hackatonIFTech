@@ -92,68 +92,6 @@
                                     </button>
                                 </form>
                             </div>
-
-                            <!-- Modal Editar Evento -->
-                            <div class="modal fade text-start" id="modalEditarEvento{{ $evento->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-lg">
-                                    <div class="modal-content rounded-4 border-0 shadow-lg">
-                                        <form action="{{ route('admin.eventos.update', $evento->id) }}" method="POST">
-                                            @csrf
-                                            @method('PUT')
-                                            <div class="modal-header border-0 pb-0 pt-4 px-4">
-                                                <h5 class="modal-title fw-bold">Editar Evento Oficial</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body p-4">
-                                                <div class="row g-3">
-                                                    <div class="col-12 col-md-8">
-                                                        <label class="form-label fw-bold small text-secondary">Nome do Evento</label>
-                                                        <input type="text" name="nome" value="{{ $evento->nome }}" class="form-control" required>
-                                                    </div>
-                                                    <div class="col-12 col-md-4">
-                                                        <label class="form-label fw-bold small text-secondary">Status</label>
-                                                        <select name="status" class="form-select" required>
-                                                            <option value="ativo" {{ $evento->status == 'ativo' ? 'selected' : '' }}>Publicado / Ativo</option>
-                                                            <option value="cancelado" {{ $evento->status == 'cancelado' ? 'selected' : '' }}>Cancelado</option>
-                                                            <option value="encerrado" {{ $evento->status == 'encerrado' ? 'selected' : '' }}>Encerrado</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-12 col-md-6">
-                                                        <label class="form-label fw-bold small text-secondary">Início</label>
-                                                        <input type="datetime-local" name="inicio" value="{{ $evento->inicio ? $evento->inicio->format('Y-m-d\TH:i') : '' }}" class="form-control" required>
-                                                    </div>
-                                                    <div class="col-12 col-md-6">
-                                                        <label class="form-label fw-bold small text-secondary">Término</label>
-                                                        <input type="datetime-local" name="fim" value="{{ $evento->fim ? $evento->fim->format('Y-m-d\TH:i') : '' }}" class="form-control">
-                                                    </div>
-                                                    <div class="col-12 col-md-6">
-                                                        <label class="form-label fw-bold small text-secondary">Local do Evento</label>
-                                                        <input type="text" name="local" value="{{ $evento->local }}" class="form-control" placeholder="Ex: Busto de Tamandaré">
-                                                    </div>
-                                                    <div class="col-12 col-md-6">
-                                                        <label class="form-label fw-bold small text-secondary">Organizador / Realização</label>
-                                                        <input type="text" name="organizador" value="{{ $evento->organizador }}" class="form-control" placeholder="Ex: Secretaria de Turismo">
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <label class="form-label fw-bold small text-secondary">Descrição e Programação</label>
-                                                        <textarea name="descricao" class="form-control" rows="3" required>{{ $evento->descricao }}</textarea>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <div class="form-check form-switch">
-                                                            <input class="form-check-input" type="checkbox" name="gratuito" value="1" id="editGratuito{{ $evento->id }}" {{ $evento->gratuito ? 'checked' : '' }}>
-                                                            <label class="form-check-label small fw-semibold" for="editGratuito{{ $evento->id }}">Evento com entrada gratuita para o público</label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer border-0 pt-0 pb-4 px-4">
-                                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                                                <button type="submit" class="btn btn-warning text-dark rounded-pill px-4 fw-bold">Salvar Alterações</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         </td>
                     </tr>
                 @empty
@@ -167,6 +105,70 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Modais de Edição de Eventos -->
+    @foreach($eventos as $evento)
+        <div class="modal fade text-start" id="modalEditarEvento{{ $evento->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content rounded-4 border-0 shadow-lg">
+                    <form action="{{ route('admin.eventos.update', $evento->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-header border-0 pb-0 pt-4 px-4">
+                            <h5 class="modal-title fw-bold">Editar Evento Oficial</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-8">
+                                    <label class="form-label fw-bold small text-secondary">Nome do Evento</label>
+                                    <input type="text" name="nome" value="{{ $evento->nome }}" class="form-control" required>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label fw-bold small text-secondary">Status</label>
+                                    <select name="status" class="form-select" required>
+                                        <option value="ativo" {{ $evento->status == 'ativo' ? 'selected' : '' }}>Publicado / Ativo</option>
+                                        <option value="cancelado" {{ $evento->status == 'cancelado' ? 'selected' : '' }}>Cancelado</option>
+                                        <option value="encerrado" {{ $evento->status == 'encerrado' ? 'selected' : '' }}>Encerrado</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-bold small text-secondary">Início</label>
+                                    <input type="datetime-local" name="inicio" value="{{ $evento->inicio ? $evento->inicio->format('Y-m-d\TH:i') : '' }}" class="form-control" required>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-bold small text-secondary">Término</label>
+                                    <input type="datetime-local" name="fim" value="{{ $evento->fim ? $evento->fim->format('Y-m-d\TH:i') : '' }}" class="form-control">
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-bold small text-secondary">Local do Evento</label>
+                                    <input type="text" name="local" value="{{ $evento->local }}" class="form-control" placeholder="Ex: Busto de Tamandaré">
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-bold small text-secondary">Organizador / Realização</label>
+                                    <input type="text" name="organizador" value="{{ $evento->organizador }}" class="form-control" placeholder="Ex: Secretaria de Turismo">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold small text-secondary">Descrição e Programação</label>
+                                    <textarea name="descricao" class="form-control" rows="3" required>{{ $evento->descricao }}</textarea>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="gratuito" value="1" id="editGratuito{{ $evento->id }}" {{ $evento->gratuito ? 'checked' : '' }}>
+                                        <label class="form-check-label small fw-semibold" for="editGratuito{{ $evento->id }}">Evento com entrada gratuita para o público</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0 pb-4 px-4">
+                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-warning text-dark rounded-pill px-4 fw-bold">Salvar Alterações</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endforeach
 
     @if($eventos->hasPages())
         <div class="card-footer bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">

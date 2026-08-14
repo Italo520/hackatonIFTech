@@ -137,78 +137,6 @@
                                     </button>
                                 </form>
                             </div>
-
-                            <!-- Modal Editar Atrativo -->
-                            <div class="modal fade text-start" id="modalEditarAtrativo{{ $atrativo->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-lg">
-                                    <div class="modal-content rounded-4 border-0 shadow-lg">
-                                        <form action="{{ route('admin.atrativos.update', $atrativo->id) }}" method="POST">
-                                            @csrf
-                                            @method('PUT')
-                                            <div class="modal-header border-0 pb-0 pt-4 px-4">
-                                                <h5 class="modal-title fw-bold">Editar Atrativo Turístico</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body p-4">
-                                                <div class="row g-3">
-                                                    <div class="col-12 col-md-8">
-                                                        <label class="form-label fw-bold small text-secondary">Nome do Ponto Turístico</label>
-                                                        <input type="text" name="nome" value="{{ $atrativo->nome }}" class="form-control" required>
-                                                    </div>
-                                                    <div class="col-12 col-md-4">
-                                                        <label class="form-label fw-bold small text-secondary">Categoria</label>
-                                                        <select name="categoria_id" class="form-select" required>
-                                                            @foreach($categorias as $cat)
-                                                                <option value="{{ $cat->id }}" {{ $atrativo->categoria_id == $cat->id ? 'selected' : '' }}>{{ $cat->nome }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-12 col-md-6">
-                                                        <label class="form-label fw-bold small text-secondary">Cidade / Município</label>
-                                                        <select name="municipio_id" class="form-select" required>
-                                                            @foreach($municipios as $m)
-                                                                <option value="{{ $m->id }}" {{ $atrativo->municipio_id == $m->id ? 'selected' : '' }}>{{ $m->nome }} ({{ $m->uf }})</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-12 col-md-6">
-                                                        <label class="form-label fw-bold small text-secondary">Status</label>
-                                                        <select name="status" class="form-select" required>
-                                                            <option value="ativo" {{ $atrativo->status == 'ativo' ? 'selected' : '' }}>Ativo</option>
-                                                            <option value="pendente" {{ $atrativo->status == 'pendente' ? 'selected' : '' }}>Pendente / Rascunho</option>
-                                                            <option value="inativo" {{ $atrativo->status == 'inativo' ? 'selected' : '' }}>Inativo</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <label class="form-label fw-bold small text-secondary">Endereço Completo</label>
-                                                        <input type="text" name="endereco" value="{{ $atrativo->endereco }}" class="form-control" placeholder="Rua, Número, Bairro">
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <label class="form-label fw-bold small text-secondary">Descrição Completa</label>
-                                                        <textarea name="descricao" class="form-control" rows="3" required>{{ $atrativo->descricao }}</textarea>
-                                                    </div>
-                                                    <div class="col-12 col-md-4">
-                                                        <label class="form-label fw-bold small text-secondary">Latitude (GPS)</label>
-                                                        <input type="number" step="any" name="lat" value="{{ $atrativo->lat }}" class="form-control" required>
-                                                    </div>
-                                                    <div class="col-12 col-md-4">
-                                                        <label class="form-label fw-bold small text-secondary">Longitude (GPS)</label>
-                                                        <input type="number" step="any" name="lng" value="{{ $atrativo->lng }}" class="form-control" required>
-                                                    </div>
-                                                    <div class="col-12 col-md-4">
-                                                        <label class="form-label fw-bold small text-secondary">Tempo Médio (minutos)</label>
-                                                        <input type="number" name="tempo_medio_visita" value="{{ $atrativo->tempo_medio_visita ?? 60 }}" class="form-control">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer border-0 pt-0 pb-4 px-4">
-                                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                                                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Salvar Alterações</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         </td>
                     </tr>
                 @empty
@@ -222,6 +150,80 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Modais de Edição de Atrativos -->
+    @foreach($atrativos as $atrativo)
+        <div class="modal fade text-start" id="modalEditarAtrativo{{ $atrativo->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content rounded-4 border-0 shadow-lg">
+                    <form action="{{ route('admin.atrativos.update', $atrativo->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-header border-0 pb-0 pt-4 px-4">
+                            <h5 class="modal-title fw-bold">Editar Atrativo Turístico</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-8">
+                                    <label class="form-label fw-bold small text-secondary">Nome do Ponto Turístico</label>
+                                    <input type="text" name="nome" value="{{ $atrativo->nome }}" class="form-control" required>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label fw-bold small text-secondary">Categoria</label>
+                                    <select name="categoria_id" class="form-select" required>
+                                        @foreach($categorias as $cat)
+                                            <option value="{{ $cat->id }}" {{ $atrativo->categoria_id == $cat->id ? 'selected' : '' }}>{{ $cat->nome }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-bold small text-secondary">Cidade / Município</label>
+                                    <select name="municipio_id" class="form-select" required>
+                                        @foreach($municipios as $m)
+                                            <option value="{{ $m->id }}" {{ $atrativo->municipio_id == $m->id ? 'selected' : '' }}>{{ $m->nome }} ({{ $m->uf }})</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-bold small text-secondary">Status</label>
+                                    <select name="status" class="form-select" required>
+                                        <option value="ativo" {{ $atrativo->status == 'ativo' ? 'selected' : '' }}>Ativo</option>
+                                        <option value="pendente" {{ $atrativo->status == 'pendente' ? 'selected' : '' }}>Pendente / Rascunho</option>
+                                        <option value="inativo" {{ $atrativo->status == 'inativo' ? 'selected' : '' }}>Inativo</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold small text-secondary">Endereço Completo</label>
+                                    <input type="text" name="endereco" value="{{ $atrativo->endereco }}" class="form-control" placeholder="Rua, Número, Bairro">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold small text-secondary">Descrição Completa</label>
+                                    <textarea name="descricao" class="form-control" rows="3" required>{{ $atrativo->descricao }}</textarea>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label fw-bold small text-secondary">Latitude (GPS)</label>
+                                    <input type="number" step="any" name="lat" value="{{ $atrativo->lat }}" class="form-control" required>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label fw-bold small text-secondary">Longitude (GPS)</label>
+                                    <input type="number" step="any" name="lng" value="{{ $atrativo->lng }}" class="form-control" required>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label fw-bold small text-secondary">Tempo Médio (minutos)</label>
+                                    <input type="number" name="tempo_medio_visita" value="{{ $atrativo->tempo_medio_visita ?? 60 }}" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0 pb-4 px-4">
+                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Salvar Alterações</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endforeach
 
     @if($atrativos->hasPages())
         <div class="card-footer bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">

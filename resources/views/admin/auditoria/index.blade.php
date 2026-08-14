@@ -95,44 +95,6 @@
                                     <button type="button" class="btn btn-sm btn-light border rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalDiff{{ $audit->id }}">
                                         <i class="bi bi-code-square me-1 text-primary"></i> Ver Diff
                                     </button>
-
-                                    <!-- Modal Diff -->
-                                    <div class="modal fade text-start" id="modalDiff{{ $audit->id }}" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered modal-lg">
-                                            <div class="modal-content rounded-4 border-0 shadow-lg">
-                                                <div class="modal-header border-0 pb-0 pt-4 px-4">
-                                                    <h5 class="modal-title fw-bold">Detalhes da Auditoria #{{ $audit->id }}</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body p-4">
-                                                    <div class="row g-3 mb-3">
-                                                        <div class="col-6">
-                                                            <div class="small text-muted">Ação Executada:</div>
-                                                            <div class="fw-bold text-uppercase">{{ $audit->event }} em {{ class_basename($audit->auditable_type) }} #{{ $audit->auditable_id }}</div>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <div class="small text-muted">Usuário / IP:</div>
-                                                            <div class="fw-bold">{{ $audit->user?->name ?? 'Sistema' }} ({{ $audit->ip_address ?? 'N/A' }})</div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="row g-3">
-                                                        <div class="col-12 col-md-6">
-                                                            <label class="form-label fw-bold small text-danger"><i class="bi bi-dash-circle me-1"></i>Valores Anteriores (Old)</label>
-                                                            <pre class="bg-light p-3 rounded-3 small font-monospace border" style="max-height: 220px; overflow-y: auto;">{{ json_encode($audit->old_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) ?: 'Nenhum valor anterior (novo registro)' }}</pre>
-                                                        </div>
-                                                        <div class="col-12 col-md-6">
-                                                            <label class="form-label fw-bold small text-success"><i class="bi bi-plus-circle me-1"></i>Valores Novos (New)</label>
-                                                            <pre class="bg-light p-3 rounded-3 small font-monospace border" style="max-height: 220px; overflow-y: auto;">{{ json_encode($audit->new_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) ?: 'Registro removido' }}</pre>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer border-0 pt-0 pb-4 px-4">
-                                                    <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Fechar</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -146,6 +108,47 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Modais de Diff de Auditoria -->
+            @foreach($audits as $audit)
+                <div class="modal fade text-start" id="modalDiff{{ $audit->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content rounded-4 border-0 shadow-lg">
+                            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                                <h5 class="modal-title fw-bold">Detalhes da Auditoria #{{ $audit->id }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <div class="small text-muted">Ação Executada:</div>
+                                        <div class="fw-bold text-uppercase">{{ $audit->event }} em {{ class_basename($audit->auditable_type) }} #{{ $audit->auditable_id }}</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="small text-muted">Usuário / IP:</div>
+                                        <div class="fw-bold">{{ $audit->user?->name ?? 'Sistema' }} ({{ $audit->ip_address ?? 'N/A' }})</div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label fw-bold small text-danger"><i class="bi bi-dash-circle me-1"></i>Valores Anteriores (Old)</label>
+                                        <pre class="bg-light p-3 rounded-3 small font-monospace border" style="max-height: 220px; overflow-y: auto;">{{ json_encode($audit->old_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) ?: 'Nenhum valor anterior (novo registro)' }}</pre>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label fw-bold small text-success"><i class="bi bi-plus-circle me-1"></i>Valores Novos (New)</label>
+                                        <pre class="bg-light p-3 rounded-3 small font-monospace border" style="max-height: 220px; overflow-y: auto;">{{ json_encode($audit->new_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) ?: 'Registro removido' }}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0 pb-4 px-4">
+                                <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Fechar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+
             @if(method_exists($audits, 'hasPages') && $audits->hasPages())
                 <div class="card-footer bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
                     <span class="small text-muted">Exibindo {{ $audits->firstItem() }} até {{ $audits->lastItem() }} de {{ $audits->total() }} auditorias</span>
