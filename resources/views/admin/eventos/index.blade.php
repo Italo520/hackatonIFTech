@@ -143,6 +143,7 @@
                                     <label class="form-label fw-bold small text-secondary">Término</label>
                                     <input type="datetime-local" name="fim" value="{{ $evento->fim ? $evento->fim->format('Y-m-d\TH:i') : '' }}" class="form-control">
                                 </div>
+                                <x-admin.location-autocomplete />
                                 <div class="col-12 col-md-6">
                                     <label class="form-label fw-bold small text-secondary">Local do Evento</label>
                                     <input type="text" name="local" value="{{ $evento->local }}" class="form-control" placeholder="Ex: Busto de Tamandaré">
@@ -215,6 +216,7 @@
                             <label class="form-label fw-bold small text-secondary">Data e Hora de Término</label>
                             <input type="datetime-local" name="fim" class="form-control">
                         </div>
+                        <x-admin.location-autocomplete />
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-bold small text-secondary">Local do Evento</label>
                             <input type="text" name="local" class="form-control" placeholder="Ex: Busto de Tamandaré, Praia de Cabo Branco">

@@ -208,7 +208,9 @@
     <div class="card border-0 rounded-4 shadow-sm overflow-hidden bg-white mb-4">
         <div class="card-header bg-white border-0 pt-3 px-3 pb-1 d-flex justify-content-between align-items-center">
             <h6 class="fw-bold text-dark mb-0"><i class="bi bi-map-fill text-primary me-1"></i> Trajeto no Mapa</h6>
-            <span class="badge bg-light text-secondary border rounded-pill small">{{ count($item['paradas']) }} paradas</span>
+            <div id="route-meta-badge" class="d-flex align-items-center gap-1">
+                <span class="badge bg-light text-secondary border rounded-pill small">{{ count($item['paradas']) }} paradas</span>
+            </div>
         </div>
         <div class="p-3">
             <div id="mapa-roteiro" class="rounded-4 overflow-hidden" style="height: 240px; width: 100%;"></div>
@@ -286,16 +288,53 @@ document.addEventListener('DOMContentLoaded', function() {
              .bindPopup(`<strong>${p.ordem}. ${p.nome}</strong><br><small>${p.tempo}</small>`);
         });
 
-        // Linha conectando as paradas
-        if (latlngs.length > 1) {
-            L.polyline(latlngs, {
-                color: '#005f73',
-                weight: 4,
-                opacity: 0.8,
-                dashArray: '6, 6'
-            }).addTo(map);
+        // 2. Traçado de Rota Real via OSRM
+        if (paradas.length > 1) {
+            const coordsStr = paradas.map(p => `${p.lng},${p.lat}`).join(';');
+            let routeLayer = null;
 
-            map.fitBounds(L.latLngBounds(latlngs), { padding: [30, 30] });
+            fetch(`/api/v1/routes/directions?coordinates=${encodeURIComponent(coordsStr)}&mode=driving`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.success && data.geojson) {
+                        routeLayer = L.geoJSON(data.geojson, {
+                            style: {
+                                color: '#0a9396',
+                                weight: 5,
+                                opacity: 0.88,
+                                lineJoin: 'round'
+                            }
+                        }).addTo(map);
+
+                        map.fitBounds(routeLayer.getBounds(), { padding: [35, 35] });
+
+                        const badgeEl = document.getElementById('route-meta-badge');
+                        if (badgeEl && data.distance_km) {
+                            badgeEl.innerHTML = `
+                                <span class="badge bg-primary text-white rounded-pill px-2.5 py-1 small fw-bold">
+                                    <i class="bi bi-signpost-split me-1 text-warning"></i>${data.distance_km} km • ~${data.duration_minutes} min
+                                </span>
+                            `;
+                        }
+                    } else {
+                        fallbackPolyline();
+                    }
+                })
+                .catch(() => {
+                    fallbackPolyline();
+                });
+
+            function fallbackPolyline() {
+                if (latlngs.length > 1 && !routeLayer) {
+                    L.polyline(latlngs, {
+                        color: '#005f73',
+                        weight: 4,
+                        opacity: 0.8,
+                        dashArray: '6, 6'
+                    }).addTo(map);
+                    map.fitBounds(L.latLngBounds(latlngs), { padding: [30, 30] });
+                }
+            }
         }
     }
 

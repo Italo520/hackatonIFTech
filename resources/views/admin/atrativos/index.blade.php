@@ -193,6 +193,7 @@
                                         <option value="inativo" {{ $atrativo->status == 'inativo' ? 'selected' : '' }}>Inativo</option>
                                     </select>
                                 </div>
+                                <x-admin.location-autocomplete />
                                 <div class="col-12">
                                     <label class="form-label fw-bold small text-secondary">Endereço Completo</label>
                                     <input type="text" name="endereco" value="{{ $atrativo->endereco }}" class="form-control" placeholder="Rua, Número, Bairro">
@@ -275,6 +276,7 @@
                                 <option value="inativo">Inativo</option>
                             </select>
                         </div>
+                        <x-admin.location-autocomplete />
                         <div class="col-12">
                             <label class="form-label fw-bold small text-secondary">Endereço Completo</label>
                             <input type="text" name="endereco" class="form-control" placeholder="Rua, Número, Bairro">

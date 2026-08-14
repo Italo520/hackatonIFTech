@@ -325,6 +325,96 @@
         });
     </script>
 
+    <!-- Geo Autocomplete Handler for Admin Modals -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('input', function(e) {
+                if (!e.target.classList.contains('geo-search-input')) return;
+
+                const input = e.target;
+                const wrapper = input.closest('.geo-autocomplete-wrapper');
+                const dropdown = wrapper?.querySelector('.geo-results-dropdown');
+                const form = input.closest('form');
+                if (!wrapper || !dropdown || !form) return;
+
+                clearTimeout(input._debounceTimer);
+                const query = input.value.trim();
+
+                if (query.length < 3) {
+                    dropdown.classList.add('d-none');
+                    dropdown.innerHTML = '';
+                    return;
+                }
+
+                input._debounceTimer = setTimeout(async () => {
+                    try {
+                        dropdown.innerHTML = '<div class="p-3 text-center text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Buscando no OpenStreetMap...</div>';
+                        dropdown.classList.remove('d-none');
+
+                        const res = await fetch(`/api/v1/location/search?q=${encodeURIComponent(query)}`);
+                        if (!res.ok) throw new Error('Falha na busca');
+                        const results = await res.json();
+
+                        if (!Array.isArray(results) || results.length === 0) {
+                            dropdown.innerHTML = '<div class="p-3 text-center text-muted small"><i class="bi bi-geo-alt me-1"></i>Nenhum local encontrado para esta busca.</div>';
+                            return;
+                        }
+
+                        dropdown.innerHTML = results.map(item => `
+                            <button type="button" class="list-group-item list-group-item-action p-2.5 px-3 border-0 border-bottom text-start d-flex align-items-center gap-2.5 geo-result-item" 
+                                data-lat="${item.lat}" 
+                                data-lng="${item.lng}" 
+                                data-display="${item.display || item.city}" 
+                                data-city="${item.city || ''}"
+                                data-state="${item.state || ''}"
+                                data-full="${item.display_name || item.display}">
+                                <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <div class="fw-bold text-dark small text-truncate">${item.display}</div>
+                                    <div class="text-muted text-truncate" style="font-size: 0.72rem;">${item.display_name || (item.city + ' - ' + item.state)}</div>
+                                </div>
+                            </button>
+                        `).join('');
+
+                        dropdown.querySelectorAll('.geo-result-item').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const lat = this.dataset.lat;
+                                const lng = this.dataset.lng;
+                                const full = this.dataset.full;
+
+                                const latInput = form.querySelector('input[name="lat"]');
+                                const lngInput = form.querySelector('input[name="lng"]');
+                                const enderecoInput = form.querySelector('input[name="endereco"], input[name="local"]');
+                                const nomeInput = form.querySelector('input[name="nome"]');
+
+                                if (latInput) latInput.value = lat;
+                                if (lngInput) lngInput.value = lng;
+                                if (enderecoInput) enderecoInput.value = full;
+                                if (nomeInput && !nomeInput.value) {
+                                    nomeInput.value = this.dataset.display;
+                                }
+
+                                input.value = this.dataset.display;
+                                dropdown.classList.add('d-none');
+                            });
+                        });
+
+                    } catch (err) {
+                        dropdown.innerHTML = '<div class="p-3 text-center text-danger small"><i class="bi bi-exclamation-triangle me-1"></i>Erro ao consultar API de mapas.</div>';
+                    }
+                }, 350);
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.geo-autocomplete-wrapper')) {
+                    document.querySelectorAll('.geo-results-dropdown').forEach(d => d.classList.add('d-none'));
+                }
+            });
+        });
+    </script>
+
     @stack('scripts')
 </body>
 </html>

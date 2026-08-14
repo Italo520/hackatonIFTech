@@ -41,6 +41,10 @@ Route::prefix('v1/location')->group(function () {
     Route::get('/search', [App\Http\Controllers\Api\LocationController::class, 'search']);
 });
 
+Route::prefix('v1/routes')->group(function () {
+    Route::get('/directions', [App\Http\Controllers\Api\RoutingApiController::class, 'directions']);
+});
+
 Route::middleware('auth:sanctum')->prefix('v1/privacidade')->group(function () {
     Route::get('/exportar', [App\Http\Controllers\Api\LGPDController::class, 'exportData']);
     Route::post('/excluir', [App\Http\Controllers\Api\LGPDController::class, 'deleteData']);
