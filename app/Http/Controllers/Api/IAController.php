@@ -52,7 +52,9 @@ class IAController extends Controller
                 'cidade_detectada' => $response['cidade_detectada']
             ]);
             echo "event: meta\ndata: {$meta}\n\n";
-            ob_flush();
+            if (ob_get_level() > 0) {
+                ob_flush();
+            }
             flush();
 
             // Simula o streaming das palavras (Efeito Real-Time SSE)
@@ -61,13 +63,17 @@ class IAController extends Controller
                 if ($word === '') continue;
                 $chunk = json_encode(['chunk' => $word]);
                 echo "data: {$chunk}\n\n";
-                ob_flush();
+                if (ob_get_level() > 0) {
+                    ob_flush();
+                }
                 flush();
                 usleep(30000); // 30ms per token
             }
 
             echo "event: done\ndata: {}\n\n";
-            ob_flush();
+            if (ob_get_level() > 0) {
+                ob_flush();
+            }
             flush();
         }, 200, [
             'Content-Type' => 'text/event-stream',
