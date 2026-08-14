@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Web\ExplorarController;
+use App\Http\Controllers\Web\AtrativoWebController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,13 +14,9 @@ Route::get('/', function () {
     return view('pwa.home');
 })->name('pwa.home');
 
-Route::get('/explorar', function () {
-    return view('pwa.explorar');
-})->name('pwa.explorar');
+Route::get('/explorar', [ExplorarController::class, 'index'])->name('pwa.explorar');
 
-Route::get('/atrativo/{id}', function ($id) {
-    return view('pwa.atrativo', ['id' => $id]);
-})->name('pwa.atrativo');
+Route::get('/atrativo/{id}', [AtrativoWebController::class, 'show'])->name('pwa.atrativo');
 
 Route::get('/eventos', function () {
     return view('pwa.eventos');

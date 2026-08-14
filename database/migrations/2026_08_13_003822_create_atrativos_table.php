@@ -21,7 +21,9 @@ return new class extends Migration
                 $table->text('descricao');
                 $table->text('historia')->nullable();
                 $table->string('endereco')->nullable();
-                $table->string('geo')->nullable(); // fallback for sqlite testing
+                $table->string('geo')->nullable(); // fallback string para compatibilidade
+                $table->decimal('lat', 10, 8)->nullable(); // latitude (compatível com seeder)
+                $table->decimal('lng', 11, 8)->nullable(); // longitude (compatível com seeder)
                 $table->json('horarios')->nullable();
                 $table->integer('tempo_medio_visita')->nullable();
                 $table->json('precos')->nullable();
@@ -36,6 +38,7 @@ return new class extends Migration
             });
             return;
         }
+
 
         Schema::create('atrativos', function (Blueprint $table) {
             $table->id();

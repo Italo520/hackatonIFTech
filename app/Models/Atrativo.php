@@ -97,5 +97,14 @@ class Atrativo extends Model implements \OwenIt\Auditing\Contracts\Auditable
     {
         return $this->belongsTo(User::class, 'validado_por');
     }
+
+    /**
+     * Avaliações e comentários de visitantes sobre este atrativo.
+     * Usa relação polimórfica para permitir avaliar também Prestadores e Eventos.
+     */
+    public function avaliacoes()
+    {
+        return $this->morphMany(Avaliacao::class, 'entidade');
+    }
 }
 
