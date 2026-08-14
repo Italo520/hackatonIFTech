@@ -43,7 +43,7 @@ class IAService
             'parts' => [['text' => $prompt]]
         ];
 
-        $response = Http::withHeaders([
+        $response = Http::withoutVerifying()->withHeaders([
             'Content-Type' => 'application/json',
         ])->post($this->apiUrl . '?key=' . $this->apiKey, [
             'contents' => $contents,
