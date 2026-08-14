@@ -209,47 +209,10 @@
 
                 <!-- Profile / Access Component -->
                 @guest
-                    <div class="dropdown">
-                        <button class="btn btn-primary btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1 shadow-sm dropdown-toggle text-decoration-none" type="button" id="guestUserDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.82rem; min-height: 38px;">
-                            <i class="bi bi-person-circle fs-6"></i>
-                            <span>Entrar</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2 mt-2" aria-labelledby="guestUserDropdown" style="min-width: 240px; border: 1px solid rgba(0,0,0,0.08) !important;">
-                            <li class="px-3 pt-2 pb-1">
-                                <div class="fw-bold text-dark small">Acesse sua Conta</div>
-                                <div class="text-muted" style="font-size: 0.72rem;">Turistas, Gestores e Parceiros</div>
-                            </li>
-                            <li><hr class="dropdown-divider my-2"></li>
-                            <li>
-                                <a class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 text-primary fw-semibold" href="{{ route('login') }}">
-                                    <i class="bi bi-box-arrow-in-right fs-5"></i>
-                                    <div>
-                                        <div class="small">Entrar / Fazer Login</div>
-                                        <div class="text-muted" style="font-size: 0.68rem;">Acesse seu painel ou perfil</div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 text-dark" href="{{ route('register') }}">
-                                    <i class="bi bi-person-plus fs-5 text-secondary"></i>
-                                    <div>
-                                        <div class="small fw-semibold">Criar Conta de Turista</div>
-                                        <div class="text-muted" style="font-size: 0.68rem;">Para usar o Chat com IA</div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider my-2"></li>
-                            <li>
-                                <a class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 text-dark" href="{{ route('empreendedor.create') }}">
-                                    <i class="bi bi-shop fs-5 text-warning"></i>
-                                    <div>
-                                        <div class="small fw-semibold">Área do Empreendedor</div>
-                                        <div class="text-muted" style="font-size: 0.68rem;">Cadastrar estabelecimento / pousada</div>
-                                    </div>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+                    <a href="{{ route('login') }}" class="btn btn-primary btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1.5 shadow-sm text-decoration-none" id="btn-header-login" style="font-size: 0.82rem; min-height: 38px;">
+                        <i class="bi bi-box-arrow-in-right fs-6"></i>
+                        <span>Entrar</span>
+                    </a>
                 @endguest
 
                 @auth
