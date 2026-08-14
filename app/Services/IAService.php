@@ -37,9 +37,14 @@ class IAService
         }
         $inputTexto .= "Instruções do Sistema / Novo Prompt:\n{$prompt}";
 
-        $response = Http::withoutVerifying()->withHeaders([
-            'Content-Type' => 'application/json',
-        ])->post($this->apiUrl . '?key=' . $this->apiKey, [
+        // Aumenta o tempo limite de execução do PHP para evitar timeout de 30s
+        set_time_limit(120);
+
+        $response = Http::withoutVerifying()
+            ->timeout(60)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post($this->apiUrl . '?key=' . $this->apiKey, [
             'model' => 'gemini-3.5-flash',
             'input' => $inputTexto,
         ]);
@@ -66,10 +71,7 @@ class IAService
         $errorBody = $response->body();
         Log::error("Erro na API do Gemini: " . $errorBody);
         
-        // Retorna o erro real no formato JSON esperado para debugar no frontend
-        return json_encode([
-            'resposta' => "ERRO DE DEBUG (API Google): " . $errorBody
-        ]);
+        return '{}';
     }
 
     /**
