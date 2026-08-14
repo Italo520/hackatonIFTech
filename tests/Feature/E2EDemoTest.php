@@ -21,7 +21,7 @@ class E2EDemoTest extends TestCase
             'idioma' => 'pt-BR'
         ]);
 
-        $response->assertStatus(200)->assertHeader('Content-Type', 'text/event-stream; charset=UTF-8');
+        $response->assertStatus(200)->assertHeader('Content-Type', 'text/event-stream; charset=utf-8');
     }
 
     public function test_flow_2_turista_gera_roteiro_ia_baixa_offline(): void

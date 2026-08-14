@@ -18,7 +18,7 @@ class IAApiTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                 ->assertHeader('Content-Type', 'text/event-stream; charset=UTF-8');
+                 ->assertHeader('Content-Type', 'text/event-stream; charset=utf-8');
 
         $this->assertDatabaseHas('assistant_logs', [
             'pergunta' => 'Quais os melhores atrativos? Meu email é [EMAIL]',
@@ -34,6 +34,6 @@ class IAApiTest extends TestCase
 
         $response->assertStatus(200)
                  ->assertJsonPath('is_ia', true)
-                 ->assertJsonPath('titulo', 'Roteiro Sua Região: Aventura');
+                 ->assertJsonPath('titulo', 'Roteiro IA: Aventura');
     }
 }
