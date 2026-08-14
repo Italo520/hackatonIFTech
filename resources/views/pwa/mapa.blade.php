@@ -70,40 +70,40 @@
                     <div class="fw-bold text-dark fs-6 current-location-display" id="map-location-title">Detectando GPS...</div>
                 </div>
             </div>
-            <button type="button" id="btn-map-recenter" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center p-0 shadow-sm" style="width: 40px; height: 40px;" title="Recentralizar no meu GPS">
-                <i class="bi bi-crosshair fs-5"></i>
+            <button type="button" id="btn-map-recenter" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center p-0 shadow-sm" style="width: 40px; height: 40px;" title="Recentralizar no meu GPS" aria-label="Recentralizar mapa no meu GPS">
+                <i class="bi bi-crosshair fs-5" aria-hidden="true"></i>
             </button>
         </div>
 
         @if(isset($alertasDefesaCivil) && $alertasDefesaCivil->count() > 0)
             @php $topAlerta = $alertasDefesaCivil->first(); @endphp
-            <div class="alert alert-warning border-0 rounded-4 shadow-sm py-2 px-3 mb-2 d-flex align-items-center justify-content-between gap-2" style="pointer-events: auto;">
+            <div class="alert alert-warning border-0 rounded-4 shadow-sm py-2 px-3 mb-2 d-flex align-items-center justify-content-between gap-2" style="pointer-events: auto;" role="alert">
                 <div class="d-flex align-items-center gap-2 overflow-hidden">
-                    <i class="bi bi-shield-exclamation text-danger fs-5 flex-shrink-0"></i>
+                    <i class="bi bi-shield-exclamation text-danger fs-5 flex-shrink-0" aria-hidden="true"></i>
                     <div class="text-truncate small fw-bold text-dark" style="font-size: 0.78rem;">
                         {{ $topAlerta->titulo }}
                     </div>
                 </div>
-                <a href="{{ route('pwa.home') }}" class="btn btn-sm btn-dark rounded-pill px-2.5 py-0.5 fw-bold flex-shrink-0" style="font-size: 0.7rem;">
+                <a href="{{ route('pwa.home') }}" class="btn btn-sm btn-dark rounded-pill px-2.5 py-0.5 fw-bold flex-shrink-0" style="font-size: 0.7rem;" aria-label="Ver detalhes do alerta">
                     Ver
                 </a>
             </div>
         @endif
 
         <!-- Filtros Rápidos de Categoria no Mapa -->
-        <div class="d-flex gap-2 overflow-auto no-scrollbar pb-1" style="pointer-events: auto;">
-            <button class="btn btn-sm btn-dark rounded-pill px-3 fw-medium flex-shrink-0 map-filter-btn active" data-cat="all">Todos</button>
-            <button class="btn btn-sm btn-white bg-white border rounded-pill px-3 fw-medium flex-shrink-0 map-filter-btn text-primary" data-cat="praia">
-                <i class="bi bi-water me-1"></i> Praias & Rios
+        <div class="d-flex gap-2 overflow-auto no-scrollbar pb-1" style="pointer-events: auto;" role="group" aria-label="Filtros de categoria no mapa">
+            <button class="btn btn-sm btn-dark rounded-pill px-3 fw-medium flex-shrink-0 map-filter-btn active" data-cat="all" aria-label="Mostrar todas as atrações">Todos</button>
+            <button class="btn btn-sm btn-white bg-white border rounded-pill px-3 fw-medium flex-shrink-0 map-filter-btn text-primary" data-cat="praia" aria-label="Filtrar por praias e rios">
+                <i class="bi bi-water me-1" aria-hidden="true"></i> Praias & Rios
             </button>
-            <button class="btn btn-sm btn-white bg-white border rounded-pill px-3 fw-medium flex-shrink-0 map-filter-btn text-success" data-cat="gastronomia">
-                <i class="bi bi-cup-hot me-1"></i> Gastronomia
+            <button class="btn btn-sm btn-white bg-white border rounded-pill px-3 fw-medium flex-shrink-0 map-filter-btn text-success" data-cat="gastronomia" aria-label="Filtrar por gastronomia">
+                <i class="bi bi-cup-hot me-1" aria-hidden="true"></i> Gastronomia
             </button>
-            <button class="btn btn-sm btn-white bg-white border rounded-pill px-3 fw-medium flex-shrink-0 map-filter-btn text-warning" data-cat="natureza">
-                <i class="bi bi-tree me-1"></i> Natureza
+            <button class="btn btn-sm btn-white bg-white border rounded-pill px-3 fw-medium flex-shrink-0 map-filter-btn text-warning" data-cat="natureza" aria-label="Filtrar por natureza">
+                <i class="bi bi-tree me-1" aria-hidden="true"></i> Natureza
             </button>
-            <button class="btn btn-sm btn-white bg-white border rounded-pill px-3 fw-medium flex-shrink-0 map-filter-btn text-danger" data-cat="cultura">
-                <i class="bi bi-bank me-1"></i> Cultura
+            <button class="btn btn-sm btn-white bg-white border rounded-pill px-3 fw-medium flex-shrink-0 map-filter-btn text-danger" data-cat="cultura" aria-label="Filtrar por cultura">
+                <i class="bi bi-bank me-1" aria-hidden="true"></i> Cultura
             </button>
         </div>
     </div>

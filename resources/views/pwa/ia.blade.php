@@ -113,10 +113,10 @@
     <!-- Input Area -->
     <div class="p-3 bg-white border-top pb-4" id="chat-input-wrapper">
         @auth
-            <form id="ia-chat-form" class="position-relative d-flex align-items-center">
-                <input type="text" id="ia-prompt-input" class="form-control rounded-pill bg-light border-0 ps-4 pe-5 shadow-none" placeholder="Pergunte sobre praias, locais, dicas..." style="height: 48px;" required>
-                <button type="submit" id="ia-send-btn" class="btn btn-primary position-absolute end-0 rounded-circle d-flex align-items-center justify-content-center me-1" style="width: 40px; height: 40px; z-index: 5;">
-                    <i class="bi bi-send-fill small"></i>
+            <form id="ia-chat-form" class="position-relative d-flex align-items-center" aria-label="Formulário de Mensagem do Assistente IA">
+                <input type="text" id="ia-prompt-input" class="form-control rounded-pill bg-light border-0 ps-4 pe-5 shadow-none" placeholder="Pergunte sobre praias, locais, dicas..." aria-label="Digite sua mensagem para o assistente IA" style="height: 48px;" required>
+                <button type="submit" id="ia-send-btn" class="btn btn-primary position-absolute end-0 rounded-circle d-flex align-items-center justify-content-center me-1" style="width: 40px; height: 40px; z-index: 5;" aria-label="Enviar mensagem">
+                    <i class="bi bi-send-fill small" aria-hidden="true"></i>
                 </button>
             </form>
             <div class="text-center mt-2">
