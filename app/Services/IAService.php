@@ -88,12 +88,22 @@ class IAService
 
         // RAG REAL: Buscando locais, eventos e prestadores reais
         $queryAtrativos = Atrativo::where('status', 'ativo')->orWhere('status', '!=', 'inativo');
+        
         if ($lat && $lng) {
-            $queryAtrativos->selectRaw("id, nome, descricao, categoria_id, lat, lng, ( 6371 * acos( cos( radians(?) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(?) ) + sin( radians(?) ) * sin( radians( lat ) ) ) ) AS distance", [$lat, $lng, $lat])->orderBy('distance');
+            if (\Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite') {
+                // Em SQLite (Dev), buscamos um pool maior e ordenamos via PHP helper
+                $atrativosDb = $queryAtrativos->take(50)->get()->sortBy(function ($item) use ($lat, $lng) {
+                    return $this->calcularDistancia((float)$lat, (float)$lng, (float)$item->lat, (float)$item->lng);
+                })->take(10);
+            } else {
+                // Em MySQL/Postgres (Produção), o cálculo no banco de dados é mais escalável
+                $queryAtrativos->selectRaw("*, ( 6371 * acos( cos( radians(?) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(?) ) + sin( radians(?) ) * sin( radians( lat ) ) ) ) AS distance", [$lat, $lng, $lat])
+                    ->orderBy('distance');
+                $atrativosDb = $queryAtrativos->take(10)->get();
+            }
         } else {
-            $queryAtrativos->select(['id', 'nome', 'descricao', 'categoria_id', 'lat', 'lng']);
+            $atrativosDb = $queryAtrativos->take(10)->get();
         }
-        $atrativosDb = $queryAtrativos->take(10)->get();
 
         $eventosDb = \App\Models\Evento::where('status', 'ativo')->take(10)->get();
         $prestadoresDb = \App\Models\Prestador::where('status', 'aprovado')->where('selo_validado', true)->take(10)->get();
@@ -196,13 +206,18 @@ Pergunta atual: '{$scrubbedPergunta}'";
         $queryAtrativos = Atrativo::where('status', 'ativo')->orWhere('status', '!=', 'inativo');
         
         if ($lat && $lng) {
-            $queryAtrativos->selectRaw("id, nome, descricao, ( 6371 * acos( cos( radians(?) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(?) ) + sin( radians(?) ) * sin( radians( lat ) ) ) ) AS distance", [$lat, $lng, $lat])
-                  ->orderBy('distance');
+            if (\Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite') {
+                $atrativosDb = $queryAtrativos->take(50)->get()->sortBy(function ($item) use ($lat, $lng) {
+                    return $this->calcularDistancia((float)$lat, (float)$lng, (float)$item->lat, (float)$item->lng);
+                })->take(15);
+            } else {
+                $queryAtrativos->selectRaw("*, ( 6371 * acos( cos( radians(?) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(?) ) + sin( radians(?) ) * sin( radians( lat ) ) ) ) AS distance", [$lat, $lng, $lat])
+                    ->orderBy('distance');
+                $atrativosDb = $queryAtrativos->take(15)->get();
+            }
         } else {
-            $queryAtrativos->select(['id', 'nome', 'descricao']);
+            $atrativosDb = $queryAtrativos->take(15)->get();
         }
-
-        $atrativosDb = $queryAtrativos->take(15)->get();
         $prestadoresDb = \App\Models\Prestador::where('status', 'aprovado')->where('selo_validado', true)->take(10)->get();
         
         $ragContext = "=== DADOS OFICIAIS DO SISTEMA ===\n(Use SOMENTE estes locais e serviços para montar o roteiro. NÃO INVENTE NADA QUE NÃO ESTEJA AQUI):\n";
@@ -268,5 +283,25 @@ Você deve retornar EXATAMENTE UM JSON com os seguintes campos, e mais nada:
         }
 
         return $dados;
+    }
+
+    /**
+     * Helper para cálculo de distância Haversine em PHP (usado em dev com SQLite)
+     */
+    private function calcularDistancia(float $lat1, float $lng1, float $lat2, float $lng2): float
+    {
+        if (!$lat1 || !$lng1 || !$lat2 || !$lng2) return 999999;
+        
+        $earthRadius = 6371;
+        $latDelta = deg2rad($lat2 - $lat1);
+        $lngDelta = deg2rad($lng2 - $lng1);
+        
+        $a = sin($latDelta / 2) * sin($latDelta / 2) +
+             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+             sin($lngDelta / 2) * sin($lngDelta / 2);
+             
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        
+        return $earthRadius * $c;
     }
 }
