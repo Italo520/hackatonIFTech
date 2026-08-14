@@ -7,39 +7,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        if (DB::getDriverName() === 'sqlite') {
-            Schema::create('atrativos', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('municipio_id')->constrained()->cascadeOnDelete();
-                $table->foreignId('categoria_id')->constrained()->cascadeOnDelete();
-                $table->string('nome');
-                $table->text('descricao');
-                $table->text('historia')->nullable();
-                $table->string('endereco')->nullable();
-                $table->string('geo')->nullable(); // fallback string para compatibilidade
-                $table->decimal('lat', 10, 8)->nullable(); // latitude (compatível com seeder)
-                $table->decimal('lng', 11, 8)->nullable(); // longitude (compatível com seeder)
-                $table->json('horarios')->nullable();
-                $table->integer('tempo_medio_visita')->nullable();
-                $table->json('precos')->nullable();
-                $table->json('contatos')->nullable();
-                $table->json('acessibilidade')->nullable();
-                $table->text('restricoes')->nullable();
-                $table->text('seguranca')->nullable();
-                $table->string('status')->default('ativo');
-                $table->foreignId('validado_por')->nullable()->constrained('users')->nullOnDelete();
-                $table->timestamp('validado_em')->nullable();
-                $table->timestamps();
-            });
-            return;
-        }
-
-
         Schema::create('atrativos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('municipio_id')->constrained('municipios')->cascadeOnDelete();
@@ -48,13 +17,14 @@ return new class extends Migration
             $table->text('descricao');
             $table->text('historia')->nullable();
             $table->string('endereco')->nullable();
+            $table->string('geo')->nullable();
             $table->decimal('lat', 10, 8)->nullable();
             $table->decimal('lng', 11, 8)->nullable();
-            $table->jsonb('horarios')->nullable();
-            $table->integer('tempo_medio_visita')->nullable(); // em minutos
-            $table->jsonb('precos')->nullable();
-            $table->jsonb('contatos')->nullable();
-            $table->jsonb('acessibilidade')->nullable();
+            $table->json('horarios')->nullable();
+            $table->integer('tempo_medio_visita')->nullable();
+            $table->json('precos')->nullable();
+            $table->json('contatos')->nullable();
+            $table->json('acessibilidade')->nullable();
             $table->text('restricoes')->nullable();
             $table->text('seguranca')->nullable();
             $table->string('status')->default('ativo');
@@ -69,9 +39,6 @@ return new class extends Migration
         }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('atrativos');
