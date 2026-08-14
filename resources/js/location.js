@@ -1,8 +1,10 @@
 /**
- * Sistema de Geolocalização e Integração com OpenStreetMap (Nominatim)
- * Permite detectar a localização real do usuário (ex: João Pessoa - PB)
- * e atualizar dinamicamente a interface do PWA.
+ * Sistema de Geolocalização, Seletor de Cidades e Integração com OpenStreetMap (Nominatim)
+ * Permite alternar dinamicamente entre cidades (João Pessoa, Bonito, Recife, Natal, São Paulo...)
+ * ou detectar a localização real do usuário via GPS, sincronizando o cabeçalho, atrações e mapas.
  */
+
+import { CITIES_DATA, PLACES_DATA, ROTEIROS_DATA } from './places-data';
 
 const BRAZIL_STATES = {
     'Acre': 'AC', 'Alagoas': 'AL', 'Amapá': 'AP', 'Amazonas': 'AM',
@@ -17,6 +19,51 @@ const BRAZIL_STATES = {
 const STORAGE_KEY = 'turismo_user_location';
 
 export const LocationService = {
+    /**
+     * Retorna o catálogo de cidades disponíveis
+     */
+    getCities() {
+        return CITIES_DATA;
+    },
+
+    /**
+     * Retorna todas as atrações disponíveis
+     */
+    getAllPlaces() {
+        return PLACES_DATA;
+    },
+
+    /**
+     * Retorna as atrações filtradas por cidade
+     */
+    getAttractionsByCity(cityName) {
+        if (!cityName) return PLACES_DATA;
+        const normalized = cityName.toLowerCase().trim();
+        const filtered = PLACES_DATA.filter(p => 
+            p.cidade.toLowerCase().includes(normalized) || 
+            normalized.includes(p.cidade.toLowerCase())
+        );
+        return filtered.length > 0 ? filtered : PLACES_DATA;
+    },
+
+    /**
+     * Retorna os roteiros recomendados para a cidade
+     */
+    getRoteirosByCity(cityName) {
+        if (!cityName) return ROTEIROS_DATA['João Pessoa'] || [];
+        
+        // Encontra chave correspondente
+        for (const [key, roteiros] of Object.entries(ROTEIROS_DATA)) {
+            if (key.toLowerCase() === cityName.toLowerCase() || 
+                cityName.toLowerCase().includes(key.toLowerCase()) || 
+                key.toLowerCase().includes(cityName.toLowerCase())) {
+                return roteiros;
+            }
+        }
+
+        return ROTEIROS_DATA['João Pessoa'] || [];
+    },
+
     /**
      * Retorna a localização armazenada ou o padrão
      */
@@ -33,7 +80,7 @@ export const LocationService = {
     },
 
     /**
-     * Salva a localização no LocalStorage e atualiza o DOM
+     * Salva a localização no LocalStorage e atualiza o DOM e eventos
      */
     saveLocation(data) {
         try {
@@ -42,7 +89,18 @@ export const LocationService = {
             console.warn('Erro ao salvar localização no storage:', e);
         }
         this.updateDOM(data);
-        window.dispatchEvent(new CustomEvent('turismo:location-changed', { detail: data }));
+
+        // Notifica aplicação com os atrativos e roteiros correspondentes à cidade
+        const attractions = this.getAttractionsByCity(data.city);
+        const roteiros = this.getRoteirosByCity(data.city);
+
+        window.dispatchEvent(new CustomEvent('turismo:location-changed', { 
+            detail: {
+                ...data,
+                attractions,
+                roteiros
+            } 
+        }));
     },
 
     /**
@@ -74,6 +132,31 @@ export const LocationService = {
         if (modalCoordsDisplay && data.lat && data.lng) {
             modalCoordsDisplay.textContent = `${Number(data.lat).toFixed(4)}, ${Number(data.lng).toFixed(4)}`;
         }
+
+        // Atualiza estado ativo nos botões do dropdown do Header
+        document.querySelectorAll('.btn-select-city').forEach(btn => {
+            const btnCity = btn.getAttribute('data-city');
+            const checkIcon = btn.querySelector('.active-check');
+            if (btnCity && (btnCity.toLowerCase() === cityName.toLowerCase() || cityName.toLowerCase().includes(btnCity.toLowerCase()))) {
+                btn.classList.add('bg-primary-subtle', 'fw-bold');
+                if (checkIcon) checkIcon.classList.remove('d-none');
+            } else {
+                btn.classList.remove('bg-primary-subtle', 'fw-bold');
+                if (checkIcon) checkIcon.classList.add('d-none');
+            }
+        });
+
+        // Atualiza botões de atalho rápido no modal
+        document.querySelectorAll('.btn-quick-location').forEach(btn => {
+            const btnCity = btn.getAttribute('data-city');
+            if (btnCity && (btnCity.toLowerCase() === cityName.toLowerCase() || cityName.toLowerCase().includes(btnCity.toLowerCase()))) {
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-primary', 'text-white');
+            } else {
+                btn.classList.remove('btn-primary', 'text-white');
+                btn.classList.add('btn-outline-secondary');
+            }
+        });
     },
 
     /**
@@ -271,7 +354,8 @@ export const LocationService = {
      * Calcula a distância entre duas coordenadas GPS em km (Fórmula Haversine)
      */
     calculateDistanceKm(lat1, lon1, lat2, lon2) {
-        if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+        if (lat1 === null || lat1 === undefined || lon1 === null || lon1 === undefined || 
+            lat2 === null || lat2 === undefined || lon2 === null || lon2 === undefined) return null;
         const R = 6371; // Raio da Terra em km
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -331,7 +415,7 @@ export const LocationService = {
     },
 
     /**
-     * Define manualmente uma localização (ex: clicando em um atalho ou busca)
+     * Define manualmente uma localização (ex: ao clicar no dropdown ou atalho)
      */
     setLocationManual(city, uf, lat, lng, displayName = null) {
         const display = displayName || (uf ? `${city} ${uf}` : city);
@@ -339,15 +423,14 @@ export const LocationService = {
             city,
             uf,
             display,
-            lat,
-            lng,
+            lat: parseFloat(lat),
+            lng: parseFloat(lng),
             isGPS: false,
             updatedAt: new Date().toISOString()
         };
         this.saveLocation(data);
         return data;
     },
-
 
     /**
      * Controla o spinner de carregamento no cabeçalho e modal
@@ -394,21 +477,6 @@ export const LocationService = {
                 }
             });
         });
-
-        // Solicita GPS imediatamente no carregamento da página
-        if (navigator.geolocation) {
-            // Chamada direta para disparar o prompt nativo do navegador
-            this.detectGPS({ showLoading: true })
-                .then(() => {
-                    banner?.classList.add('d-none');
-                })
-                .catch(() => {
-                    // Mantém João Pessoa como fallback caso o usuário negue
-                    if (!this.getSavedLocation()) {
-                        this.saveLocation(defaultLocation);
-                    }
-                });
-        }
     }
 };
 
@@ -423,6 +491,5 @@ if (typeof window !== 'undefined') {
         LocationService.init();
     }
 }
-
 
 export default LocationService;

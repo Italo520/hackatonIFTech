@@ -105,19 +105,105 @@
     <!-- Topbar -->
     <header class="glass-nav fixed-top w-100 z-3 safe-area-pt">
         <div class="container-fluid px-3 py-2 d-flex justify-content-between align-items-center" style="min-height: 56px;">
-            <button type="button" class="btn p-0 border-0 bg-transparent navbar-brand fw-bold text-primary d-flex align-items-center gap-2 m-0 fs-5 text-start shadow-none" data-bs-toggle="modal" data-bs-target="#locationModal" title="Alterar ou atualizar localização">
-                <i class="bi bi-geo-alt-fill text-primary" id="location-pin-icon"></i>
-                <span id="current-location-display">João Pessoa PB</span>
-                <span id="location-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status" style="width: 0.85rem; height: 0.85rem;"></span>
-                <i class="bi bi-chevron-down text-muted" style="font-size: 0.75rem;"></i>
-            </button>
+            <!-- Dropdown / Toggle de Seleção de Cidade -->
+            <div class="dropdown">
+                <button type="button" class="btn p-0 border-0 bg-transparent navbar-brand fw-bold text-primary d-flex align-items-center gap-2 m-0 fs-5 text-start shadow-none" id="cityDropdownToggle" data-bs-toggle="dropdown" aria-expanded="false" title="Trocar cidade ou localização">
+                    <i class="bi bi-geo-alt-fill text-primary" id="location-pin-icon"></i>
+                    <span id="current-location-display">João Pessoa PB</span>
+                    <span id="location-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status" style="width: 0.85rem; height: 0.85rem;"></span>
+                    <i class="bi bi-chevron-down text-muted" style="font-size: 0.75rem;"></i>
+                </button>
+
+                <div class="dropdown-menu shadow-lg border-0 rounded-4 p-2 mt-2" aria-labelledby="cityDropdownToggle" style="min-width: 290px; z-index: 1060; border: 1px solid rgba(0,0,0,0.08) !important;">
+                    <div class="d-flex justify-content-between align-items-center px-3 pt-2 pb-2 border-bottom">
+                        <span class="text-uppercase fw-bold text-muted small" style="font-size: 0.68rem; letter-spacing: 0.5px;">Escolher Destino</span>
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1" style="font-size: 0.65rem;">Mapa Integrado</span>
+                    </div>
+                    
+                    <div class="py-1" id="dropdown-cities-list">
+                        <!-- João Pessoa -->
+                        <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center justify-content-between btn-select-city" data-city="João Pessoa" data-uf="PB" data-lat="-7.1153" data-lng="-34.8641">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="rounded-circle bg-primary d-inline-block" style="width: 8px; height: 8px;"></span>
+                                <div>
+                                    <div class="fw-bold text-dark small">João Pessoa</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Paraíba • 6 atrações</div>
+                                </div>
+                            </div>
+                            <i class="bi bi-check2 text-primary fs-5 active-check"></i>
+                        </button>
+                        
+                        <!-- Bonito -->
+                        <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center justify-content-between btn-select-city" data-city="Bonito" data-uf="MS" data-lat="-21.1275" data-lng="-56.4831">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="rounded-circle bg-success d-inline-block" style="width: 8px; height: 8px;"></span>
+                                <div>
+                                    <div class="fw-bold text-dark small">Bonito</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Mato Grosso do Sul • 4 atrações</div>
+                                </div>
+                            </div>
+                            <i class="bi bi-check2 text-primary fs-5 d-none active-check"></i>
+                        </button>
+                        
+                        <!-- Recife -->
+                        <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center justify-content-between btn-select-city" data-city="Recife" data-uf="PE" data-lat="-8.0476" data-lng="-34.8770">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="rounded-circle bg-warning d-inline-block" style="width: 8px; height: 8px;"></span>
+                                <div>
+                                    <div class="fw-bold text-dark small">Recife</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Pernambuco • 3 atrações</div>
+                                </div>
+                            </div>
+                            <i class="bi bi-check2 text-primary fs-5 d-none active-check"></i>
+                        </button>
+
+                        <!-- Natal -->
+                        <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center justify-content-between btn-select-city" data-city="Natal" data-uf="RN" data-lat="-5.7945" data-lng="-35.2110">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="rounded-circle bg-info d-inline-block" style="width: 8px; height: 8px;"></span>
+                                <div>
+                                    <div class="fw-bold text-dark small">Natal</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Rio Grande do Norte • 3 atrações</div>
+                                </div>
+                            </div>
+                            <i class="bi bi-check2 text-primary fs-5 d-none active-check"></i>
+                        </button>
+
+                        <!-- São Paulo -->
+                        <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center justify-content-between btn-select-city" data-city="São Paulo" data-uf="SP" data-lat="-23.5505" data-lng="-46.6333">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="rounded-circle bg-danger d-inline-block" style="width: 8px; height: 8px;"></span>
+                                <div>
+                                    <div class="fw-bold text-dark small">São Paulo</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">São Paulo • 3 atrações</div>
+                                </div>
+                            </div>
+                            <i class="bi bi-check2 text-primary fs-5 d-none active-check"></i>
+                        </button>
+                    </div>
+
+                    <div class="dropdown-divider my-2"></div>
+
+                    <!-- Botão GPS no dropdown -->
+                    <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 text-primary fw-bold" id="btn-dropdown-gps">
+                        <i class="bi bi-crosshair fs-6"></i>
+                        <span class="small">Detectar Meu GPS Real</span>
+                    </button>
+
+                    <!-- Botão Buscar com OpenStreetMap no modal -->
+                    <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 text-secondary" data-bs-toggle="modal" data-bs-target="#locationModal">
+                        <i class="bi bi-search fs-6"></i>
+                        <span class="small">Buscar outra cidade...</span>
+                    </button>
+                </div>
+            </div>
 
             <div class="d-flex align-items-center gap-2">
                 <button id="btn-header-install" type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 fw-bold d-none d-flex align-items-center gap-1 shadow-sm btn-trigger-pwa-install" title="Instalar Aplicativo" style="font-size: 0.8rem; min-height: 36px;">
                     <i class="bi bi-download"></i>
                     <span>Instalar</span>
                 </button>
-                <button class="btn btn-light rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 44px; height: 44px; border: none; background: rgba(0,0,0,0.05);" data-bs-toggle="modal" data-bs-target="#locationModal" title="Ver localização">
+                <button class="btn btn-light rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 44px; height: 44px; border: none; background: rgba(0,0,0,0.05);" data-bs-toggle="modal" data-bs-target="#locationModal" title="Ver localização e busca avançada">
                     <i class="bi bi-compass fs-5 text-primary"></i>
                 </button>
             </div>
@@ -375,8 +461,8 @@
                 });
             }
 
-            // Quick location buttons
-            quickButtons.forEach(btn => {
+            // Select city buttons (no dropdown e no modal)
+            document.querySelectorAll('.btn-select-city, .btn-quick-location').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const city = this.getAttribute('data-city');
                     const uf = this.getAttribute('data-uf');
@@ -386,10 +472,21 @@
                     if (window.LocationService) {
                         window.LocationService.setLocationManual(city, uf, lat, lng);
                     }
+                    
                     const modal = getModalInstance();
                     if (modal) modal.hide();
                 });
             });
+
+            // Dropdown GPS Button
+            const dropdownGpsBtn = document.getElementById('btn-dropdown-gps');
+            if (dropdownGpsBtn) {
+                dropdownGpsBtn.addEventListener('click', function() {
+                    if (window.LocationService) {
+                        window.LocationService.detectGPS({ showLoading: true });
+                    }
+                });
+            }
 
             // OpenStreetMap Search Handler
             let searchTimeout = null;
