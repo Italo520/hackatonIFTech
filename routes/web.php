@@ -91,6 +91,7 @@ Route::delete('/admin/roteiros/{id}', [AdminController::class, 'destroyRoteiro']
 // Módulos de Gestão - Alertas, Auditoria e Prestadores
 Route::get('/admin/alertas', [AlertaController::class, 'index'])->name('admin.alertas.index');
 Route::post('/admin/alertas', [AlertaController::class, 'store'])->name('admin.alertas.store');
+Route::delete('/admin/alertas/{id}', [AlertaController::class, 'destroy'])->name('admin.alertas.destroy');
 Route::get('/admin/auditoria', [AdminController::class, 'auditoria'])->name('admin.auditoria.index');
 Route::get('/admin/prestadores', [PrestadorValidationController::class, 'index'])->name('admin.prestadores.index');
 Route::put('/admin/prestadores/{id}', [PrestadorValidationController::class, 'update'])->name('admin.prestadores.update');

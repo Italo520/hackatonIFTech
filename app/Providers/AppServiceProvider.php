@@ -27,5 +27,19 @@ class AppServiceProvider extends ServiceProvider
         ) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
+
+        // View Composer para injetar alertas ativos e vigentes no layout PWA e telas do turista
+        \Illuminate\Support\Facades\View::composer(['layouts.pwa', 'pwa.*'], function ($view) {
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('alertas')) {
+                    $alertasAtivos = \App\Models\Alerta::ativos()->orderBy('created_at', 'desc')->take(10)->get();
+                    $view->with('alertasAtivos', $alertasAtivos);
+                } else {
+                    $view->with('alertasAtivos', collect());
+                }
+            } catch (\Throwable $e) {
+                $view->with('alertasAtivos', collect());
+            }
+        });
     }
 }

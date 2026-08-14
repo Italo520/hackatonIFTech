@@ -207,6 +207,14 @@
                     <i class="bi bi-compass fs-5 text-primary"></i>
                 </button>
 
+                <!-- Botão Central de Notificações / Alertas Oficiais -->
+                <button type="button" class="btn btn-light rounded-circle position-relative d-flex align-items-center justify-content-center p-0" id="btn-header-notifications" data-bs-toggle="modal" data-bs-target="#modalCentralNotificacoes" title="Notificações & Alertas Oficiais" style="width: 38px; height: 38px; border: none; background: rgba(0,0,0,0.05);">
+                    <i class="bi bi-bell-fill fs-5 text-dark" id="header-bell-icon"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light d-none" id="header-unread-badge" style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                        0
+                    </span>
+                </button>
+
                 <!-- Profile / Access Component -->
                 @guest
                     <a href="{{ route('login') }}" class="btn btn-primary btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1.5 shadow-sm text-decoration-none" id="btn-header-login" style="font-size: 0.82rem; min-height: 38px;">
@@ -385,6 +393,115 @@
                             </button>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Central de Notificações & Alertas Oficiais -->
+    <div class="modal fade" id="modalCentralNotificacoes" tabindex="-1" aria-labelledby="modalCentralNotificacoesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+            <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+                <div class="modal-header border-0 pb-0 pt-4 px-4 bg-light">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; background: rgba(155, 34, 38, 0.1); color: #9b2226;">
+                            <i class="bi bi-bell-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold text-dark m-0" id="modalCentralNotificacoesLabel" style="font-size: 1.05rem;">Notificações & Alertas</h5>
+                            <span class="text-secondary small">Comunicados oficiais de segurança e turismo</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <span class="small text-muted" id="notifications-status-count">
+                            Carregando comunicados...
+                        </span>
+                        <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 fw-semibold text-primary" id="btn-mark-all-read" style="font-size: 0.8rem;">
+                            <i class="bi bi-check2-all me-1"></i> Marcar todos como vistos
+                        </button>
+                    </div>
+
+                    <!-- Container da Lista de Alertas -->
+                    <div id="notifications-list-container" class="d-flex flex-column gap-3">
+                        @forelse($alertasAtivos ?? [] as $alerta)
+                            @php
+                                $isUrgente = in_array($alerta->urgencia, ['urgente', 'emergencia', 'perigo']);
+                                $cardBg = $isUrgente ? 'border-danger-subtle bg-danger-subtle' : ($alerta->urgencia === 'aviso' ? 'border-warning-subtle bg-warning-subtle' : 'border-light bg-light');
+                                $badgeClass = $isUrgente ? 'bg-danger text-white' : ($alerta->urgencia === 'aviso' ? 'bg-warning text-dark' : 'bg-primary text-white');
+                            @endphp
+                            <div class="card rounded-4 border p-3 shadow-sm notification-item-card" id="notif-item-{{ $alerta->id }}" data-alert-id="{{ $alerta->id }}" data-urgency="{{ $alerta->urgencia }}">
+                                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                    <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                        <span class="badge {{ $badgeClass }} rounded-pill px-2.5 py-1 text-uppercase fw-bold" style="font-size: 0.65rem;">
+                                            {{ ucfirst($alerta->urgencia) }}
+                                        </span>
+                                        <span class="badge bg-white text-secondary border rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">
+                                            <i class="bi bi-clock me-1"></i>{{ $alerta->created_at ? $alerta->created_at->diffForHumans() : 'Hoje' }}
+                                        </span>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0.5 notif-seen-badge d-none" style="font-size: 0.65rem;">
+                                            <i class="bi bi-check-lg me-1"></i>Visto
+                                        </span>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light border rounded-pill px-2 py-0.5 text-secondary btn-toggle-seen" onclick="window.AlertasManager.toggleSeen({{ $alerta->id }})" title="Marcar ou desmarcar como visto" style="font-size: 0.72rem;">
+                                        <i class="bi bi-eye me-1"></i><span class="seen-text">Visto</span>
+                                    </button>
+                                </div>
+
+                                <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">{{ $alerta->titulo }}</h6>
+                                <p class="text-secondary small mb-3" style="line-height: 1.5; font-size: 0.83rem; white-space: pre-line;">{{ $alerta->corpo }}</p>
+
+                                @if($alerta->responsavel || $alerta->contato_emergencia)
+                                    <div class="p-2.5 rounded-3 bg-white border mb-2">
+                                        @if($alerta->responsavel)
+                                            <div class="small fw-semibold text-dark mb-1" style="font-size: 0.78rem;">
+                                                <i class="bi bi-shield-check text-primary me-1"></i> {{ $alerta->responsavel }}
+                                            </div>
+                                        @endif
+                                        @if($alerta->contato_emergencia)
+                                            <div class="small text-danger fw-bold d-flex align-items-center gap-1" style="font-size: 0.78rem;">
+                                                <i class="bi bi-telephone-fill"></i>
+                                                <span>{{ $alerta->contato_emergencia }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+
+                                <div class="d-flex justify-content-between align-items-center pt-1">
+                                    <span class="text-muted small font-monospace" style="font-size: 0.7rem;">
+                                        <i class="bi bi-hourglass-split me-1"></i>Validade: {{ $alerta->valido_ate ? $alerta->valido_ate->format('d/m H:i') : '24h' }}
+                                    </span>
+                                    @if($alerta->contato_emergencia)
+                                        @php
+                                            preg_match_all('/\d+/', $alerta->contato_emergencia, $matches);
+                                            $firstNumber = !empty($matches[0]) ? $matches[0][0] : null;
+                                        @endphp
+                                        @if($firstNumber)
+                                            <a href="tel:{{ $firstNumber }}" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-0.5 fw-bold text-decoration-none" style="font-size: 0.75rem;">
+                                                <i class="bi bi-telephone me-1"></i> Ligar
+                                            </a>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center py-5 text-muted empty-notifs-state">
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px; background: rgba(25, 135, 84, 0.1); color: #198754;">
+                                    <i class="bi bi-shield-check fs-2"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-1">Tudo tranquilo!</h6>
+                                <p class="small text-muted mb-0">Nenhum comunicado ou alerta meteorológico emitido no momento.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light p-3 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="window.AlertasManager.clearAllSeen()">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar Alertas
+                    </button>
+                    <button type="button" class="btn btn-dark btn-sm rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
@@ -664,6 +781,163 @@
         });
     </script>
 
+    <!-- Gerenciador de Alertas e Notificações Oficiais no PWA -->
+    <script>
+        window.AlertasManager = {
+            STORAGE_KEY: 'turista_seen_alerts',
+            
+            getSeenAlerts() {
+                try {
+                    const raw = localStorage.getItem(this.STORAGE_KEY);
+                    return raw ? JSON.parse(raw) : [];
+                } catch (e) {
+                    return [];
+                }
+            },
+            
+            setSeenAlerts(ids) {
+                try {
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(ids));
+                } catch (e) {}
+                this.updateUI();
+            },
+            
+            markAsSeen(id) {
+                id = parseInt(id);
+                const seen = this.getSeenAlerts();
+                if (!seen.includes(id)) {
+                    seen.push(id);
+                    this.setSeenAlerts(seen);
+                }
+            },
+            
+            toggleSeen(id) {
+                id = parseInt(id);
+                let seen = this.getSeenAlerts();
+                if (seen.includes(id)) {
+                    seen = seen.filter(item => item !== id);
+                } else {
+                    seen.push(id);
+                }
+                this.setSeenAlerts(seen);
+            },
+            
+            markAllAsSeen() {
+                const cards = document.querySelectorAll('.notification-item-card');
+                const ids = [];
+                cards.forEach(card => {
+                    const id = parseInt(card.getAttribute('data-alert-id'));
+                    if (id) ids.push(id);
+                });
+                this.setSeenAlerts(ids);
+            },
+            
+            clearAllSeen() {
+                this.setSeenAlerts([]);
+            },
+            
+            dismissHomeBanner(id) {
+                id = parseInt(id);
+                this.markAsSeen(id);
+                const card = document.getElementById(`alerta-card-${id}`);
+                if (card) {
+                    card.remove();
+                }
+            },
+            
+            updateUI() {
+                const seen = this.getSeenAlerts();
+                const cards = document.querySelectorAll('.notification-item-card');
+                let unreadCount = 0;
+                let totalCount = cards.length;
+                
+                cards.forEach(card => {
+                    const id = parseInt(card.getAttribute('data-alert-id'));
+                    const isSeen = seen.includes(id);
+                    const seenBadge = card.querySelector('.notif-seen-badge');
+                    const seenBtn = card.querySelector('.btn-toggle-seen');
+                    const seenText = card.querySelector('.seen-text');
+                    
+                    if (isSeen) {
+                        if (seenBadge) seenBadge.classList.remove('d-none');
+                        if (seenBtn) {
+                            seenBtn.classList.remove('btn-light', 'text-secondary');
+                            seenBtn.classList.add('btn-success-subtle', 'text-success');
+                        }
+                        if (seenText) seenText.textContent = 'Visto';
+                        card.style.opacity = '0.7';
+                    } else {
+                        unreadCount++;
+                        if (seenBadge) seenBadge.classList.add('d-none');
+                        if (seenBtn) {
+                            seenBtn.classList.remove('btn-success-subtle', 'text-success');
+                            seenBtn.classList.add('btn-light', 'text-secondary');
+                        }
+                        if (seenText) seenText.textContent = 'Marcar Visto';
+                        card.style.opacity = '1';
+                    }
+                    
+                    // Sincronizar com banners embutidos na Home/Mapa
+                    const homeCard = document.getElementById(`alerta-card-${id}`);
+                    if (homeCard) {
+                        if (isSeen) {
+                            homeCard.classList.add('d-none');
+                        } else {
+                            homeCard.classList.remove('d-none');
+                        }
+                    }
+                });
+                
+                // Atualizar badge do sino no topo
+                const badge = document.getElementById('header-unread-badge');
+                const bellIcon = document.getElementById('header-bell-icon');
+                if (badge) {
+                    if (unreadCount > 0) {
+                        badge.textContent = unreadCount;
+                        badge.classList.remove('d-none');
+                        if (bellIcon) {
+                            bellIcon.classList.remove('text-dark');
+                            bellIcon.classList.add('text-danger');
+                        }
+                    } else {
+                        badge.textContent = '0';
+                        badge.classList.add('d-none');
+                        if (bellIcon) {
+                            bellIcon.classList.remove('text-danger');
+                            bellIcon.classList.add('text-dark');
+                        }
+                    }
+                }
+                
+                // Atualizar texto do status no modal
+                const statusText = document.getElementById('notifications-status-count');
+                if (statusText) {
+                    if (totalCount === 0) {
+                        statusText.textContent = 'Nenhuma notificação ativa';
+                    } else if (unreadCount === 0) {
+                        statusText.textContent = `Todos os ${totalCount} comunicados foram vistos`;
+                    } else {
+                        statusText.textContent = `${unreadCount} comunicado(s) novo(s)`;
+                    }
+                }
+            },
+            
+            init() {
+                this.updateUI();
+                
+                const btnMarkAll = document.getElementById('btn-mark-all-read');
+                if (btnMarkAll) {
+                    btnMarkAll.addEventListener('click', () => {
+                        this.markAllAsSeen();
+                    });
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.AlertasManager.init();
+        });
+    </script>
     
     @stack('scripts')
 </body>

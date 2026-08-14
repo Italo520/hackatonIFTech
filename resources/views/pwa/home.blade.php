@@ -37,12 +37,12 @@
 
     <!-- Alertas e Comunicados Oficiais de Defesa Civil -->
     @if(isset($alertasDefesaCivil) && $alertasDefesaCivil->count() > 0)
-        <div class="mb-4">
+        <div class="mb-4" id="home-alerts-wrapper">
             @foreach($alertasDefesaCivil as $alerta)
                 @php
                     $isUrgente = in_array($alerta->urgencia, ['urgente', 'emergencia', 'perigo']);
-                    $bgClass = $isUrgente ? 'bg-danger text-white' : ($alerta->urgencia === 'alerta' ? 'bg-warning-subtle text-dark border border-warning' : 'bg-primary-subtle text-dark border border-primary-subtle');
-                    $badgeClass = $isUrgente ? 'bg-white text-danger' : ($alerta->urgencia === 'alerta' ? 'bg-warning text-dark' : 'bg-primary text-white');
+                    $bgClass = $isUrgente ? 'bg-danger text-white' : ($alerta->urgencia === 'aviso' ? 'bg-warning-subtle text-dark border border-warning' : 'bg-primary-subtle text-dark border border-primary-subtle');
+                    $badgeClass = $isUrgente ? 'bg-white text-danger' : ($alerta->urgencia === 'aviso' ? 'bg-warning text-dark' : 'bg-primary text-white');
                     $icon = $isUrgente ? 'bi-exclamation-triangle-fill text-warning' : 'bi-megaphone-fill text-primary';
                 @endphp
                 <div class="card border-0 rounded-4 p-3 shadow-sm mb-2 {{ $bgClass }}" id="alerta-card-{{ $alerta->id }}">
@@ -54,20 +54,32 @@
                             <div>
                                 <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                                     <span class="badge {{ $badgeClass }} rounded-pill px-2.5 py-1 text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">
-                                        Defesa Civil • {{ ucfirst($alerta->urgencia) }}
+                                        {{ $alerta->responsavel ?? 'Defesa Civil' }} • {{ ucfirst($alerta->urgencia) }}
                                     </span>
                                     <span class="small opacity-75 font-monospace" style="font-size: 0.7rem;">
                                         {{ $alerta->created_at ? $alerta->created_at->diffForHumans() : 'Hoje' }}
                                     </span>
                                 </div>
                                 <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">{{ $alerta->titulo }}</h6>
-                                <p class="small mb-2 opacity-90" style="font-size: 0.82rem; line-height: 1.35;">{{ Str::limit($alerta->corpo, 100) }}</p>
-                                <button type="button" class="btn btn-sm {{ $isUrgente ? 'btn-light text-danger' : 'btn-primary' }} rounded-pill px-3 py-1 fw-bold" data-bs-toggle="modal" data-bs-target="#modalAlerta{{ $alerta->id }}" style="font-size: 0.75rem;">
-                                    <i class="bi bi-shield-exclamation me-1"></i> Ver Orientações Oficiais
-                                </button>
+                                <p class="small mb-2 opacity-90" style="font-size: 0.82rem; line-height: 1.35;">{{ Str::limit($alerta->corpo, 110) }}</p>
+                                
+                                @if($alerta->contato_emergencia)
+                                    <div class="small fw-semibold mb-2 opacity-90" style="font-size: 0.78rem;">
+                                        <i class="bi bi-telephone-fill me-1"></i> {{ $alerta->contato_emergencia }}
+                                    </div>
+                                @endif
+
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <button type="button" class="btn btn-sm {{ $isUrgente ? 'btn-light text-danger' : 'btn-primary' }} rounded-pill px-3 py-1 fw-bold" data-bs-toggle="modal" data-bs-target="#modalAlerta{{ $alerta->id }}" style="font-size: 0.75rem;">
+                                        <i class="bi bi-shield-exclamation me-1"></i> Ver Orientações Oficiais
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 {{ $isUrgente ? 'text-white' : 'text-secondary' }} opacity-75 small" onclick="if(window.AlertasManager) window.AlertasManager.dismissHomeBanner({{ $alerta->id }}); else document.getElementById('alerta-card-{{ $alerta->id }}').remove();" style="font-size: 0.75rem;">
+                                        Dispensar
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <button type="button" class="btn-close {{ $isUrgente ? 'btn-close-white' : '' }} opacity-50" onclick="document.getElementById('alerta-card-{{ $alerta->id }}').remove();" aria-label="Fechar"></button>
+                        <button type="button" class="btn-close {{ $isUrgente ? 'btn-close-white' : '' }} opacity-50" onclick="if(window.AlertasManager) window.AlertasManager.dismissHomeBanner({{ $alerta->id }}); else document.getElementById('alerta-card-{{ $alerta->id }}').remove();" aria-label="Fechar" title="Marcar como visto"></button>
                     </div>
                 </div>
 
@@ -78,25 +90,43 @@
                             <div class="modal-header border-0 pb-0 pt-4 px-4 {{ $isUrgente ? 'bg-danger text-white' : 'bg-light' }}">
                                 <div class="d-flex align-items-center gap-2">
                                     <i class="bi bi-shield-fill-exclamation fs-4 {{ $isUrgente ? 'text-warning' : 'text-primary' }}"></i>
-                                    <h5 class="modal-title fw-bold fs-6">Comunicado de Defesa Civil</h5>
+                                    <h5 class="modal-title fw-bold fs-6">Comunicado Oficial</h5>
                                 </div>
                                 <button type="button" class="btn-close {{ $isUrgente ? 'btn-close-white' : '' }}" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body p-4">
-                                <div class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 fw-bold mb-3">
-                                    Grau de Risco: {{ strtoupper($alerta->urgencia) }}
+                                <div class="d-flex gap-2 mb-3 flex-wrap">
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1 fw-bold">
+                                        Grau de Risco: {{ strtoupper($alerta->urgencia) }}
+                                    </span>
+                                    <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1">
+                                        Válido até: {{ $alerta->valido_ate ? $alerta->valido_ate->format('d/m/Y H:i') : '24h' }}
+                                    </span>
                                 </div>
+
                                 <h5 class="fw-bold text-dark mb-2">{{ $alerta->titulo }}</h5>
                                 <p class="text-secondary small mb-4" style="line-height: 1.6; white-space: pre-line;">{{ $alerta->corpo }}</p>
 
-                                <div class="bg-light p-3 rounded-4 border">
-                                    <div class="fw-bold text-dark small mb-2"><i class="bi bi-telephone-fill text-danger me-1"></i> Contatos Úteis de Emergência:</div>
-                                    <div class="d-flex flex-wrap gap-2">
+                                <div class="bg-light p-3 rounded-4 border mb-3">
+                                    @if($alerta->responsavel)
+                                        <div class="small fw-bold text-dark mb-1">
+                                            <i class="bi bi-shield-check text-primary me-1"></i> Órgão Emissor:
+                                        </div>
+                                        <div class="text-secondary small mb-3">{{ $alerta->responsavel }}</div>
+                                    @endif
+
+                                    <div class="fw-bold text-dark small mb-2"><i class="bi bi-telephone-fill text-danger me-1"></i> Telefones & Contatos de Emergência:</div>
+                                    <div class="text-danger fw-bold small mb-2">{{ $alerta->contato_emergencia ?? 'Defesa Civil 199 / SAMU 192' }}</div>
+
+                                    <div class="d-flex flex-wrap gap-2 pt-1">
                                         <a href="tel:199" class="btn btn-outline-danger btn-sm rounded-pill fw-bold">
                                             <i class="bi bi-shield me-1"></i> Defesa Civil 199
                                         </a>
                                         <a href="tel:193" class="btn btn-outline-danger btn-sm rounded-pill fw-bold">
                                             <i class="bi bi-fire me-1"></i> Bombeiros 193
+                                        </a>
+                                        <a href="tel:192" class="btn btn-outline-danger btn-sm rounded-pill fw-bold">
+                                            <i class="bi bi-heart-pulse me-1"></i> SAMU 192
                                         </a>
                                         <a href="tel:190" class="btn btn-outline-secondary btn-sm rounded-pill fw-bold">
                                             <i class="bi bi-shield-shaded me-1"></i> PM 190
@@ -105,8 +135,8 @@
                                 </div>
                             </div>
                             <div class="modal-footer border-0 pt-0 pb-4 px-4">
-                                <button type="button" class="btn btn-primary rounded-pill px-4 w-100 fw-bold" data-bs-dismiss="modal">
-                                    <i class="bi bi-check2-circle me-1"></i> Estou Ciente
+                                <button type="button" class="btn btn-primary rounded-pill px-4 w-100 fw-bold" data-bs-dismiss="modal" onclick="if(window.AlertasManager) window.AlertasManager.dismissHomeBanner({{ $alerta->id }});">
+                                    <i class="bi bi-check2-circle me-1"></i> Estou Ciente (Marcar como Visto)
                                 </button>
                             </div>
                         </div>

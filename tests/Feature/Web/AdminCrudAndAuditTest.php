@@ -176,6 +176,11 @@ class AdminCrudAndAuditTest extends TestCase
             'titulo' => 'Aviso de Ressaca Marítima',
             'corpo' => 'Ondas de até 2.5 metros na orla de Cabo Branco e Tambaú.',
             'urgencia' => 'urgente',
+            'contato_emergencia' => 'Defesa Civil 199 / SAMU 192',
+            'responsavel' => 'Capitania dos Portos e Defesa Civil',
+            'duracao_horas' => 24,
+            'valido_ate' => now()->addHours(24),
+            'status' => 'ativo',
             'segmentacao' => ['orla', 'praias'],
         ]);
 
@@ -183,11 +188,43 @@ class AdminCrudAndAuditTest extends TestCase
         $responseHome = $this->get('/');
         $responseHome->assertOk();
         $responseHome->assertSee('Aviso de Ressaca Marítima');
-        $responseHome->assertSee('Defesa Civil');
+        $responseHome->assertSee('Capitania dos Portos e Defesa Civil');
+        $responseHome->assertSee('Defesa Civil 199 / SAMU 192');
 
-        // Visualizar no Mapa do PWA
+        // Visualizar no Mapa do PWA (através do sino de notificações e view global)
         $responseMapa = $this->get('/mapa');
         $responseMapa->assertOk();
         $responseMapa->assertSee('Aviso de Ressaca Marítima');
+    }
+
+    public function test_admin_can_publish_and_delete_alert_with_emergency_contacts(): void
+    {
+        // Publicar Alerta
+        $response = $this->actingAs($this->admin)->post(route('admin.alertas.store'), [
+            'titulo' => 'Alerta de Maré Alta',
+            'corpo' => 'Atenção aos banhistas na praia de Manaíra.',
+            'urgencia' => 'aviso',
+            'responsavel' => 'Defesa Civil Municipal',
+            'contato_emergencia' => 'Defesa Civil: 199 / Bombeiros: 193',
+            'duracao_horas' => 48,
+        ]);
+
+        $response->assertRedirect(route('admin.alertas.index'));
+        $this->assertDatabaseHas('alertas', [
+            'titulo' => 'Alerta de Maré Alta',
+            'urgencia' => 'aviso',
+            'responsavel' => 'Defesa Civil Municipal',
+            'contato_emergencia' => 'Defesa Civil: 199 / Bombeiros: 193',
+            'duracao_horas' => 48,
+            'status' => 'ativo',
+        ]);
+
+        $alerta = Alerta::where('titulo', 'Alerta de Maré Alta')->first();
+        $this->assertNotNull($alerta->valido_ate);
+
+        // Excluir Alerta
+        $deleteResponse = $this->actingAs($this->admin)->delete(route('admin.alertas.destroy', $alerta->id));
+        $deleteResponse->assertRedirect(route('admin.alertas.index'));
+        $this->assertDatabaseMissing('alertas', ['id' => $alerta->id]);
     }
 }
