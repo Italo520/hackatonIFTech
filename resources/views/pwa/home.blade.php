@@ -27,13 +27,6 @@
         <p class="text-secondary small mt-1">O que vamos descobrir hoje em <span class="current-city-name fw-semibold text-primary">João Pessoa</span>?</p>
     </div>
 
-    <!-- Search Bar -->
-    <a href="{{ route('pwa.explorar') }}" class="d-block mb-4 text-decoration-none">
-        <div class="form-control rounded-pill border-0 shadow-sm d-flex align-items-center gap-2 text-secondary px-3" style="height: 48px; background-color: #ffffff;">
-            <i class="bi bi-search text-primary"></i>
-            <span class="small">Buscar praias, atrativos, restaurantes...</span>
-        </div>
-    </a>
 
     <!-- Alertas e Comunicados Oficiais de Defesa Civil -->
     @if(isset($alertasDefesaCivil) && $alertasDefesaCivil->count() > 0)
