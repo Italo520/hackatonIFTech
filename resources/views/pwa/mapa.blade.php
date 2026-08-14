@@ -151,20 +151,22 @@
             const savedLoc = window.LocationService ? window.LocationService.getSavedLocation() : null;
             const uLat = savedLoc?.lat ? parseFloat(savedLoc.lat) : null;
             const uLng = savedLoc?.lng ? parseFloat(savedLoc.lng) : null;
+            const currentPlaces = window.LocationService ? window.LocationService.getAllPlaces() : ALL_PLACES;
 
-            ALL_PLACES.forEach(place => {
+            currentPlaces.forEach(place => {
                 if (currentFilter !== 'all' && place.catKey !== currentFilter) {
                     return;
                 }
 
-                let distFormatted = '';
-                if (uLat && uLng && window.LocationService) {
+                let distFormatted = place.distancia || '';
+                if (!distFormatted && uLat && uLng && window.LocationService) {
                     const distKm = window.LocationService.calculateDistanceKm(uLat, uLng, place.lat, place.lng);
                     distFormatted = window.LocationService.formatDistance(distKm);
                 }
 
+                const iconClass = place.catIcon || place.icon || 'bi-geo-alt';
                 const pinIcon = L.divIcon({
-                    html: `<div class="atrativo-pin" style="background-color: ${place.color};"><i class="bi ${place.icon}"></i></div>`,
+                    html: `<div class="atrativo-pin" style="background-color: ${place.color || '#005f73'};"><i class="bi ${iconClass}"></i></div>`,
                     className: 'custom-place-marker',
                     iconSize: [36, 36],
                     iconAnchor: [18, 36],
@@ -173,9 +175,9 @@
 
                 const popupHtml = `
                     <div style="width: 220px; font-family: inherit;">
-                        <img src="${place.img}" style="width: 100%; height: 110px; object-fit: cover;" alt="${place.nome}">
+                        <img src="${place.img}" style="width: 100%; height: 110px; object-fit: cover;" alt="${place.nome}" loading="lazy">
                         <div style="padding: 10px 12px;">
-                            <span style="font-size: 0.65rem; text-transform: uppercase; font-weight: bold; color: ${place.color};">${place.cat}</span>
+                            <span style="font-size: 0.65rem; text-transform: uppercase; font-weight: bold; color: ${place.color || '#005f73'};">${place.cat}</span>
                             <h6 style="margin: 2px 0 4px; font-weight: bold; font-size: 0.95rem;">${place.nome}</h6>
                             ${distFormatted ? `
                                 <div style="font-size: 0.75rem; color: #555; margin-bottom: 8px;">

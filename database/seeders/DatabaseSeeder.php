@@ -44,18 +44,27 @@ class DatabaseSeeder extends Seeder
         // 2. Municípios Reais
         $municipioBonito = Municipio::firstOrCreate(
             ['nome' => 'Bonito'],
-            [
-                'uf' => 'MS',
-                'tema_visual' => 'default',
-            ]
+            ['uf' => 'MS', 'tema_visual' => 'default']
         );
 
         $municipioJampa = Municipio::firstOrCreate(
             ['nome' => 'João Pessoa'],
-            [
-                'uf' => 'PB',
-                'tema_visual' => 'praia',
-            ]
+            ['uf' => 'PB', 'tema_visual' => 'praia']
+        );
+
+        $municipioRecife = Municipio::firstOrCreate(
+            ['nome' => 'Recife'],
+            ['uf' => 'PE', 'tema_visual' => 'cultura']
+        );
+
+        $municipioNatal = Municipio::firstOrCreate(
+            ['nome' => 'Natal'],
+            ['uf' => 'RN', 'tema_visual' => 'praia']
+        );
+
+        $municipioSP = Municipio::firstOrCreate(
+            ['nome' => 'São Paulo'],
+            ['uf' => 'SP', 'tema_visual' => 'urbano']
         );
 
         // 3. Categorias Realistas
@@ -66,20 +75,21 @@ class DatabaseSeeder extends Seeder
         $catHospedagem = Categoria::firstOrCreate(['slug' => 'hospedagem'], ['nome' => 'Hospedagem', 'icone' => 'bi-house-heart', 'tipo' => 'servico']);
         $catCultura = Categoria::firstOrCreate(['slug' => 'cultura'], ['nome' => 'História & Cultura', 'icone' => 'bi-bank', 'tipo' => 'atrativo']);
 
-        // 4. Atrativos Realistas com Coordenadas GPS
+        // 4. Atrativos Realistas com Coordenadas GPS e Fotos Reais
         $atrativosData = [
-            // João Pessoa - PB
+            // --- JOÃO PESSOA (PB) ---
             [
                 'municipio' => $municipioJampa,
                 'categoria' => $catAgua,
                 'nome' => 'Praia de Tambaú',
-                'descricao' => 'Uma das praias urbanas mais famosas de João Pessoa, com águas mornas, calçadão movimentado, feirinha de artesanato e passeios de catamarã.',
-                'historia' => 'O coração turístico da capital paraibana, ponto de partida para as piscinas de Picãozinho.',
+                'descricao' => 'Uma das praias urbanas mais famosas de João Pessoa, com águas mornas, calçadão movimentado, feirinha de artesanato e passeios de catamarã para Picãozinho.',
+                'historia' => 'O coração turístico da capital paraibana, com excelente infraestrutura e vida noturna.',
                 'endereco' => 'Av. Almirante Tamandaré, Tambaú, João Pessoa - PB',
                 'tempo' => 180,
                 'acessibilidade' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1147,
                 'lng' => -34.8239,
+                'foto' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
             ],
             [
                 'municipio' => $municipioJampa,
@@ -92,30 +102,33 @@ class DatabaseSeeder extends Seeder
                 'acessibilidade' => ['cadeirante'],
                 'lat' => -7.1477,
                 'lng' => -34.7963,
+                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
             ],
             [
                 'municipio' => $municipioJampa,
                 'categoria' => $catAgua,
                 'nome' => 'Piscinas Naturais dos Seixas',
-                'descricao' => 'Aquários naturais formados por corais na maré baixa com águas cristalinas repletas de peixes coloridos, ideal para mergulho livre.',
+                'descricao' => 'Aquários naturais formados por corais na maré baixa com águas cristalinas repletas de peixes coloridos, ideal para mergulho livre e stand up paddle.',
                 'historia' => 'Formação de recifes de corais protegida acessível por embarcações credenciadas.',
                 'endereco' => 'Praia dos Seixas, João Pessoa - PB',
                 'tempo' => 150,
                 'acessibilidade' => ['deficiencia_auditiva'],
                 'lat' => -7.1597,
                 'lng' => -34.7877,
+                'foto' => 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
             ],
             [
                 'municipio' => $municipioJampa,
                 'categoria' => $catCultura,
                 'nome' => 'Centro Cultural São Francisco',
-                'descricao' => 'Um dos mais importantes complexos barrocos do Brasil, com igreja, convento, claustro e rico acervo de arte sacra.',
+                'descricao' => 'Um dos mais importantes complexos barrocos do Brasil, com igreja, convento, claustro com azulejaria portuguesa e rico acervo de arte sacra.',
                 'historia' => 'Construído a partir de 1589 pela Ordem Franciscana, tombado pelo IPHAN.',
                 'endereco' => 'Praça São Francisco, Centro Histórico, João Pessoa - PB',
                 'tempo' => 90,
                 'acessibilidade' => ['cadeirante'],
                 'lat' => -7.1155,
                 'lng' => -34.8864,
+                'foto' => 'https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=1200&q=80',
             ],
             [
                 'municipio' => $municipioJampa,
@@ -128,6 +141,7 @@ class DatabaseSeeder extends Seeder
                 'acessibilidade' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1067,
                 'lng' => -34.8315,
+                'foto' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
             ],
             [
                 'municipio' => $municipioJampa,
@@ -140,55 +154,145 @@ class DatabaseSeeder extends Seeder
                 'acessibilidade' => ['cadeirante'],
                 'lat' => -7.1189,
                 'lng' => -34.8302,
+                'foto' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
             ],
-            // Bonito - MS
+
+            // --- BONITO (MS) ---
             [
                 'municipio' => $municipioBonito,
                 'categoria' => $catAgua,
                 'nome' => 'Flutuação no Rio Sucuri',
-                'descricao' => 'Uma das águas mais cristalinas do mundo. Flutuação tranquila em meio a muita vida subaquática e vegetação exuberante.',
-                'historia' => 'O Rio Sucuri é famoso por sua nascente e pela visibilidade inacreditável da água, resultado da alta concentração de calcário.',
-                'endereco' => 'Fazenda São Geraldo, Rodovia Bonito - São Geraldo',
+                'descricao' => 'Uma das águas mais cristalinas do planeta Terra. Flutuação tranquila em meio a piraputangas, dourados e vegetação exuberante.',
+                'historia' => 'O Rio Sucuri é famoso por sua nascente e pela visibilidade de mais de 40 metros.',
+                'endereco' => 'Fazenda São Geraldo, Rodovia Bonito - São Geraldo, Bonito - MS',
                 'tempo' => 120,
                 'acessibilidade' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -21.2642,
                 'lng' => -56.5516,
+                'foto' => 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
             ],
             [
                 'municipio' => $municipioBonito,
                 'categoria' => $catGrutas,
                 'nome' => 'Gruta do Lago Azul',
-                'descricao' => 'Cartão postal de Bonito, uma caverna com um lago subterrâneo de coloração azul intensa.',
-                'historia' => 'Descoberta em 1924 por índios Terena, a gruta é um monumento natural tombado pelo IPHAN.',
-                'endereco' => 'Rodovia MS 382, Km 20',
+                'descricao' => 'Monumento natural e cartão-postal do ecoturismo brasileiro, uma caverna com um lago subterrâneo de coloração azul cobalto fascinante.',
+                'historia' => 'Descoberta em 1924 por índios Terena, a gruta é tombada pelo IPHAN e abriga fósseis da megafauna pré-histórica.',
+                'endereco' => 'Rodovia MS 382, Km 20, Bonito - MS',
                 'tempo' => 90,
                 'acessibilidade' => [],
                 'lat' => -21.1469,
                 'lng' => -56.5861,
+                'foto' => 'https://images.unsplash.com/photo-1499244571948-7cc805602889?auto=format&fit=crop&w=1200&q=80',
             ],
             [
                 'municipio' => $municipioBonito,
                 'categoria' => $catAventura,
                 'nome' => 'Bóia Cross no Rio Formoso',
-                'descricao' => 'Aventura em bóias individuais por corredeiras refrescantes no Rio Formoso.',
-                'historia' => 'Atividade tradicional que mistura emoção e contato com a natureza.',
-                'endereco' => 'Parque Ecológico Rio Formoso',
+                'descricao' => 'Aventura em bóias individuais descendo corredeiras e cachoeiras refrescantes pelas águas calmas do Rio Formoso.',
+                'historia' => 'Atividade tradicional que combina emoção ecológica e segurança profissional.',
+                'endereco' => 'Parque Ecológico Rio Formoso, Bonito - MS',
                 'tempo' => 60,
                 'acessibilidade' => ['deficiencia_auditiva'],
                 'lat' => -21.1895,
                 'lng' => -56.4523,
+                'foto' => 'https://images.unsplash.com/photo-1533230491024-e22d9976da28?auto=format&fit=crop&w=1200&q=80',
             ],
             [
                 'municipio' => $municipioBonito,
                 'categoria' => $catGastronomia,
                 'nome' => 'Casa do João',
-                'descricao' => 'Um dos restaurantes mais famosos da região, conhecido por seus pratos com peixes locais como Pintado e Pacu.',
-                'historia' => 'Fundado pela família de Seu João, virou ponto de encontro obrigatório para os turistas em Bonito.',
-                'endereco' => 'Rua Cel. Nélson Felício dos Santos, Centro',
+                'descricao' => 'Restaurante gastronômico premiado de Bonito, especializado em peixes nobres do pantanal como Traíra sem espinho e Pintado ao Urucum.',
+                'historia' => 'Fundado pela família de Seu João, tornou-se ponto de encontro gastronômico imperdível.',
+                'endereco' => 'Rua Cel. Nélson Felício dos Santos, Centro, Bonito - MS',
                 'tempo' => 120,
                 'acessibilidade' => ['cadeirante', 'cego'],
                 'lat' => -21.1275,
                 'lng' => -56.4831,
+                'foto' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
+            ],
+
+            // --- RECIFE & OLINDA (PE) ---
+            [
+                'municipio' => $municipioRecife,
+                'categoria' => $catCultura,
+                'nome' => 'Marco Zero e Recife Antigo',
+                'descricao' => 'Praça histórica na beira do cais com a Rosa dos Ventos de Cícero Dias, esculturas de Brennand e casarios coloniais holandeses.',
+                'historia' => 'Ponto de fundação da cidade e centro das celebrações do frevo e do maracatu pernambucano.',
+                'endereco' => 'Praça Barão do Rio Branco, Recife Antigo, Recife - PE',
+                'tempo' => 120,
+                'acessibilidade' => ['cadeirante', 'deficiencia_auditiva'],
+                'lat' => -8.0631,
+                'lng' => -34.8711,
+                'foto' => 'https://images.unsplash.com/photo-1548625149-fc4a29cf7092?auto=format&fit=crop&w=1200&q=80',
+            ],
+            [
+                'municipio' => $municipioRecife,
+                'categoria' => $catAgua,
+                'nome' => 'Praia de Boa Viagem',
+                'descricao' => 'A mais famosa praia urbana de Pernambuco, com extensa faixa de areia, arrecifes naturais que formam piscinas mornas e calçadão icônico.',
+                'historia' => 'Símbolo da modernização recifense ao longo do século XX.',
+                'endereco' => 'Av. Boa Viagem, Recife - PE',
+                'tempo' => 180,
+                'acessibilidade' => ['cadeirante'],
+                'lat' => -8.1276,
+                'lng' => -34.9022,
+                'foto' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+            ],
+
+            // --- NATAL (RN) ---
+            [
+                'municipio' => $municipioNatal,
+                'categoria' => $catGrutas,
+                'nome' => 'Dunas de Genipabu',
+                'descricao' => 'Parque ecológico com dunas móveis monumentais, lagoas de água doce e passeios com emoção de buggy e dromedários.',
+                'historia' => 'Um dos cartões postais mais fotografados do litoral potiguar.',
+                'endereco' => 'Extremoz / Litoral Norte, Natal - RN',
+                'tempo' => 240,
+                'acessibilidade' => [],
+                'lat' => -5.7003,
+                'lng' => -35.1972,
+                'foto' => 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80',
+            ],
+            [
+                'municipio' => $municipioNatal,
+                'categoria' => $catAgua,
+                'nome' => 'Praia de Ponta Negra e Morro do Careca',
+                'descricao' => 'A principal praia de Natal com a emblemática duna de 120 metros cercada por vegetação e mar excelente para banho.',
+                'historia' => 'O Morro do Careca é área de preservação permanente e símbolo turístico do Rio Grande do Norte.',
+                'endereco' => 'Av. Erivan França, Ponta Negra, Natal - RN',
+                'tempo' => 180,
+                'acessibilidade' => ['cadeirante'],
+                'lat' => -5.8856,
+                'lng' => -35.1722,
+                'foto' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+            ],
+
+            // --- SÃO PAULO (SP) ---
+            [
+                'municipio' => $municipioSP,
+                'categoria' => $catCultura,
+                'nome' => 'MASP - Museu de Arte de São Paulo',
+                'descricao' => 'Ícone da arquitetura moderna de Lina Bo Bardi com vão livre de 74 metros e o acervo de arte ocidental mais importante da América Latina.',
+                'historia' => 'Fundado em 1947 por Assis Chateaubriand na Avenida Paulista.',
+                'endereco' => 'Av. Paulista, 1578, Bela Vista, São Paulo - SP',
+                'tempo' => 150,
+                'acessibilidade' => ['cadeirante', 'cego', 'deficiencia_auditiva'],
+                'lat' => -23.5614,
+                'lng' => -46.6559,
+                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+            ],
+            [
+                'municipio' => $municipioSP,
+                'categoria' => $catGrutas,
+                'nome' => 'Parque Ibirapuera',
+                'descricao' => 'O maior e mais visitado parque urbano da metrópole, com lagos, pistas de caminhada, planetário e pavilhões de Oscar Niemeyer.',
+                'historia' => 'Inaugurado em 1954 nas comemorações do quarto centenário de São Paulo.',
+                'endereco' => 'Av. Pedro Álvares Cabral, Vila Mariana, São Paulo - SP',
+                'tempo' => 180,
+                'acessibilidade' => ['cadeirante', 'deficiencia_auditiva'],
+                'lat' => -23.5874,
+                'lng' => -46.6576,
+                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
             ]
         ];
 
@@ -211,6 +315,23 @@ class DatabaseSeeder extends Seeder
                 ]
             );
             $atrativosCriados[] = $atrativo;
+
+            // Criar Mídia de Foto Real
+            if (!empty($data['foto'])) {
+                \App\Models\Midia::firstOrCreate(
+                    [
+                        'entidade_type' => Atrativo::class,
+                        'entidade_id' => $atrativo->id,
+                        'tipo' => 'foto'
+                    ],
+                    [
+                        'url' => $data['foto'],
+                        'alt_text' => 'Foto de ' . $atrativo->nome,
+                        'autor' => 'Acervo Fotográfico Municipal & OpenStreetMap',
+                        'licenca' => 'CC-BY-SA',
+                    ]
+                );
+            }
             
             // Generate QR Code
             QrCode::firstOrCreate(

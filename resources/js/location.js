@@ -19,6 +19,8 @@ const BRAZIL_STATES = {
 const STORAGE_KEY = 'turismo_user_location';
 
 export const LocationService = {
+    _cachedPlaces: null,
+
     /**
      * Retorna o catálogo de cidades disponíveis
      */
@@ -27,9 +29,12 @@ export const LocationService = {
     },
 
     /**
-     * Retorna todas as atrações disponíveis
+     * Retorna todas as atrações disponíveis (prioriza dados reais da API)
      */
     getAllPlaces() {
+        if (this._cachedPlaces && this._cachedPlaces.length > 0) {
+            return this._cachedPlaces;
+        }
         return PLACES_DATA;
     },
 
@@ -37,13 +42,82 @@ export const LocationService = {
      * Retorna as atrações filtradas por cidade
      */
     getAttractionsByCity(cityName) {
-        if (!cityName) return PLACES_DATA;
+        const pool = (this._cachedPlaces && this._cachedPlaces.length > 0) ? this._cachedPlaces : PLACES_DATA;
+        if (!cityName) return pool;
         const normalized = cityName.toLowerCase().trim();
-        const filtered = PLACES_DATA.filter(p => 
+        const filtered = pool.filter(p => 
             p.cidade.toLowerCase().includes(normalized) || 
             normalized.includes(p.cidade.toLowerCase())
         );
-        return filtered.length > 0 ? filtered : PLACES_DATA;
+        return filtered.length > 0 ? filtered : pool;
+    },
+
+    /**
+     * Busca atrações dinamicamente do backend e OpenStreetMap
+     */
+    async fetchAttractionsFromApi(cityName, lat = null, lng = null) {
+        try {
+            let url = `/api/v1/atrativos?status=ativo`;
+            if (cityName) {
+                url += `&cidade=${encodeURIComponent(cityName)}`;
+            }
+            if (lat && lng) {
+                url += `&lat=${lat}&lng=${lng}`;
+            }
+
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+                const json = await response.json();
+                const items = json.data || json;
+                if (Array.isArray(items) && items.length > 0) {
+                    const mapped = items.map(item => {
+                        const slug = item.categoria?.slug || 'geral';
+                        const colorMap = {
+                            'rios': '#0077b6',
+                            'praias-e-rios': '#0077b6',
+                            'aventura': '#0a9396',
+                            'grutas': '#ee9b00',
+                            'gastronomia': '#ba1a1a',
+                            'cultura': '#9b2226',
+                            'hospedagem': '#6c757d',
+                        };
+
+                        return {
+                            id: item.id,
+                            nome: item.nome,
+                            cidade: item.municipio?.nome || cityName || 'Destino',
+                            uf: item.municipio?.uf || '',
+                            cat: item.categoria?.nome || 'Atrativo',
+                            catKey: slug === 'rios' ? 'praia' : (slug === 'grutas' ? 'natureza' : (slug === 'gastronomia' ? 'gastronomia' : (slug === 'cultura' ? 'cultura' : slug))),
+                            catIcon: item.categoria?.icone || 'bi-geo-alt',
+                            color: colorMap[slug] || '#005f73',
+                            lat: parseFloat(item.lat),
+                            lng: parseFloat(item.lng),
+                            tempoVisita: item.tempo_medio_visita ? `${item.tempo_medio_visita} min` : '1-2 horas',
+                            tempoMinutos: item.tempo_medio_visita || 60,
+                            rating: 4.9,
+                            numAvaliacoes: 120,
+                            endereco: item.endereco || '',
+                            descricao: item.descricao || '',
+                            img: item.imagem_url || item.midias?.[0]?.url || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+                            fotos: item.fotos || (item.imagem_url ? [item.imagem_url] : []),
+                            distancia: item.distancia_formatada || null,
+                            distanciaKm: item.distancia_km || null,
+                            acessibilidade: item.acessibilidade || [],
+                        };
+                    });
+
+                    this._cachedPlaces = mapped;
+                    return mapped;
+                }
+            }
+        } catch (e) {
+            console.warn('Falha ao carregar atrativos da API:', e);
+        }
+        return null;
     },
 
     /**
@@ -82,7 +156,7 @@ export const LocationService = {
     /**
      * Salva a localização no LocalStorage e atualiza o DOM e eventos
      */
-    saveLocation(data) {
+    async saveLocation(data) {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         } catch (e) {
@@ -90,8 +164,11 @@ export const LocationService = {
         }
         this.updateDOM(data);
 
-        // Notifica aplicação com os atrativos e roteiros correspondentes à cidade
-        const attractions = this.getAttractionsByCity(data.city);
+        // Busca atrativos reais da API
+        let attractions = await this.fetchAttractionsFromApi(data.city, data.lat, data.lng);
+        if (!attractions || attractions.length === 0) {
+            attractions = this.getAttractionsByCity(data.city);
+        }
         const roteiros = this.getRoteirosByCity(data.city);
 
         window.dispatchEvent(new CustomEvent('turismo:location-changed', { 
@@ -461,6 +538,18 @@ export const LocationService = {
 
         const saved = this.getSavedLocation() || defaultLocation;
         this.updateDOM(saved);
+
+        // Dispara busca inicial na API para alimentar atrativos e fotos reais
+        this.fetchAttractionsFromApi(saved.city, saved.lat, saved.lng).then(attractions => {
+            const roteiros = this.getRoteirosByCity(saved.city);
+            window.dispatchEvent(new CustomEvent('turismo:location-changed', { 
+                detail: {
+                    ...saved,
+                    attractions: attractions || this.getAttractionsByCity(saved.city),
+                    roteiros
+                } 
+            }));
+        });
 
         // Controla banner de permissão de GPS
         const banner = document.getElementById('location-permission-banner');

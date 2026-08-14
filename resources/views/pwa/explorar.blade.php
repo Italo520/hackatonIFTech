@@ -137,7 +137,7 @@
                         <div class="col">
                             <article class="card border-0 rounded-4 overflow-hidden shadow-sm h-100 place-hover-card bg-white" aria-labelledby="lugar-title-{{ $lugar->id }}">
                                 <div class="position-relative" style="height: 160px; background-color: #f3f4f5;">
-                                    <img src="https://images.unsplash.com/photo-1548625149-fc4a29cf7092?auto=format&fit=crop&w=500&q=80&sig={{ $lugar->id }}" 
+                                    <img src="{{ $lugar->imagem_url }}" 
                                          alt="Foto de {{ $lugar->nome }}" 
                                          class="w-100 h-100 object-fit-cover" 
                                          loading="lazy">
@@ -207,7 +207,7 @@
                     @forelse ($atividades_gratuitas ?? [] as $atividade)
                         <article class="card border-0 rounded-4 overflow-hidden shadow-sm flex-shrink-0 bg-white" style="width: 220px;" aria-labelledby="gratuito-title-{{ $atividade->id }}">
                             <div style="height: 120px; background-color: #f3f4f5;">
-                                <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=300&q=80&sig={{ $atividade->id }}" 
+                                <img src="{{ $atividade->imagem_url }}" 
                                      alt="Foto de {{ $atividade->nome }}" 
                                      class="w-100 h-100 object-fit-cover" 
                                      loading="lazy">
