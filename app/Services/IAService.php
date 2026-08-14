@@ -55,7 +55,13 @@ class IAService
 
         if ($response->successful()) {
             $data = $response->json();
-            return $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+            $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+            
+            // Remove blocos markdown caso o Gemini retorne ` ```json `
+            $text = preg_replace('/```json\s*/', '', $text);
+            $text = preg_replace('/```\s*/', '', $text);
+            
+            return trim($text);
         }
 
         Log::error("Erro na API do Gemini: " . $response->body());
