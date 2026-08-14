@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\ExplorarController;
 use App\Http\Controllers\Web\AtrativoWebController;
 use App\Http\Controllers\Web\AdminController;
@@ -16,9 +17,7 @@ use Illuminate\Support\Facades\Route;
 | PWA Turista (Público)
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
-    return view('pwa.home');
-})->name('pwa.home');
+Route::get('/', [HomeController::class, 'index'])->name('pwa.home');
 
 Route::get('/explorar', [ExplorarController::class, 'index'])->name('pwa.explorar');
 Route::get('/atrativo/{id}', [AtrativoWebController::class, 'show'])->name('pwa.atrativo');
@@ -27,9 +26,7 @@ Route::get('/eventos', function () {
     return view('pwa.eventos');
 })->name('pwa.eventos');
 
-Route::get('/mapa', function () {
-    return view('pwa.mapa');
-})->name('pwa.mapa');
+Route::get('/mapa', [HomeController::class, 'mapa'])->name('pwa.mapa');
 
 Route::get('/utilidade', function () {
     return view('pwa.utilidade');
@@ -73,10 +70,25 @@ Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard
 Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.index');
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
-// Módulos de Gestão
+// Módulos de Gestão - Atrativos
 Route::get('/admin/atrativos', [AdminController::class, 'atrativos'])->name('admin.atrativos.index');
+Route::post('/admin/atrativos', [AdminController::class, 'storeAtrativo'])->name('admin.atrativos.store');
+Route::put('/admin/atrativos/{id}', [AdminController::class, 'updateAtrativo'])->name('admin.atrativos.update');
+Route::delete('/admin/atrativos/{id}', [AdminController::class, 'destroyAtrativo'])->name('admin.atrativos.destroy');
+Route::patch('/admin/atrativos/{id}/status', [AdminController::class, 'toggleStatusAtrativo'])->name('admin.atrativos.toggle-status');
+
+// Módulos de Gestão - Eventos
 Route::get('/admin/eventos', [AdminController::class, 'eventos'])->name('admin.eventos.index');
+Route::post('/admin/eventos', [AdminController::class, 'storeEvento'])->name('admin.eventos.store');
+Route::put('/admin/eventos/{id}', [AdminController::class, 'updateEvento'])->name('admin.eventos.update');
+Route::delete('/admin/eventos/{id}', [AdminController::class, 'destroyEvento'])->name('admin.eventos.destroy');
+
+// Módulos de Gestão - Roteiros
 Route::get('/admin/roteiros', [AdminController::class, 'roteiros'])->name('admin.roteiros.index');
+Route::post('/admin/roteiros', [AdminController::class, 'storeRoteiro'])->name('admin.roteiros.store');
+Route::delete('/admin/roteiros/{id}', [AdminController::class, 'destroyRoteiro'])->name('admin.roteiros.destroy');
+
+// Módulos de Gestão - Alertas, Auditoria e Prestadores
 Route::get('/admin/alertas', [AlertaController::class, 'index'])->name('admin.alertas.index');
 Route::post('/admin/alertas', [AlertaController::class, 'store'])->name('admin.alertas.store');
 Route::get('/admin/auditoria', [AdminController::class, 'auditoria'])->name('admin.auditoria.index');

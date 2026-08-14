@@ -3,6 +3,14 @@
 @section('title', 'Gestão de Atrativos Turísticos')
 
 @section('content')
+@if(session('status'))
+    <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm d-flex align-items-center gap-2 mb-4" role="alert">
+        <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+        <div>{{ session('status') }}</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+@endif
+
 <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
     <div>
         <h4 class="fw-bold text-dark mb-1">Atrativos Cadastrados</h4>
@@ -27,11 +35,9 @@
         <div class="col-6 col-md-3">
             <select name="cidade" class="form-select bg-light shadow-none">
                 <option value="">Todas as Cidades</option>
-                <option value="João Pessoa" {{ request('cidade') == 'João Pessoa' ? 'selected' : '' }}>João Pessoa (PB)</option>
-                <option value="Bonito" {{ request('cidade') == 'Bonito' ? 'selected' : '' }}>Bonito (MS)</option>
-                <option value="Recife" {{ request('cidade') == 'Recife' ? 'selected' : '' }}>Recife (PE)</option>
-                <option value="Natal" {{ request('cidade') == 'Natal' ? 'selected' : '' }}>Natal (RN)</option>
-                <option value="São Paulo" {{ request('cidade') == 'São Paulo' ? 'selected' : '' }}>São Paulo (SP)</option>
+                @foreach($municipios as $m)
+                    <option value="{{ $m->nome }}" {{ request('cidade') == $m->nome ? 'selected' : '' }}>{{ $m->nome }} ({{ $m->uf }})</option>
+                @endforeach
             </select>
         </div>
         <div class="col-6 col-md-2">
@@ -74,7 +80,7 @@
                                 </div>
                                 <div>
                                     <div class="fw-bold text-dark">{{ $atrativo->nome }}</div>
-                                    <div class="text-muted small" style="font-size: 0.75rem;">{{ Str::limit($atrativo->endereco, 45) }}</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">{{ Str::limit($atrativo->endereco ?? 'Sem endereço cadastrado', 45) }}</div>
                                 </div>
                             </div>
                         </td>
@@ -97,20 +103,111 @@
                             <span class="small text-muted"><i class="bi bi-clock me-1"></i>{{ $atrativo->tempo_medio_visita ? $atrativo->tempo_medio_visita . ' min' : 'Livre' }}</span>
                         </td>
                         <td>
-                            @if($atrativo->status === 'ativo')
-                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1">Ativo</span>
-                            @else
-                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2.5 py-1">{{ ucfirst($atrativo->status) }}</span>
-                            @endif
+                            <form action="{{ route('admin.atrativos.toggle-status', $atrativo->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('PATCH')
+                                @if($atrativo->status === 'ativo')
+                                    <button type="submit" class="btn btn-sm border-0 p-0" title="Clique para desativar">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1"><i class="bi bi-check-circle-fill me-1"></i>Ativo</span>
+                                    </button>
+                                @elseif($atrativo->status === 'pendente')
+                                    <button type="submit" class="btn btn-sm border-0 p-0" title="Clique para aprovar rascunho">
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2.5 py-1"><i class="bi bi-hourglass-split me-1"></i>Rascunho / Pendente</span>
+                                    </button>
+                                @else
+                                    <button type="submit" class="btn btn-sm border-0 p-0" title="Clique para ativar">
+                                        <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2.5 py-1"><i class="bi bi-slash-circle me-1"></i>Inativo</span>
+                                    </button>
+                                @endif
+                            </form>
                         </td>
                         <td class="text-end pe-4">
-                            <div class="d-inline-flex gap-1">
-                                <a href="/atrativo/{{ $atrativo->id }}" class="btn btn-sm btn-light border rounded-circle p-2" target="_blank" title="Ver no PWA">
+                            <div class="d-inline-flex gap-1 align-items-center">
+                                <a href="/atrativo/{{ $atrativo->id }}" class="btn btn-sm btn-light border rounded-circle p-2" target="_blank" title="Visualizar no PWA">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <button type="button" class="btn btn-sm btn-light border rounded-circle p-2 text-primary" title="Editar Atrativo">
+                                <button type="button" class="btn btn-sm btn-light border rounded-circle p-2 text-primary" data-bs-toggle="modal" data-bs-target="#modalEditarAtrativo{{ $atrativo->id }}" title="Editar Atrativo">
                                     <i class="bi bi-pencil"></i>
                                 </button>
+                                <form action="{{ route('admin.atrativos.destroy', $atrativo->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja remover este atrativo?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-light border rounded-circle p-2 text-danger" title="Excluir Atrativo">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Modal Editar Atrativo -->
+                            <div class="modal fade text-start" id="modalEditarAtrativo{{ $atrativo->id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content rounded-4 border-0 shadow-lg">
+                                        <form action="{{ route('admin.atrativos.update', $atrativo->id) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                                                <h5 class="modal-title fw-bold">Editar Atrativo Turístico</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body p-4">
+                                                <div class="row g-3">
+                                                    <div class="col-12 col-md-8">
+                                                        <label class="form-label fw-bold small text-secondary">Nome do Ponto Turístico</label>
+                                                        <input type="text" name="nome" value="{{ $atrativo->nome }}" class="form-control" required>
+                                                    </div>
+                                                    <div class="col-12 col-md-4">
+                                                        <label class="form-label fw-bold small text-secondary">Categoria</label>
+                                                        <select name="categoria_id" class="form-select" required>
+                                                            @foreach($categorias as $cat)
+                                                                <option value="{{ $cat->id }}" {{ $atrativo->categoria_id == $cat->id ? 'selected' : '' }}>{{ $cat->nome }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-12 col-md-6">
+                                                        <label class="form-label fw-bold small text-secondary">Cidade / Município</label>
+                                                        <select name="municipio_id" class="form-select" required>
+                                                            @foreach($municipios as $m)
+                                                                <option value="{{ $m->id }}" {{ $atrativo->municipio_id == $m->id ? 'selected' : '' }}>{{ $m->nome }} ({{ $m->uf }})</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-12 col-md-6">
+                                                        <label class="form-label fw-bold small text-secondary">Status</label>
+                                                        <select name="status" class="form-select" required>
+                                                            <option value="ativo" {{ $atrativo->status == 'ativo' ? 'selected' : '' }}>Ativo</option>
+                                                            <option value="pendente" {{ $atrativo->status == 'pendente' ? 'selected' : '' }}>Pendente / Rascunho</option>
+                                                            <option value="inativo" {{ $atrativo->status == 'inativo' ? 'selected' : '' }}>Inativo</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-bold small text-secondary">Endereço Completo</label>
+                                                        <input type="text" name="endereco" value="{{ $atrativo->endereco }}" class="form-control" placeholder="Rua, Número, Bairro">
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-bold small text-secondary">Descrição Completa</label>
+                                                        <textarea name="descricao" class="form-control" rows="3" required>{{ $atrativo->descricao }}</textarea>
+                                                    </div>
+                                                    <div class="col-12 col-md-4">
+                                                        <label class="form-label fw-bold small text-secondary">Latitude (GPS)</label>
+                                                        <input type="number" step="any" name="lat" value="{{ $atrativo->lat }}" class="form-control" required>
+                                                    </div>
+                                                    <div class="col-12 col-md-4">
+                                                        <label class="form-label fw-bold small text-secondary">Longitude (GPS)</label>
+                                                        <input type="number" step="any" name="lng" value="{{ $atrativo->lng }}" class="form-control" required>
+                                                    </div>
+                                                    <div class="col-12 col-md-4">
+                                                        <label class="form-label fw-bold small text-secondary">Tempo Médio (minutos)</label>
+                                                        <input type="number" name="tempo_medio_visita" value="{{ $atrativo->tempo_medio_visita ?? 60 }}" class="form-control">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-0 pt-0 pb-4 px-4">
+                                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Salvar Alterações</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -136,48 +233,73 @@
     @endif
 </div>
 
-<!-- Modal Novo Atrativo (Mock) -->
+<!-- Modal Novo Atrativo -->
 <div class="modal fade" id="modalNovoAtrativo" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content rounded-4 border-0 shadow-lg">
-            <div class="modal-header border-0 pb-0 pt-4 px-4">
-                <h5 class="modal-title fw-bold">Cadastrar Novo Atrativo</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form class="row g-3">
-                    <div class="col-12 col-md-8">
-                        <label class="form-label fw-bold small text-secondary">Nome do Ponto Turístico</label>
-                        <input type="text" class="form-control" placeholder="Ex: Piscinas Naturais do Seixas" required>
+            <form action="{{ route('admin.atrativos.store') }}" method="POST">
+                @csrf
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold">Cadastrar Novo Atrativo Turístico</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-8">
+                            <label class="form-label fw-bold small text-secondary">Nome do Ponto Turístico</label>
+                            <input type="text" name="nome" class="form-control" placeholder="Ex: Piscinas Naturais do Seixas" required>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-bold small text-secondary">Categoria</label>
+                            <select name="categoria_id" class="form-select" required>
+                                @foreach($categorias as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->nome }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Cidade / Município</label>
+                            <select name="municipio_id" class="form-select" required>
+                                @foreach($municipios as $m)
+                                    <option value="{{ $m->id }}">{{ $m->nome }} ({{ $m->uf }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Status</label>
+                            <select name="status" class="form-select" required>
+                                <option value="ativo" selected>Ativo</option>
+                                <option value="pendente">Pendente / Rascunho</option>
+                                <option value="inativo">Inativo</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-secondary">Endereço Completo</label>
+                            <input type="text" name="endereco" class="form-control" placeholder="Rua, Número, Bairro">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-secondary">Descrição Completa</label>
+                            <textarea name="descricao" class="form-control" rows="3" placeholder="Detalhes, história e orientações para o visitante..." required></textarea>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-bold small text-secondary">Latitude (GPS)</label>
+                            <input type="number" step="any" name="lat" class="form-control" placeholder="-7.1153" required>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-bold small text-secondary">Longitude (GPS)</label>
+                            <input type="number" step="any" name="lng" class="form-control" placeholder="-34.8641" required>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-bold small text-secondary">Tempo Médio (minutos)</label>
+                            <input type="number" name="tempo_medio_visita" value="60" class="form-control">
+                        </div>
                     </div>
-                    <div class="col-12 col-md-4">
-                        <label class="form-label fw-bold small text-secondary">Cidade / Município</label>
-                        <select class="form-select">
-                            <option>João Pessoa (PB)</option>
-                            <option>Bonito (MS)</option>
-                            <option>Recife (PE)</option>
-                            <option>Natal (RN)</option>
-                            <option>São Paulo (SP)</option>
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label fw-bold small text-secondary">Descrição Completa</label>
-                        <textarea class="form-control" rows="3" placeholder="Detalhes, história e orientações para o visitante..."></textarea>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label fw-bold small text-secondary">Latitude (GPS)</label>
-                        <input type="number" step="0.0001" class="form-control" placeholder="-7.1153">
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label fw-bold small text-secondary">Longitude (GPS)</label>
-                        <input type="number" step="0.0001" class="form-control" placeholder="-34.8641">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer border-0 pt-0 pb-4 px-4">
-                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Salvar Atrativo</button>
-            </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 pb-4 px-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Salvar Atrativo</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

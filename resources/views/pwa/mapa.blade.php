@@ -75,6 +75,21 @@
             </button>
         </div>
 
+        @if(isset($alertasDefesaCivil) && $alertasDefesaCivil->count() > 0)
+            @php $topAlerta = $alertasDefesaCivil->first(); @endphp
+            <div class="alert alert-warning border-0 rounded-4 shadow-sm py-2 px-3 mb-2 d-flex align-items-center justify-content-between gap-2" style="pointer-events: auto;">
+                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                    <i class="bi bi-shield-exclamation text-danger fs-5 flex-shrink-0"></i>
+                    <div class="text-truncate small fw-bold text-dark" style="font-size: 0.78rem;">
+                        {{ $topAlerta->titulo }}
+                    </div>
+                </div>
+                <a href="{{ route('pwa.home') }}" class="btn btn-sm btn-dark rounded-pill px-2.5 py-0.5 fw-bold flex-shrink-0" style="font-size: 0.7rem;">
+                    Ver
+                </a>
+            </div>
+        @endif
+
         <!-- Filtros Rápidos de Categoria no Mapa -->
         <div class="d-flex gap-2 overflow-auto no-scrollbar pb-1" style="pointer-events: auto;">
             <button class="btn btn-sm btn-dark rounded-pill px-3 fw-medium flex-shrink-0 map-filter-btn active" data-cat="all">Todos</button>

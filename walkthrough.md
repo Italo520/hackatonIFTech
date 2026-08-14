@@ -34,8 +34,15 @@ Este documento resume as implementações realizadas para atender 100% dos requi
 ### Roteiros & Modo Viagem Offline (`/roteiros` e `/roteiro/{id}`)
 - [`resources/views/pwa/roteiros.blade.php`](file:///c:/Users/italo/Desktop/jules_session_10912906180266624816/resources/views/pwa/roteiros.blade.php): listagem dinâmica de itinerários por cidade e filtros por duração.
 - [`resources/views/pwa/roteiro.blade.php`](file:///c:/Users/italo/Desktop/jules_session_10912906180266624816/resources/views/pwa/roteiro.blade.php):
-  - **Botão "Salvar Offline / Modo Viagem"** com persistência em LocalStorage / Cache.
-  - **Mapa da Rota** com traçado sequencial (Polyline Leaflet) e marcadores numerados.
+
+## 📦 Deploy no Coolify & Atualização de Cache do PWA
+- **Commits**:
+  - `32d6b49`: Atualização inicial do Service Worker e idempotência de banco de dados.
+  - `cfb6809`: Ajustes nos testes de CI e assertions (feito por Nichollas).
+  - `f7e36a6`: Botão *"Entrar"* transformado em link direto para `/login` e elevação do cache para `v3`.
+- **Status do Build no Coolify**: Concluído com sucesso (`status: finished`).
+- **Validação de Navegação**: Teste E2E automatizado com browser confirmou que o clique no botão *"Entrar"* navega imediatamente para `https://iftech.italohub.cloud/login`.
+- **Ambiente de Produção**: [iftech.italohub.cloud](https://iftech.italohub.cloud)
 
 ### Utilidade Pública & Acessibilidade (`/utilidade`)
 - [`resources/views/pwa/utilidade.blade.php`](file:///c:/Users/italo/Desktop/jules_session_10912906180266624816/resources/views/pwa/utilidade.blade.php):

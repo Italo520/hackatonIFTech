@@ -8,6 +8,7 @@ use App\Models\AssistantLog;
 use App\Models\Atrativo;
 use App\Models\Evento;
 use App\Models\Roteiro;
+use App\Models\RoteiroItem;
 use App\Models\Alerta;
 use App\Models\Prestador;
 use App\Models\Municipio;
@@ -56,8 +57,10 @@ class AdminController extends Controller
 
         if ($request->filled('q')) {
             $q = $request->q;
-            $query->where('nome', 'like', "%{$q}%")
-                  ->orWhere('descricao', 'like', "%{$q}%");
+            $query->where(function($sub) use ($q) {
+                $sub->where('nome', 'like', "%{$q}%")
+                    ->orWhere('descricao', 'like', "%{$q}%");
+            });
         }
 
         if ($request->filled('cidade')) {
@@ -78,13 +81,126 @@ class AdminController extends Controller
         return view('admin.atrativos.index', compact('atrativos', 'municipios', 'categorias'));
     }
 
+    public function storeAtrativo(Request $request)
+    {
+        $validated = $request->validate([
+            'nome' => 'required|string|max:255',
+            'descricao' => 'required|string',
+            'categoria_id' => 'required|exists:categorias,id',
+            'municipio_id' => 'required|exists:municipios,id',
+            'endereco' => 'nullable|string|max:255',
+            'lat' => 'required|numeric',
+            'lng' => 'required|numeric',
+            'tempo_medio_visita' => 'nullable|integer|min:0',
+            'status' => 'required|in:ativo,pendente,inativo',
+        ]);
+
+        $validated['capacidade_suportada'] = $request->input('capacidade_suportada', 100);
+        $validated['acessibilidade'] = $request->has('acessibilidade') ? ['rampas' => true] : [];
+
+        Atrativo::create($validated);
+
+        return redirect()->route('admin.atrativos.index')->with('status', 'Atrativo turístico cadastrado com sucesso!');
+    }
+
+    public function updateAtrativo(Request $request, $id)
+    {
+        $atrativo = Atrativo::findOrFail($id);
+
+        $validated = $request->validate([
+            'nome' => 'required|string|max:255',
+            'descricao' => 'required|string',
+            'categoria_id' => 'required|exists:categorias,id',
+            'municipio_id' => 'required|exists:municipios,id',
+            'endereco' => 'nullable|string|max:255',
+            'lat' => 'required|numeric',
+            'lng' => 'required|numeric',
+            'tempo_medio_visita' => 'nullable|integer|min:0',
+            'status' => 'required|in:ativo,pendente,inativo',
+        ]);
+
+        $atrativo->update($validated);
+
+        return redirect()->route('admin.atrativos.index')->with('status', 'Atrativo atualizado com sucesso!');
+    }
+
+    public function destroyAtrativo($id)
+    {
+        $atrativo = Atrativo::findOrFail($id);
+        $atrativo->delete();
+
+        return redirect()->route('admin.atrativos.index')->with('status', 'Atrativo removido com sucesso.');
+    }
+
+    public function toggleStatusAtrativo($id)
+    {
+        $atrativo = Atrativo::findOrFail($id);
+        $atrativo->status = ($atrativo->status === 'ativo') ? 'inativo' : 'ativo';
+        $atrativo->save();
+
+        return redirect()->route('admin.atrativos.index')->with('status', 'Status do atrativo alterado para ' . ucfirst($atrativo->status) . '!');
+    }
+
     /**
      * Gestão de Eventos
      */
     public function eventos()
     {
         $eventos = Evento::orderBy('inicio', 'asc')->paginate(10);
-        return view('admin.eventos.index', compact('eventos'));
+        $municipios = Municipio::all();
+        return view('admin.eventos.index', compact('eventos', 'municipios'));
+    }
+
+    public function storeEvento(Request $request)
+    {
+        $validated = $request->validate([
+            'nome' => 'required|string|max:255',
+            'descricao' => 'required|string',
+            'local' => 'nullable|string|max:255',
+            'inicio' => 'required|date',
+            'fim' => 'nullable|date|after_or_equal:inicio',
+            'organizador' => 'nullable|string|max:255',
+            'gratuito' => 'nullable|boolean',
+            'status' => 'required|in:ativo,cancelado,encerrado',
+        ]);
+
+        $validated['gratuito'] = $request->has('gratuito');
+        $validated['fim'] = $validated['fim'] ?? $validated['inicio'];
+
+        Evento::create($validated);
+
+        return redirect()->route('admin.eventos.index')->with('status', 'Evento cadastrado com sucesso no calendário oficial!');
+    }
+
+    public function updateEvento(Request $request, $id)
+    {
+        $evento = Evento::findOrFail($id);
+
+        $validated = $request->validate([
+            'nome' => 'required|string|max:255',
+            'descricao' => 'required|string',
+            'local' => 'nullable|string|max:255',
+            'inicio' => 'required|date',
+            'fim' => 'nullable|date|after_or_equal:inicio',
+            'organizador' => 'nullable|string|max:255',
+            'gratuito' => 'nullable|boolean',
+            'status' => 'required|in:ativo,cancelado,encerrado',
+        ]);
+
+        $validated['gratuito'] = $request->has('gratuito');
+        $validated['fim'] = $validated['fim'] ?? $validated['inicio'];
+
+        $evento->update($validated);
+
+        return redirect()->route('admin.eventos.index')->with('status', 'Evento atualizado com sucesso!');
+    }
+
+    public function destroyEvento($id)
+    {
+        $evento = Evento::findOrFail($id);
+        $evento->delete();
+
+        return redirect()->route('admin.eventos.index')->with('status', 'Evento excluído com sucesso.');
     }
 
     /**
@@ -93,7 +209,58 @@ class AdminController extends Controller
     public function roteiros()
     {
         $roteiros = Roteiro::with('itens.atrativo')->paginate(10);
-        return view('admin.roteiros.index', compact('roteiros'));
+        $atrativosDisponiveis = Atrativo::where('status', 'ativo')->orderBy('nome')->get();
+        return view('admin.roteiros.index', compact('roteiros', 'atrativosDisponiveis'));
+    }
+
+    public function storeRoteiro(Request $request)
+    {
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:255',
+            'tema' => 'required|string|max:100',
+            'perfil' => 'nullable|string|max:100',
+            'transporte' => 'nullable|string|max:100',
+            'duracao' => 'required|numeric|min:0.5',
+            'orcamento' => 'nullable|numeric|min:0',
+            'dificuldade' => 'required|in:facil,medio,dificil',
+            'atrativos' => 'nullable|array',
+            'atrativos.*' => 'exists:atrativos,id',
+        ]);
+
+        $roteiro = Roteiro::create([
+            'titulo' => $validated['titulo'],
+            'tema' => $validated['tema'],
+            'perfil' => $validated['perfil'] ?? 'Geral',
+            'transporte' => $validated['transporte'] ?? 'Carro / Caminhada',
+            'duracao' => $validated['duracao'],
+            'orcamento' => $validated['orcamento'] ?? 0,
+            'dificuldade' => $validated['dificuldade'],
+            'publico' => true,
+            'origem' => 'oficial',
+        ]);
+
+        if (!empty($validated['atrativos'])) {
+            $ordem = 1;
+            foreach ($validated['atrativos'] as $atrativoId) {
+                RoteiroItem::create([
+                    'roteiro_id' => $roteiro->id,
+                    'atrativo_id' => $atrativoId,
+                    'ordem' => $ordem++,
+                    'tempo_estimado_min' => 60,
+                ]);
+            }
+        }
+
+        return redirect()->route('admin.roteiros.index')->with('status', 'Roteiro oficial criado com sucesso!');
+    }
+
+    public function destroyRoteiro($id)
+    {
+        $roteiro = Roteiro::findOrFail($id);
+        $roteiro->itens()->delete();
+        $roteiro->delete();
+
+        return redirect()->route('admin.roteiros.index')->with('status', 'Roteiro removido com sucesso.');
     }
 
     /**
@@ -101,10 +268,14 @@ class AdminController extends Controller
      */
     public function auditoria()
     {
-        $logs = AssistantLog::orderBy('created_at', 'desc')->paginate(15);
-        $analytics = AnalyticEvent::orderBy('created_at', 'desc')->take(10)->get();
+        $audits = class_exists(\OwenIt\Auditing\Models\Audit::class)
+            ? \OwenIt\Auditing\Models\Audit::with('user')->orderBy('created_at', 'desc')->paginate(15)
+            : collect();
 
-        return view('admin.auditoria.index', compact('logs', 'analytics'));
+        $logs = AssistantLog::orderBy('created_at', 'desc')->paginate(15);
+        $analytics = AnalyticEvent::orderBy('created_at', 'desc')->take(20)->get();
+
+        return view('admin.auditoria.index', compact('audits', 'logs', 'analytics'));
     }
 
     /**
