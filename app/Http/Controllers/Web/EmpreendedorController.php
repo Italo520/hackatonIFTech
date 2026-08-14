@@ -21,8 +21,13 @@ class EmpreendedorController extends Controller
             'documento' => 'required|string', // Could be PDF in real life, string for MVP mock
         ]);
 
+        $userId = auth()->id() ?? \App\Models\User::firstOrCreate(
+            ['email' => 'demo_empreendedor@example.com'],
+            ['name' => 'Empreendedor Demo', 'password' => bcrypt('password'), 'role' => 'empreendedor']
+        )->id;
+
         Prestador::create([
-            'user_id' => 1, // Mock authenticated user for demo
+            'user_id' => $userId,
             'tipo' => $data['tipo'],
             'dados' => ['nome_negocio' => $data['nome_negocio']],
             'documentos' => ['doc' => $data['documento']],
