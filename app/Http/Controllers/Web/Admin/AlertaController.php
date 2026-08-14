@@ -19,16 +19,16 @@ class AlertaController extends Controller
         $data = $request->validate([
             'titulo' => 'required|string',
             'corpo' => 'required|string',
-            'urgencia' => 'required|in:info,aviso,emergencia',
+            'urgencia' => 'nullable|string',
         ]);
 
         Alerta::create([
             'titulo' => $data['titulo'],
             'corpo' => $data['corpo'],
-            'urgencia' => $data['urgencia'],
+            'urgencia' => $data['urgencia'] ?? 'info',
             'criado_por' => auth()->id()
         ]);
 
-        return back()->with('success', 'Alerta emergencial publicado.');
+        return redirect()->to('/admin/alertas')->with('success', 'Alerta emergencial publicado.');
     }
 }

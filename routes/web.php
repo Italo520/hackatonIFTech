@@ -48,11 +48,10 @@ use App\Http\Controllers\QrCodeController;
 Route::get('/qr/{hash}', [QrCodeController::class, 'resolve'])->name('qr.resolve');
 
 
-/*
-|--------------------------------------------------------------------------
-| Admin & Empreendedor (Privado)
-|--------------------------------------------------------------------------
-*/
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
     
     // Dashboard principal

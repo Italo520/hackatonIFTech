@@ -19,23 +19,23 @@ class RelatorioController extends Controller
             "Expires"             => "0"
         ];
 
-        $handle = fopen('php://output', 'w');
-        fputcsv($handle, ['ID', 'Tipo', 'Entidade Type', 'Entidade ID', 'Data']);
+        return response()->stream(function() use ($events) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['ID', 'Tipo', 'Entidade Type', 'Entidade ID', 'Data']);
 
-        foreach ($events as $e) {
-            fputcsv($handle, [
-                $e->id,
-                $e->tipo,
-                $e->entidade_type,
-                $e->entidade_id,
-                $e->created_at->toDateTimeString()
-            ]);
-        }
+            foreach ($events as $e) {
+                fputcsv($handle, [
+                    $e->id,
+                    $e->tipo,
+                    $e->entidade_type,
+                    $e->entidade_id,
+                    $e->created_at ? $e->created_at->toDateTimeString() : now()->toDateTimeString()
+                ]);
+            }
 
-        // Disclaimer T-045
-        fputcsv($handle, ['DISCLAIMER: Os dados extraídos não garantem elegibilidade a editais de captação de recursos.']);
-        fclose($handle);
-
-        return response()->stream(function() use ($handle) {}, 200, $headers);
+            // Disclaimer T-045
+            fputcsv($handle, ['DISCLAIMER: Os dados extraídos não garantem elegibilidade a editais de captação de recursos.']);
+            fclose($handle);
+        }, 200, $headers);
     }
 }

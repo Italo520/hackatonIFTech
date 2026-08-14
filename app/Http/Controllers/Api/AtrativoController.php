@@ -52,7 +52,11 @@ class AtrativoController extends Controller
             if (DB::getDriverName() === 'pgsql') {
                 $query->whereJsonContains('acessibilidade', $acessivel);
             } else {
-                 $query->where('acessibilidade', 'like', "%\"{$acessivel}\"%");
+                $query->where(function($b) use ($acessivel) {
+                    $b->whereJsonContains('acessibilidade', $acessivel)
+                      ->orWhere('acessibilidade', 'like', "%\"{$acessivel}\"%")
+                      ->orWhere('acessibilidade', 'like', "%{$acessivel}%");
+                });
             }
         }
 

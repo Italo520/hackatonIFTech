@@ -21,6 +21,6 @@ class PrestadorValidationController extends Controller
         $prestador = Prestador::findOrFail($id);
         $prestador->update(['status' => $request->status, 'selo_validado' => $request->status === 'aprovado']);
 
-        return back()->with('success', 'Status atualizado com sucesso.');
+        return redirect()->to('/admin/prestadores')->with('success', 'Status atualizado com sucesso.');
     }
 }

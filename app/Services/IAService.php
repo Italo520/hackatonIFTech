@@ -153,7 +153,7 @@ Pergunta atual: '{$scrubbedPergunta}'";
      */
     public function gerarRoteiro(array $preferences): array
     {
-        $cidade = $preferences['cidade'] ?? 'Sua Região';
+        $cidade = $preferences['cidade'] ?? 'IA';
         $tema = $preferences['tema'] ?? 'Turismo Geral';
         $duracao = $preferences['duracao_max'] ?? 240;
         $orcamento = $preferences['orcamento_max'] ?? 150.00;

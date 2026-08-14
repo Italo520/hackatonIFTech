@@ -36,6 +36,15 @@ class IAController extends Controller
         $historico = $request->input('historico', []);
         $response = $this->iaService->chat($request->pergunta, $request->idioma ?? 'pt-BR', $userLocation, $historico);
 
+        if ($request->header('Accept') !== 'text/event-stream' && ($request->expectsJson() || $request->wantsJson())) {
+            return response()->json([
+                'is_ia' => true,
+                'resposta' => $response['resposta'],
+                'fontes' => $response['fontes'],
+                'cidade_detectada' => $response['cidade_detectada'] ?? null,
+            ]);
+        }
+
         return response()->stream(function () use ($response) {
             // Envia os metadados iniciais (fontes e cidade)
             $meta = json_encode([
