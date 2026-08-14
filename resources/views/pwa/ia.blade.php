@@ -152,10 +152,27 @@
             chatInputWrapper.classList.add('d-none');
         });
 
-        function appendMessage(text, isUser = false, fontes = []) {
+        function renderFontes(fontes) {
+            if (!fontes || fontes.length === 0) return '';
+            return `
+                <div class="mt-3 pt-2 border-top small text-secondary">
+                    <strong class="d-block mb-1 text-dark" style="font-size: 0.75rem;">Sugestões de locais:</strong>
+                    <div class="d-flex flex-column gap-1">
+                        ${fontes.map(f => `
+                            <a href="/atrativo/${f.id}" class="badge bg-light text-primary border text-decoration-none text-start p-2 rounded-3">
+                                <i class="bi bi-geo-alt-fill text-warning me-1"></i> ${f.nome} <span class="text-muted">(${f.cidade || f.tipo})</span>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function appendMessage(text, isUser = false, fontes = [], msgId = null) {
             const msgDiv = document.createElement('div');
             msgDiv.className = `d-flex gap-2 w-100 ${isUser ? 'align-self-end flex-row-reverse' : ''}`;
             msgDiv.style.maxWidth = '92%';
+            if (msgId) msgDiv.id = msgId;
 
             if (isUser) {
                 msgDiv.innerHTML = `
@@ -164,35 +181,20 @@
                     </div>
                 `;
             } else {
-                let fontesHtml = '';
-                if (fontes && fontes.length > 0) {
-                    fontesHtml = `
-                        <div class="mt-3 pt-2 border-top small text-secondary">
-                            <strong class="d-block mb-1 text-dark" style="font-size: 0.75rem;">Sugestões de locais:</strong>
-                            <div class="d-flex flex-column gap-1">
-                                ${fontes.map(f => `
-                                    <a href="/atrativo/${f.id}" class="badge bg-light text-primary border text-decoration-none text-start p-2 rounded-3">
-                                        <i class="bi bi-geo-alt-fill text-warning me-1"></i> ${f.nome} <span class="text-muted">(${f.cidade || f.tipo})</span>
-                                    </a>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // Utilizando marked.js para renderizar markdown completo (títulos, listas, negrito, etc)
+                const fontesHtml = renderFontes(fontes);
                 const formattedText = typeof marked !== 'undefined' ? marked.parse(text) : text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                const safeText = text ? escapeHtml(text).replace(/'/g, "\\'") : '';
 
                 msgDiv.innerHTML = `
                     <div class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width: 34px; height: 34px; background-color: #005f73; margin-top: 4px;">
                         <i class="bi bi-robot small"></i>
                     </div>
                     <div class="bg-white p-3 shadow-sm border text-dark w-100 position-relative" style="border-radius: 18px; border-top-left-radius: 4px; font-size: 0.9rem;">
-                        <button onclick="window.speakText('${escapeHtml(text).replace(/'/g, "\\'")}')" class="btn btn-sm btn-light border rounded-circle position-absolute top-0 end-0 m-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px; padding: 0;">
+                        <button onclick="window.speakText('${safeText}')" class="btn btn-sm btn-light border rounded-circle position-absolute top-0 end-0 m-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px; padding: 0;">
                             <i class="bi bi-volume-up-fill text-primary" style="font-size: 0.9rem;"></i>
                         </button>
-                        <div class="pt-1 pe-4">${formattedText}</div>
-                        ${fontesHtml}
+                        <div id="${msgId ? msgId + '-content' : ''}" class="pt-1 pe-4">${formattedText}</div>
+                        <div id="${msgId ? msgId + '-fontes' : ''}">${fontesHtml}</div>
                     </div>
                 `;
             }
@@ -238,26 +240,64 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json',
+                        'Accept': 'text/event-stream',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                     },
                     body: JSON.stringify({
                         pergunta: pergunta,
-                        historico: chatHistory,
-                        cidade: savedLoc?.city || 'João Pessoa',
-                        uf: savedLoc?.uf || 'PB',
-                        lat: savedLoc?.lat || -7.1153,
-                        lng: savedLoc?.lng || -34.8641,
-                        idioma: 'pt-BR'
+                        idioma: 'pt-BR',
+                        userLocation: savedLoc || {},
+                        historico: chatHistory
                     })
                 });
 
                 document.getElementById('ai-loading-indicator')?.remove();
 
                 if (res.ok) {
-                    const data = await res.json();
-                    chatHistory.push({ role: 'model', text: data.resposta || '' });
-                    appendMessage(data.resposta || 'Aqui estão algumas sugestões!', false, data.fontes || []);
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    let accumulatedText = "";
+                    let fontesData = [];
+                    
+                    const msgId = 'msg-' + Date.now();
+                    appendMessage('', false, [], msgId);
+                    const msgContentDiv = document.getElementById(msgId + '-content');
+                    const msgFontesDiv = document.getElementById(msgId + '-fontes');
+
+                    let isDone = false;
+                    while (!isDone) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        
+                        const chunk = decoder.decode(value, {stream: true});
+                        const lines = chunk.split('\n');
+                        
+                        for (let i = 0; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            if (line.startsWith('event: done')) {
+                                isDone = true;
+                            } else if (line.startsWith('data: ')) {
+                                const dataStr = line.substring(6);
+                                if (dataStr === 'done' || dataStr === '{}') continue;
+                                
+                                try {
+                                    const dataObj = JSON.parse(dataStr);
+                                    if (dataObj.fontes) {
+                                        fontesData = dataObj.fontes;
+                                        msgFontesDiv.innerHTML = renderFontes(fontesData);
+                                    } else if (dataObj.chunk) {
+                                        accumulatedText += dataObj.chunk + ' ';
+                                        msgContentDiv.innerHTML = typeof marked !== 'undefined' ? marked.parse(accumulatedText) : accumulatedText;
+                                        viewChat.scrollTop = viewChat.scrollHeight;
+                                    }
+                                } catch (e) {
+                                    // ignore parse errors for partial chunks if any
+                                }
+                            }
+                        }
+                    }
+                    
+                    chatHistory.push({ role: 'model', text: accumulatedText });
                 } else {
                     appendMessage('Desculpe, tive uma oscilação na consulta da IA. Mas você pode conferir as opções na aba Explorar!', false);
                 }

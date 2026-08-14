@@ -206,6 +206,20 @@ Você deve retornar EXATAMENTE UM JSON com os seguintes campos, e mais nada:
         }
 
         $dados['is_ia'] = true;
+
+        // Anexar lat/lng reais do banco de dados aos itens para o Mapa Leaflet
+        if (isset($dados['itens']) && is_array($dados['itens'])) {
+            foreach ($dados['itens'] as &$item) {
+                if (isset($item['atrativo_id'])) {
+                    $atrativo = Atrativo::find($item['atrativo_id']);
+                    if ($atrativo) {
+                        $item['lat'] = $atrativo->lat;
+                        $item['lng'] = $atrativo->lng;
+                    }
+                }
+            }
+        }
+
         return $dados;
     }
 }

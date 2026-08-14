@@ -36,7 +36,36 @@ class IAController extends Controller
         $historico = $request->input('historico', []);
         $response = $this->iaService->chat($request->pergunta, $request->idioma ?? 'pt-BR', $userLocation, $historico);
 
-        return response()->json($response);
+        return response()->stream(function () use ($response) {
+            // Envia os metadados iniciais (fontes e cidade)
+            $meta = json_encode([
+                'fontes' => $response['fontes'],
+                'cidade_detectada' => $response['cidade_detectada']
+            ]);
+            echo "event: meta\ndata: {$meta}\n\n";
+            ob_flush();
+            flush();
+
+            // Simula o streaming das palavras (Efeito Real-Time SSE)
+            $words = preg_split('/( +)/', $response['resposta'], -1, PREG_SPLIT_DELIM_CAPTURE);
+            foreach ($words as $word) {
+                if ($word === '') continue;
+                $chunk = json_encode(['chunk' => $word]);
+                echo "data: {$chunk}\n\n";
+                ob_flush();
+                flush();
+                usleep(30000); // 30ms per token
+            }
+
+            echo "event: done\ndata: {}\n\n";
+            ob_flush();
+            flush();
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
+        ]);
     }
 
     public function gerarRoteiro(Request $request)
