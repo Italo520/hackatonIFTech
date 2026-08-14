@@ -14,7 +14,8 @@ class Sprint3Test extends TestCase
 
     public function test_can_submit_prestador_cadastro(): void
     {
-        $response = $this->post('/parceiro/cadastro', [
+        $user = \App\Models\User::factory()->create();
+        $response = $this->actingAs($user)->post('/parceiro/cadastro', [
             'tipo' => 'hospedagem',
             'nome_negocio' => 'Pousada Teste',
             'documento' => 'url_para_doc.pdf'
