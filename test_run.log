@@ -1,0 +1,111 @@
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true
+
+   PASS  Tests\Feature\AtrativoApiTest
+  ✓ can list active atrativos                                            0.13s  
+  ✓ can search by keyword                                                0.01s  
+  ✓ can filter by accessibility                                          0.01s  
+
+   PASS  Tests\Feature\Auth\AuthenticationTest
+  ✓ login screen can be rendered                                         0.02s  
+  ✓ users can authenticate using the login screen                        0.02s  
+  ✓ users can not authenticate with invalid password                     0.21s  
+  ✓ users can logout                                                     0.01s  
+
+   PASS  Tests\Feature\Auth\EmailVerificationTest
+  ✓ email verification screen can be rendered                            0.01s  
+  ✓ email can be verified                                                0.01s  
+  ✓ email is not verified with invalid hash                              0.01s  
+
+   PASS  Tests\Feature\Auth\PasswordConfirmationTest
+  ✓ confirm password screen can be rendered                              0.01s  
+  ✓ password can be confirmed                                            0.01s  
+  ✓ password is not confirmed with invalid password                      0.21s  
+
+   PASS  Tests\Feature\Auth\PasswordResetTest
+  ✓ reset password link screen can be rendered                           0.01s  
+  ✓ reset password link can be requested                                 0.21s  
+  ✓ reset password screen can be rendered                                0.21s  
+  ✓ password can be reset with valid token                               0.21s  
+
+   PASS  Tests\Feature\Auth\PasswordUpdateTest
+  ✓ password can be updated                                              0.01s  
+  ✓ correct password must be provided to update password                 0.01s  
+
+   PASS  Tests\Feature\Auth\RegistrationTest
+  ✓ registration screen can be rendered                                  0.01s  
+  ✓ new users can register                                               0.01s  
+
+   PASS  Tests\Feature\E2EDemoTest
+  ✓ flow 1 turista busca linguagem natural                               0.01s  
+  ✓ flow 2 turista gera roteiro ia baixa offline                         0.01s  
+  ✓ flow 3 turista escaneia qr                                           0.01s  
+  ✓ flow 4 empreendedor cadastro validacao                               0.01s  
+  ✓ flow 5 alerta heatmap dashboard                                      0.01s  
+
+   PASS  Tests\Feature\EventoApiTest
+  ✓ can list eventos with filters                                        0.01s  
+
+   PASS  Tests\Feature\ExampleTest
+  ✓ the application returns a successful response                        0.01s  
+
+   PASS  Tests\Feature\IAApiTest
+  ✓ can chat with assistant and it scrubs pii                            0.01s  
+  ✓ can generate roteiro                                                 0.01s  
+
+   PASS  Tests\Feature\ProfileTest
+  ✓ profile page is displayed                                            0.02s  
+  ✓ profile information can be updated                                   0.01s  
+  ✓ email verification status is unchanged when the email address is un… 0.01s  
+  ✓ user can delete their account                                        0.01s  
+  ✓ correct password must be provided to delete account                  0.01s  
+
+   PASS  Tests\Feature\QrCodeApiTest
+  ✓ can scan qrcode and increment metrics                                0.01s  
+
+   PASS  Tests\Feature\RoteiroApiTest
+  ✓ can list and filter roteiros                                         0.01s  
+
+   PASS  Tests\Feature\Sprint3Test
+  ✓ can submit prestador cadastro                                        0.01s  
+  ✓ can create ocorrencia                                                0.01s  
+  ✓ admin can create alerta                                              0.01s  
+
+   FAIL  Tests\Feature\Sprint4Test
+  ✓ can store analytic event                                             0.01s  
+  ✓ admin dashboard heatmap endpoint                                     0.01s  
+  ⨯ admin can export report                                              0.01s  
+
+   PASS  Tests\Feature\SyncApiTest
+  ✓ can sync avaliacoes                                                  0.01s  
+
+   PASS  Tests\Feature\UtilidadePublicaApiTest
+  ✓ can list active utilidades                                           0.01s  
+
+   PASS  Tests\Feature\Web\HomeTest
+  ✓ home page loads correctly                                            0.01s  
+  ✓ mapa page loads correctly                                            0.01s  
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Sprint4Test > admin can export report                  
+  Header [Content-type] was found, but value [text/csv; charset=utf-8] does not match [text/csv].
+Failed asserting that two strings are equal.
+  -'text/csv'
+  +'text/csv; charset=utf-8'
+  
+
+  at tests/Feature/Sprint4Test.php:43
+     39▕         AnalyticEvent::create(['tipo' => 'test_event']);
+     40▕ 
+     41▕         $response = $this->get('/admin/relatorios/exportar');
+     42▕         $response->assertStatus(200)
+  ➜  43▕                  ->assertHeader('Content-type', 'text/csv');
+     44▕                  
+     45▕         $this->assertStringContainsString('DISCLAIMER', $response->streamedContent());
+     46▕     }
+     47▕ }
+
+
+  Tests:    1 failed, 47 passed (135 assertions)
+  Duration: 1.63s
+
