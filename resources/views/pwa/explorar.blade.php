@@ -10,19 +10,49 @@
         transform: translateY(-3px);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
     }
+    
+    /* Correção do Sidebar de Filtros */
+    @media (min-width: 992px) {
+        .filter-sidebar {
+            top: 48px !important; /* Gruda no exato limite da margem, não empurra o card pra baixo */
+            z-index: 2 !important; /* Garante que fique por baixo da nav inferior (z-3) */
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+        .filter-container {
+            padding-top: 0 !important; 
+        }
+    }
+    @media (max-width: 991px) {
+        .filter-container {
+            padding-top: 0 !important;
+            margin-top: -1.5rem; /* Puxa todo o container de filtros mais para cima no mobile */
+        }
+    }
+    
+    /* Estilo para a barra do slider de orçamento */
+    .custom-range {
+        --range-progress: 50%;
+    }
+    .custom-range::-webkit-slider-runnable-track {
+        background: linear-gradient(to right, var(--bs-primary) var(--range-progress), #dee2e6 var(--range-progress)) !important;
+    }
+    .custom-range::-moz-range-track {
+        background: linear-gradient(to right, var(--bs-primary) var(--range-progress), #dee2e6 var(--range-progress)) !important;
+    }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid px-3 py-3">
+<div class="container-fluid px-3 py-2 py-lg-3 filter-container">
     <div class="row g-4">
         <!-- SIDEBAR / FILTROS (ESQUERDA EM DESKTOP, TOPO EM MOBILE) -->
         <aside class="col-12 col-lg-4 col-xl-3">
-            <div class="card border-0 rounded-4 shadow-sm p-3 p-md-4 bg-white sticky-lg-top" style="top: 80px; z-index: 10;">
+            <div class="card border-0 rounded-4 shadow-sm p-3 p-md-4 bg-white sticky-lg-top filter-sidebar">
+                <form action="{{ route('pwa.explorar') }}" method="GET" id="explorar-search-form">
                 <!-- Search Box -->
                 <div class="rounded-4 p-3 mb-4 text-white text-center shadow-sm" style="background: linear-gradient(135deg, #005f73, #0a9396);">
                     <h2 class="fs-6 fw-bold mb-2">Busca Inteligente</h2>
-                    <form action="{{ route('pwa.explorar') }}" method="GET" id="explorar-search-form">
                         <div class="mb-2">
                             <textarea 
                                 name="q" 
@@ -34,7 +64,6 @@
                         <button type="submit" class="btn btn-warning text-dark w-100 rounded-pill fw-bold btn-sm py-2 shadow-sm" aria-label="Executar pesquisa">
                             <i class="bi bi-search me-1" aria-hidden="true"></i> Pesquisar
                         </button>
-                    </form>
                 </div>
 
                 <!-- Filtro de Categorias -->
@@ -42,15 +71,13 @@
                     <h3 class="fs-6 fw-bold text-dark mb-2 d-flex align-items-center gap-2">
                         <i class="bi bi-grid-fill text-primary" aria-hidden="true"></i> Categorias
                     </h3>
-                    <div class="row row-cols-2 g-2 small text-secondary" id="filter-categories">
+                    <div class="d-flex flex-column gap-2 small text-secondary" id="filter-categories">
                         @foreach($categorias ?? [] as $cat)
-                            <div class="col">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="cat" value="{{ $cat->slug }}" id="cat-{{ $cat->id }}" {{ request('cat') === $cat->slug ? 'checked' : '' }}>
-                                    <label class="form-check-label text-truncate" for="cat-{{ $cat->id }}" title="{{ $cat->nome }}">
-                                        {{ $cat->nome }}
-                                    </label>
-                                </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="cat[]" value="{{ $cat->slug }}" id="cat-{{ $cat->id }}" {{ in_array($cat->slug, (array)request('cat', [])) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="cat-{{ $cat->id }}">
+                                    {{ $cat->nome }}
+                                </label>
                             </div>
                         @endforeach
                     </div>
@@ -61,7 +88,7 @@
                     <h3 class="fs-6 fw-bold text-dark mb-2 d-flex align-items-center gap-2">
                         <i class="bi bi-wallet2 text-success" aria-hidden="true"></i> Orçamento Estimado
                     </h3>
-                    <input type="range" class="form-range" min="0" max="1000" step="50" id="filtro-orcamento" value="{{ request('orcamento', 300) }}">
+                    <input type="range" class="form-range custom-range" name="orcamento" min="0" max="1000" step="50" id="filtro-orcamento" value="{{ request('orcamento', 300) }}">
                     <div class="d-flex justify-content-between small text-muted">
                         <span>R$ 0</span>
                         <span id="valor-orcamento-display" class="fw-bold text-primary">Até R$ {{ request('orcamento', 300) }}</span>
@@ -75,24 +102,31 @@
                     </h3>
                     <div class="d-flex flex-column gap-1 small text-secondary">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="acess-cadeirante">
+                            <input class="form-check-input" type="checkbox" name="acess[]" value="cadeirante" id="acess-cadeirante" {{ in_array('cadeirante', (array)request('acess', [])) ? 'checked' : '' }}>
                             <label class="form-check-label" for="acess-cadeirante">♿ Acessível para Cadeirantes</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="acess-libras">
+                            <input class="form-check-input" type="checkbox" name="acess[]" value="libras" id="acess-libras" {{ in_array('libras', (array)request('acess', [])) ? 'checked' : '' }}>
                             <label class="form-check-label" for="acess-libras">🤟 Atendimento em Libras</label>
                         </div>
                     </div>
                 </div>
+                
+                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm d-lg-none mt-2">
+                    Aplicar Filtros
+                </button>
+                </form>
             </div>
         </aside>
 
         <!-- CONTEÚDO PRINCIPAL (DIREITA) -->
         <main class="col-12 col-lg-8 col-xl-9 d-flex flex-column gap-4">
-            <!-- SEÇÃO 1: PRINCIPAIS LUGARES -->
+            <!-- SEÇÃO 1: PRINCIPAIS LUGARES OU RESULTADOS -->
             <section aria-labelledby="section-lugares-title">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 id="section-lugares-title" class="fs-5 fw-bold text-dark mb-0">Principais Lugares</h2>
+                    <h2 id="section-lugares-title" class="fs-5 fw-bold text-dark mb-0">
+                        {{ isset($is_search) && $is_search ? 'Resultados da Busca' : 'Principais Lugares' }}
+                    </h2>
                     <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 small">
                         {{ count($principais_lugares ?? []) }} atrações
                     </span>
@@ -146,6 +180,7 @@
                 </div>
             </section>
 
+            @if(!isset($is_search) || !$is_search)
             <!-- SEÇÃO 2: BANNER IA -->
             <section aria-label="Criação de Roteiro com Inteligência Artificial">
                 <div class="card border-0 rounded-4 shadow-sm p-4 text-white text-center position-relative overflow-hidden" 
@@ -221,6 +256,7 @@
                     </div>
                 </section>
             @endif
+            @endif
         </main>
     </div>
 </div>
@@ -232,9 +268,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const orcamentoInput = document.getElementById('filtro-orcamento');
     const orcamentoDisplay = document.getElementById('valor-orcamento-display');
 
+    function updateRangeBackground() {
+        if (!orcamentoInput) return;
+        const min = parseFloat(orcamentoInput.min) || 0;
+        const max = parseFloat(orcamentoInput.max) || 1000;
+        const val = parseFloat(orcamentoInput.value);
+        const percentage = ((val - min) / (max - min)) * 100;
+        orcamentoInput.style.setProperty('--range-progress', `${percentage}%`);
+    }
+
     if (orcamentoInput && orcamentoDisplay) {
+        // Define o background inicial baseado no valor preenchido
+        updateRangeBackground();
+
         orcamentoInput.addEventListener('input', function() {
             orcamentoDisplay.textContent = `Até R$ ${this.value}`;
+            updateRangeBackground();
         });
     }
 });
