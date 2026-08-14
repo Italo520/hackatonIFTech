@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class IAService
 {
     private $apiKey;
-    private $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+    private $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/interactions';
 
     public function __construct()
     {
@@ -27,34 +27,34 @@ class IAService
             return '{"erro": "Chave da API do Gemini não configurada no .env."}';
         }
 
-        $contents = [];
-        
-        // Mapear o histórico (Conversational Memory)
+        $inputTexto = "";
         foreach ($historico as $msg) {
-            $contents[] = [
-                'role' => $msg['role'] === 'user' ? 'user' : 'model',
-                'parts' => [['text' => $msg['text']]]
-            ];
+            $role = $msg['role'] === 'user' ? 'Usuário' : 'Assistente';
+            $inputTexto .= "{$role}: {$msg['text']}\n";
         }
-
-        // Adicionar o prompt atual
-        $contents[] = [
-            'role' => 'user',
-            'parts' => [['text' => $prompt]]
-        ];
+        if (!empty($inputTexto)) {
+            $inputTexto .= "\n(Fim do Histórico)\n\n";
+        }
+        $inputTexto .= "Instruções do Sistema / Novo Prompt:\n{$prompt}";
 
         $response = Http::withoutVerifying()->withHeaders([
             'Content-Type' => 'application/json',
         ])->post($this->apiUrl . '?key=' . $this->apiKey, [
-            'contents' => $contents,
-            'generationConfig' => [
-                'response_mime_type' => 'application/json',
-            ]
+            'model' => 'gemini-3.5-flash',
+            'input' => $inputTexto,
         ]);
 
         if ($response->successful()) {
             $data = $response->json();
-            $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+            $text = '{}';
+            if (isset($data['steps'])) {
+                foreach ($data['steps'] as $step) {
+                    if (isset($step['type']) && $step['type'] === 'model_output' && isset($step['content'])) {
+                        $text = $step['content'][0]['text'] ?? '{}';
+                        break;
+                    }
+                }
+            }
             
             // Remove blocos markdown caso o Gemini retorne ` ```json `
             $text = preg_replace('/```json\s*/', '', $text);
