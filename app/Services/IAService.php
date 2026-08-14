@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class IAService
 {
     private $apiKey;
-    private $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+    private $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
     public function __construct()
     {
@@ -47,7 +47,10 @@ class IAService
             'Content-Type' => 'application/json',
         ])->post($this->apiUrl . '?key=' . $this->apiKey, [
             'contents' => $contents,
-        ]); // Removi o generationConfig pois o gemini-pro (1.0) as vezes não suporta response_mime_type nativamente. O prompt já pede JSON.
+            'generationConfig' => [
+                'response_mime_type' => 'application/json',
+            ]
+        ]);
 
         if ($response->successful()) {
             $data = $response->json();
