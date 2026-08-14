@@ -20,8 +20,9 @@ chmod -R 775 /app/storage /app/bootstrap/cache /app/database
 
 # Run migrations and seeders
 echo "==> Running database migrations and seeders..."
-php /app/artisan migrate --force || echo "Migration complete or skipped."
-php /app/artisan db:seed --force || echo "Seeding complete or skipped."
+php /app/artisan migrate:status || true
+php /app/artisan migrate --force || true
+php /app/artisan db:seed --force || true
 
 # Clear and optimize configuration cache
 php /app/artisan config:clear || true
