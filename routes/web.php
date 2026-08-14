@@ -47,6 +47,10 @@ Route::get('/ia', function () {
     return view('pwa.ia');
 })->name('pwa.ia');
 
+Route::get('/privacidade', function () {
+    return view('pwa.privacidade');
+})->name('pwa.privacidade');
+
 // QR Code Redirecionamento
 Route::get('/qr/{hash}', [QrCodeController::class, 'resolve'])->name('qr.resolve');
 

@@ -128,6 +128,39 @@
                 {{ $atrativo->historia }}
             </p>
         @endif
+
+        {{-- Audiodescrição (WCAG / Acessibilidade) --}}
+        <div class="card border-0 rounded-4 bg-light p-3 shadow-sm mb-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(0, 95, 115, 0.1); color: var(--bs-primary);">
+                        <i class="bi bi-volume-up-fill fs-5" id="audio-play-icon"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-dark small">Guia por Voz & Audiodescrição</div>
+                        <div class="text-muted" style="font-size: 0.72rem;">Ouça a história e detalhes do local</div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary rounded-pill btn-sm px-3 fw-bold" id="btn-toggle-audio-guide">
+                    <i class="bi bi-play-fill me-1"></i> <span id="label-audio-guide">Ouvir</span>
+                </button>
+            </div>
+        </div>
+
+        {{-- Experiência Imersiva 360° (Piloto do PRD) --}}
+        <div class="card border-0 rounded-4 p-3 shadow-sm mb-3 text-white overflow-hidden position-relative" style="background: linear-gradient(135deg, #0a9396 0%, #005f73 100%);">
+            <div class="d-flex align-items-center justify-content-between position-relative z-1">
+                <div>
+                    <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-2.5 py-0.5 small mb-1">
+                        <i class="bi bi-view-360 me-1"></i> Tour Virtual Piloto
+                    </span>
+                    <h6 class="fw-bold text-white mb-0">Vista Panorâmica 360°</h6>
+                </div>
+                <button type="button" class="btn btn-light btn-sm rounded-pill px-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTour360">
+                    <i class="bi bi-badge-vr me-1 text-primary"></i> Explorar 360°
+                </button>
+            </div>
+        </div>
     </div>
 
     {{-- Bento Grid: Duração, Preço, Mapa --}}
@@ -339,6 +372,34 @@
     </div>
 </div>
 
+{{-- Modal: Visualizador Panorâmico 360° (Piloto) --}}
+<div class="modal fade" id="modalTour360" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-5 border-0 shadow-lg overflow-hidden bg-dark text-white">
+            <div class="modal-header border-0 pb-0 pt-3 px-4">
+                <div>
+                    <h5 class="modal-title fw-bold text-white"><i class="bi bi-view-360 me-2 text-warning"></i> Tour Virtual 360°</h5>
+                    <span class="small text-white-50">{{ $atrativo->nome }}</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="position-relative rounded-4 overflow-hidden" style="height: 380px; background: #000;">
+                    <img src="{{ $imagemPrincipal ?? 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80' }}" id="img-panorama-360" class="w-100 h-100 object-fit-cover" style="cursor: grab; filter: brightness(0.95);" alt="Panorâmica 360">
+                    <div class="position-absolute bottom-0 start-50 translate-middle-x mb-3 text-center w-100 px-3" style="pointer-events: none;">
+                        <span class="badge bg-dark bg-opacity-75 text-white rounded-pill px-3 py-1.5 small border border-secondary" style="backdrop-filter: blur(5px);">
+                            <i class="bi bi-arrows-move me-1 text-warning"></i> Arraste para girar a visão 360°
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 pb-3 px-4 text-center justify-content-center">
+                <span class="small text-white-50" style="font-size: 0.72rem;">* Experiência piloto de realidade virtual e imersão turística.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- FAB: Adicionar ao Roteiro --}}
 <div class="position-fixed start-50 translate-middle-x w-100 px-4 z-3 d-flex justify-content-center"
      style="bottom: 80px; max-width: 400px; pointer-events: none;">
@@ -459,6 +520,50 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             navigator.clipboard.writeText(window.location.href);
             alert('Link copiado para a área de transferência!');
+        }
+    });
+
+    // =========================================================================
+    // AUDIODESCRIÇÃO E GUIA POR VOZ (WCAG / SPEECH SYNTHESIS)
+    // =========================================================================
+    let isPlayingAudio = false;
+    const btnAudio = document.getElementById('btn-toggle-audio-guide');
+    const labelAudio = document.getElementById('label-audio-guide');
+    const iconAudio = document.getElementById('audio-play-icon');
+
+    btnAudio?.addEventListener('click', function () {
+        if (!('speechSynthesis' in window)) {
+            alert('Síntese de voz não suportada neste navegador.');
+            return;
+        }
+
+        if (isPlayingAudio) {
+            window.speechSynthesis.cancel();
+            isPlayingAudio = false;
+            if (labelAudio) labelAudio.textContent = 'Ouvir';
+            if (iconAudio) iconAudio.className = 'bi bi-volume-up-fill fs-5';
+            btnAudio.classList.remove('btn-danger');
+            btnAudio.classList.add('btn-primary');
+        } else {
+            const texto = `{{ $atrativo->nome }}. {{ $atrativo->descricao }} {{ $atrativo->historia ?? '' }}`;
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = 'pt-BR';
+            utterance.rate = 1.0;
+
+            utterance.onend = function () {
+                isPlayingAudio = false;
+                if (labelAudio) labelAudio.textContent = 'Ouvir';
+                if (iconAudio) iconAudio.className = 'bi bi-volume-up-fill fs-5';
+                btnAudio.classList.remove('btn-danger');
+                btnAudio.classList.add('btn-primary');
+            };
+
+            window.speechSynthesis.speak(utterance);
+            isPlayingAudio = true;
+            if (labelAudio) labelAudio.textContent = 'Pausar';
+            if (iconAudio) iconAudio.className = 'bi bi-pause-fill fs-5';
+            btnAudio.classList.remove('btn-primary');
+            btnAudio.classList.add('btn-danger');
         }
     });
 });

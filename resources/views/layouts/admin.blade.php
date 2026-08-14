@@ -202,11 +202,18 @@
         </div>
 
         <!-- Rodapé do Sidebar -->
-        <div class="p-3 border-top border-white border-opacity-10">
+        <div class="p-3 border-top border-white border-opacity-10 d-flex flex-column gap-2">
             <a href="{{ route('pwa.home') }}" class="btn btn-outline-light btn-sm w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" target="_blank">
                 <i class="bi bi-phone"></i>
                 <span>Ver App do Turista</span>
             </a>
+            <form method="POST" action="{{ route('logout') }}" class="w-100 m-0">
+                @csrf
+                <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-pill py-1.5 fw-semibold d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sair do Painel</span>
+                </button>
+            </form>
         </div>
     </aside>
 
@@ -254,9 +261,9 @@
                         </li>
                         <li><hr class="dropdown-divider my-1"></li>
                         <li>
-                            <form method="POST" action="{{ route('logout') }}">
+                            <form method="POST" action="{{ route('logout') }}" class="m-0">
                                 @csrf
-                                <button type="submit" class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger small">
+                                <button type="submit" class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger small w-100 text-start border-0 bg-transparent">
                                     <i class="bi bi-box-arrow-right"></i> Sair do Painel
                                 </button>
                             </form>

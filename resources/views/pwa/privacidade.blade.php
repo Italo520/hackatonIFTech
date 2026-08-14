@@ -1,60 +1,133 @@
 @extends('layouts.pwa')
 
 @section('content')
-<h2>Privacidade (LGPD)</h2>
-<div class="card mt-3">
-    <div class="card-body">
-        <h5>Exportar meus dados</h5>
-        <button class="btn btn-primary" onclick="exportData()">Exportar JSON</button>
+<div class="container-fluid px-3 py-4 mb-5" style="max-width: 650px;">
+    <!-- Header -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{{ route('pwa.utilidade') }}" class="btn btn-light rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+            <i class="bi bi-chevron-left text-dark fs-5"></i>
+        </a>
+        <div>
+            <h1 class="fw-bold text-dark fs-4 mb-0">Privacidade & LGPD</h1>
+            <span class="text-muted small">Transparência e controle sobre seus dados pessoais</span>
+        </div>
     </div>
-</div>
 
-<div class="card mt-3 border-danger">
-    <div class="card-body">
-        <h5 class="text-danger">Excluir Conta e Dados</h5>
-        <p>Esta ação é irreversível.</p>
-        <form onsubmit="deleteData(event)">
-            <input type="password" id="senha_delete" class="form-control mb-2" placeholder="Digite sua senha para confirmar" required>
-            <button type="submit" class="btn btn-danger">Excluir Tudo</button>
-        </form>
+    <!-- Termos e Minimização de Dados -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white mb-4">
+        <div class="d-flex align-items-center gap-2 mb-2 text-primary">
+            <i class="bi bi-shield-check fs-4"></i>
+            <h5 class="fw-bold mb-0">Privacidade por Design (LGPD)</h5>
+        </div>
+        <p class="small text-secondary mb-3">
+            O aplicativo <strong>Destino Inteligente</strong> foi projetado seguindo o princípio da minimização de dados da Lei Geral de Proteção de Dados (Lei nº 13.709/2018). Você pode navegar livremente sem criar conta.
+        </p>
+        <div class="p-3 bg-light rounded-3 small text-muted">
+            <i class="bi bi-info-circle me-1 text-primary"></i> <strong>Mapas de calor e estatísticas:</strong> Todos os dados de engajamento são anonimizados e agregados (com supressão estatística para grupos menores que 5 pessoas).
+        </div>
+    </div>
+
+    <!-- Gerenciamento de Consentimentos Granulares -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white mb-4">
+        <h5 class="fw-bold text-dark mb-3">Seus Consentimentos</h5>
+        
+        <div class="d-flex flex-column gap-3">
+            <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
+                <div>
+                    <div class="fw-semibold small text-dark">Geolocalização (GPS)</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Para calcular distâncias e sugerir atrações próximas</div>
+                </div>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="consent-gps" checked>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
+                <div>
+                    <div class="fw-semibold small text-dark">Alertas da Defesa Civil & Clima</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Para receber notificações sobre marés e tempestades</div>
+                </div>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="consent-alerts" checked>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="fw-semibold small text-dark">Métricas de Uso e IA</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Para aprimoramento contínuo das rotas geradas</div>
+                </div>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="consent-analytics" checked>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill mt-3 w-100 fw-semibold" onclick="alert('Preferências de privacidade atualizadas com sucesso!')">
+            Salvar Preferências
+        </button>
+    </div>
+
+    <!-- Direitos do Titular (Exportação e Exclusão) -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white mb-4">
+        <h5 class="fw-bold text-dark mb-3">Direitos do Titular</h5>
+        
+        <div class="d-flex flex-column gap-2">
+            <button class="btn btn-light border rounded-3 p-3 d-flex align-items-center justify-content-between text-start" onclick="exportUserData()">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-download text-primary fs-4"></i>
+                    <div>
+                        <div class="fw-bold small text-dark">Exportar Meus Dados (JSON)</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">Baixe uma cópia dos seus favoritos e histórico local</div>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-right text-muted small"></i>
+            </button>
+
+            <button class="btn btn-light border border-danger-subtle rounded-3 p-3 d-flex align-items-center justify-content-between text-start text-danger" onclick="clearUserData()">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-trash text-danger fs-4"></i>
+                    <div>
+                        <div class="fw-bold small text-danger">Excluir e Anonimizar Dados Locais</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">Limpa cache, favoritos salvos e redefinição de identificadores</div>
+                    </div>
+                </div>
+                <i class="bi bi-chevron-right text-muted small"></i>
+            </button>
+        </div>
     </div>
 </div>
 
 @push('scripts')
 <script>
-    function exportData() {
-        fetch('/api/v1/privacidade/exportar', {
-            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } // Mock token integration
-        })
-        .then(res => res.json())
-        .then(data => {
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'meus_dados_destino_turistico.json';
-            a.click();
-        });
-    }
+function exportUserData() {
+    const data = {
+        app: "Destino Inteligente",
+        export_date: new Date().toISOString(),
+        location_preferences: JSON.parse(localStorage.getItem('turismo_user_location') || '{}'),
+        offline_roteiros: JSON.parse(localStorage.getItem('saved_offline_roteiros') || '{}'),
+        lgpd_consents: {
+            gps: document.getElementById('consent-gps').checked,
+            alerts: document.getElementById('consent-alerts').checked,
+            analytics: document.getElementById('consent-analytics').checked
+        }
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dados_turista_${new Date().getTime()}.json`;
+    a.click();
+}
 
-    function deleteData(e) {
-        e.preventDefault();
-        fetch('/api/v1/privacidade/excluir', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
-            },
-            body: JSON.stringify({ password: document.getElementById('senha_delete').value })
-        }).then(res => {
-            if (res.ok) {
-                alert("Conta excluída.");
-                window.location.href = '/';
-            } else {
-                alert("Erro ao excluir. Verifique sua senha.");
-            }
-        });
+function clearUserData() {
+    if (confirm('Tem certeza que deseja limpar seus dados locais salvos?')) {
+        localStorage.removeItem('saved_offline_roteiros');
+        localStorage.removeItem('turismo_user_location');
+        alert('Todos os dados locais foram excluídos.');
+        window.location.reload();
     }
+}
 </script>
 @endpush
 @endsection

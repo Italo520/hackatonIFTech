@@ -1,356 +1,394 @@
 @extends('layouts.pwa')
 
 @push('styles')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
-    /* =========================================================================
-       2. ESTILIZAÇÃO CSS (PALETA INSPIRADA NO APP)
-       ========================================================================= */
-    :root {
-        --teal-primary: #008282; 
-        --blue-accent: #0066CC;  
-        --surface: #FFFFFF;      
-        --text-main: #1F2937;    
-        --text-muted: #6B7280;   
-        --border-light: #E5E7EB; 
+    .explorar-hero-search {
+        background: linear-gradient(135deg, #005f73 0%, #0a9396 100%);
+        border-bottom-left-radius: 24px;
+        border-bottom-right-radius: 24px;
     }
-
-    /* CONTAINER PRINCIPAL (LAYOUT DO FÓRUM) */
-    .explorar-container {
-        display: flex;
-        max-width: 1440px;
-        margin: 0 auto;
-        padding: 10px 10px;
-        gap: 30px;
+    .place-img-wrapper {
+        position: relative;
+        height: 180px;
+        overflow: hidden;
     }
-
-    /* SIDEBAR / FILTROS (ESQUERDA) */
-    .explorar-aside {
-        width: 320px;
-        background: var(--surface);
-        border-radius: 16px;
-        border: 1px solid var(--border-light);
-        padding: 20px;
-        height: fit-content;
-    }
-    
-    .search-box {
-        background-color: var(--teal-primary);
-        padding: 20px;
-        border-radius: 12px;
-        color: white;
-        margin-bottom: 25px;
-        text-align: center;
-    }
-    .search-box h3 { font-size: 1.1rem; margin-bottom: 10px; font-weight: 600; }
-    .search-box textarea {
-        width: 100%; padding: 12px; border-radius: 8px; border: none;
-        resize: none; height: 80px; font-family: inherit; font-size: 0.9rem;
-    }
-
-    .filter-section { margin-bottom: 25px; }
-    .filter-section h4 { 
-        font-size: 1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; 
-        color: var(--text-main); font-weight: 600;
-    }
-    .filter-section h4 i { color: var(--blue-accent); } 
-    
-    .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem; color: var(--text-muted); }
-    .checkbox-grid label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
-    
-    .slider-container { padding: 0 5px; }
-    input[type=range] { width: 100%; accent-color: var(--teal-primary); }
-
-    .btn-pesquisar {
+    .place-img-wrapper img {
         width: 100%;
-        background-color: var(--teal-primary);
-        color: white;
-        border: none;
-        padding: 14px;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: 0.2s;
-        margin-top: 10px;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
     }
-    .btn-pesquisar:hover { opacity: 0.9; transform: translateY(-2px); }
-
-    /* CONTEÚDO PRINCIPAL (DIREITA) */
-    .explorar-main { flex: 1; display: flex; flex-direction: column; gap: 40px; }
-    
-    .section-header h2 { font-size: 1.8rem; font-weight: 700; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; }
-
-    /* GRID PRINCIPAIS LUGARES */
-    .places-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 20px;
-        margin-top: 15px;
+    .card-place:hover .place-img-wrapper img {
+        transform: scale(1.05);
     }
-    .place-card {
-        background: var(--surface);
-        border-radius: 16px;
-        border: 1px solid var(--border-light);
-        overflow: hidden;
-        transition: 0.3s;
+    .filter-chip {
+        white-space: nowrap;
+        font-size: 0.82rem;
+        transition: all 0.2s ease;
+        border-radius: 50rem;
     }
-    .place-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-    .place-card img { width: 100%; height: 160px; object-fit: cover; }
-    .place-card-body { padding: 16px; }
-    .place-card-body h3 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 700; }
-    .place-card-body p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
-    .place-card-footer { display: flex; justify-content: space-between; align-items: center; }
-    .stars { color: #F59E0B; font-size: 0.85rem; }
-    
-    .btn-explorar {
-        background-color: var(--teal-primary);
-        color: white;
-        border: none;
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        cursor: pointer;
-    }
-
-    /* BANNER EXPERIÊNCIAS */
-    .banner-experiencias {
-        background: linear-gradient(rgba(0, 130, 130, 0.85), rgba(0, 130, 130, 0.85)), url('https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?auto=format&fit=crop&w=1200&q=80') center/cover;
-        border-radius: 16px;
-        padding: 40px 30px;
-        text-align: center;
-        color: white;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    .banner-experiencias h2 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 700; }
-    .banner-experiencias p { font-size: 1.1rem; margin-bottom: 20px; opacity: 0.9; }
-    .btn-banner {
-        background-color: white;
-        color: var(--teal-primary);
-        padding: 12px 28px;
-        border-radius: 30px;
-        font-weight: 700;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-    }
-
-    /* ATIVIDADES GRATUITAS */
-    .free-scroll {
-        display: flex;
-        gap: 15px;
-        overflow-x: auto;
-        padding-bottom: 15px;
-        margin-top: 15px;
-    }
-    .free-card {
-        min-width: 220px;
-        background: var(--surface);
-        border-radius: 12px;
-        border: 1px solid var(--border-light);
-        overflow: hidden;
-    }
-    .free-card img { width: 100%; height: 120px; object-fit: cover; }
-    .free-card .content { padding: 12px; text-align: center; }
-    .free-card h4 { font-size: 0.95rem; margin-bottom: 12px; color: var(--text-main); }
-    .free-card button { 
-        width: 100%; background: transparent; color: var(--teal-primary); 
-        border: 1px solid var(--teal-primary); padding: 8px; border-radius: 8px; 
-        font-weight: 600; cursor: pointer; transition: 0.2s;
-    }
-    .free-card button:hover { background: var(--teal-primary); color: white; }
-    
-    @media (max-width: 900px) {
-        .explorar-container { flex-direction: column; }
-        .explorar-aside { width: 100%; }
+    .filter-chip.active {
+        background-color: var(--bs-primary) !important;
+        color: #ffffff !important;
+        border-color: var(--bs-primary) !important;
+        box-shadow: 0 4px 10px rgba(0, 95, 115, 0.25);
     }
 </style>
 @endpush
 
 @section('content')
-<div class="explorar-container">
-    <!-- SIDEBAR -->
-    <div class="explorar-aside">
-        <div class="search-box">
-            <h3>Mecanismo de Busca Inteligente</h3>
-            <textarea placeholder="Encontre experiências familiares gratuitas ao ar livre..."></textarea>
-        </div>
+<!-- Barra Superior de Pesquisa & IA -->
+<div class="explorar-hero-search p-4 text-white shadow-sm mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h1 class="fw-bold fs-5 mb-0">Explorar Destinos</h1>
+        <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1 small">
+            <i class="bi bi-geo-alt-fill text-warning me-1"></i> <span class="current-city-name">Sua Cidade</span>
+        </span>
+    </div>
+    <p class="small text-white-50 mb-3">Encontre pontos turísticos, praias, monumentos e sabores</p>
 
-        <div class="filter-section">
-            <h4><i class="fa-solid fa-layer-group"></i> Categorias</h4>
-            <div class="checkbox-grid" id="filter-categories">
-                <label><input type="checkbox" value="historico"> Histórico</label>
-                <label><input type="checkbox" value="ecologico"> Ecológico</label>
-                <label><input type="checkbox" value="cultural"> Cultural</label>
-                <label><input type="checkbox" value="aventura"> Aventura</label>
-                <label><input type="checkbox" value="negocios"> Negócios</label>
-                <label><input type="checkbox" value="saude"> Saúde</label>
-                <label><input type="checkbox" value="pet_friendly"> Pet Friendly</label>
-            </div>
+    <!-- Campo de Busca -->
+    <div class="position-relative">
+        <div class="position-absolute top-50 start-0 translate-middle-y ps-3 text-secondary">
+            <i class="bi bi-search"></i>
         </div>
+        <input type="text" id="input-busca-explorar" class="form-control form-control-lg rounded-pill border-0 shadow-sm ps-5 pe-5 bg-white text-dark" placeholder="Buscar praias, museus, restaurantes..." autocomplete="off">
+        <button type="button" id="btn-limpar-busca" class="btn btn-sm text-secondary position-absolute top-50 end-0 translate-middle-y me-2 d-none">
+            <i class="bi bi-x-circle-fill"></i>
+        </button>
+    </div>
+</div>
 
-        <div class="filter-section">
-            <h4><i class="fa-regular fa-calendar"></i> Datas</h4>
-            <div style="background: #F1F5F9; height: 50px; border-radius: 8px; display:flex; align-items:center; justify-content:center; color: var(--text-main); font-size: 0.95rem; padding: 0 15px;">
-                <input type="text" id="filtro-datas" placeholder="Selecione as datas" style="width: 100%; border: none; background: transparent; text-align: center; font-family: inherit; font-weight: 600; outline: none; cursor: pointer;">
-            </div>
+<!-- Filtros Rápidos (Chips Horizontais) -->
+<div class="px-3 mb-3">
+    <div class="d-flex gap-2 overflow-auto no-scrollbar pb-1" id="chips-categorias-container">
+        <button class="btn btn-light border filter-chip active" data-cat="todos">
+            <i class="bi bi-grid-fill me-1 text-primary"></i> Todos
+        </button>
+        <button class="btn btn-light border filter-chip" data-cat="praias">
+            <i class="bi bi-water me-1 text-info"></i> Praias & Piscinas
+        </button>
+        <button class="btn btn-light border filter-chip" data-cat="gastronomia">
+            <i class="bi bi-cup-hot-fill me-1 text-warning"></i> Gastronomia
+        </button>
+        <button class="btn btn-light border filter-chip" data-cat="historico">
+            <i class="bi bi-bank me-1 text-danger"></i> História & Cultura
+        </button>
+        <button class="btn btn-light border filter-chip" data-cat="ecoturismo">
+            <i class="bi bi-tree-fill me-1 text-success"></i> Ecoturismo
+        </button>
+        <button class="btn btn-light border filter-chip" data-cat="acessivel">
+            <i class="bi bi-universal-access-circle me-1 text-primary"></i> ♿ Acessíveis
+        </button>
+        <button class="btn btn-outline-secondary filter-chip" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFiltros">
+            <i class="bi bi-sliders me-1"></i> Filtros
+        </button>
+    </div>
+</div>
+
+<!-- Resultados Dinâmicos -->
+<div class="container-fluid px-3 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fs-6 fw-bold text-dark mb-0">
+            <span id="contador-resultados">Carregando</span> atrativos
+        </h2>
+        <div class="dropdown">
+            <button class="btn btn-light btn-sm rounded-pill px-3 dropdown-toggle border" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-sort-down me-1"></i> <span id="label-ordem">Mais Próximos</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                <li><a class="dropdown-item small opt-ordem active" href="#" data-ordem="distancia">Mais Próximos (GPS)</a></li>
+                <li><a class="dropdown-item small opt-ordem" href="#" data-ordem="rating">Melhor Avaliados</a></li>
+                <li><a class="dropdown-item small opt-ordem" href="#" data-ordem="nome">Ordem Alfabética</a></li>
+            </ul>
         </div>
+    </div>
 
-        <div class="filter-section">
-            <h4><i class="fa-solid fa-wallet"></i> Orçamento</h4>
-            <div class="slider-container">
-                <input type="range" min="0" max="1000" value="300">
-                <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.85rem; color: var(--text-muted);">
-                    <span>R$ 0</span>
-                    <span>Até R$ 300</span>
+    <!-- Grid de Atrativos -->
+    <div class="row g-3" id="grid-atrativos-explorar">
+        <!-- Preenchido via JavaScript -->
+    </div>
+
+    <!-- Estado Vazio / Sem Resultados -->
+    <div id="empty-state-explorar" class="text-center py-5 d-none">
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 bg-light text-muted mb-3" style="width: 64px; height: 64px;">
+            <i class="bi bi-search fs-3"></i>
+        </div>
+        <h5 class="fw-bold text-dark mb-1">Nenhum local encontrado</h5>
+        <p class="text-muted small mb-3">Tente buscar por termos mais genéricos ou limpe os filtros.</p>
+        <button type="button" class="btn btn-outline-primary rounded-pill px-4 btn-sm" id="btn-reset-filtros">
+            Limpar Filtros
+        </button>
+    </div>
+</div>
+
+<!-- Offcanvas de Filtros Avançados -->
+<div class="offcanvas offcanvas-bottom rounded-top-4" tabindex="-1" id="offcanvasFiltros" style="max-height: 85vh;">
+    <div class="offcanvas-header border-bottom pb-3">
+        <h5 class="offcanvas-title fw-bold text-dark">
+            <i class="bi bi-sliders me-2 text-primary"></i>Filtros Avançados
+        </h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body p-4">
+        <!-- Acessibilidade e Inclusão -->
+        <div class="mb-4">
+            <label class="fw-bold small text-secondary mb-2 d-block text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                Acessibilidade (WCAG / Inclusão)
+            </label>
+            <div class="d-flex flex-column gap-2">
+                <div class="form-check">
+                    <input class="form-check-input filter-check-ac" type="checkbox" value="cadeirante" id="chk-cadeirante">
+                    <label class="form-check-label small text-dark" for="chk-cadeirante">♿ Acessível para cadeirantes / rampas</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input filter-check-ac" type="checkbox" value="libras" id="chk-libras">
+                    <label class="form-check-label small text-dark" for="chk-libras">🤟 Atendimento ou suporte em Libras</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input filter-check-ac" type="checkbox" value="cego" id="chk-cego">
+                    <label class="form-check-label small text-dark" for="chk-cego">🦯 Audiodescrição / Piso tátil</label>
                 </div>
             </div>
         </div>
-        
-        <div class="filter-section">
-            <h4><i class="fa-solid fa-wheelchair"></i> Acessibilidade</h4>
-            <div class="checkbox-grid">
-                <label><input type="checkbox"> Acessível (Cadeirante)</label>
-                <label><input type="checkbox"> Libras</label>
+
+        <!-- Duração da Visita -->
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="fw-bold small text-secondary text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">Duração Máxima</label>
+                <span class="badge bg-light text-primary border" id="badge-duracao-valor">Qualquer tempo</span>
+            </div>
+            <input type="range" class="form-range" min="30" max="360" step="30" id="range-duracao" value="360">
+            <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem;">
+                <span>30 min</span>
+                <span>2h</span>
+                <span>4h</span>
+                <span>Livre</span>
             </div>
         </div>
 
-        <button class="btn-pesquisar">PESQUISAR</button>
+        <div class="d-flex gap-2 pt-2">
+            <button type="button" class="btn btn-light rounded-pill flex-grow-1" id="btn-limpar-offcanvas" data-bs-dismiss="offcanvas">Limpar</button>
+            <button type="button" class="btn btn-primary rounded-pill flex-grow-1 fw-bold" id="btn-aplicar-offcanvas" data-bs-dismiss="offcanvas">Aplicar Filtros</button>
+        </div>
     </div>
+</div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <div class="explorar-main">
-        <!-- SEÇÃO 1 -->
-        <section>
-            <div class="section-header">
-                <h2>Principais Lugares</h2>
-            </div>
-            <div class="places-grid">
-                @foreach ($principais_lugares as $lugar)
-                    <div class="place-card">
-                        <img src="https://images.unsplash.com/photo-1548625149-fc4a29cf7092?auto=format&fit=crop&w=400&q=80&sig={{ $lugar->id }}" alt="{{ $lugar->nome }}">
-                        <div class="place-card-body">
-                            <h3>{{ $lugar->nome }}</h3>
-                            <p>{{ Str::limit($lugar->descricao, 80) }}</p>
-                            <div class="place-card-footer">
-                                <div class="stars">
-                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
-                                </div>
-                                <a href="/atrativo/{{ $lugar->id }}" class="btn-explorar" style="text-decoration:none;">Explorar</a>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentCategory = 'todos';
+    let searchQuery = '';
+    let sortOrder = 'distancia';
+    let accessibilityFilters = [];
+    let maxDuration = 360;
+
+    const inputBusca = document.getElementById('input-busca-explorar');
+    const btnLimparBusca = document.getElementById('btn-limpar-busca');
+    const gridAtrativos = document.getElementById('grid-atrativos-explorar');
+    const emptyState = document.getElementById('empty-state-explorar');
+    const contadorResultados = document.getElementById('contador-resultados');
+    const chipsContainer = document.getElementById('chips-categorias-container');
+    const rangeDuracao = document.getElementById('range-duracao');
+    const badgeDuracao = document.getElementById('badge-duracao-valor');
+
+    function renderAtrativos() {
+        if (!window.LocationService || !window.LocationService.getAttractionsByCity) {
+            setTimeout(renderAtrativos, 100);
+            return;
+        }
+
+        const city = window.LocationService.getCurrentCity();
+        let list = window.LocationService.getAttractionsByCity(city.key) || [];
+        const userLoc = window.LocationService.getUserCoordinates();
+
+        // 1. Filtro de Categoria
+        if (currentCategory === 'praias') {
+            list = list.filter(i => (i.categoria_slug || '').includes('praia') || (i.categoria_slug || '').includes('rios') || (i.categoria_slug || '').includes('gruta'));
+        } else if (currentCategory === 'gastronomia') {
+            list = list.filter(i => (i.categoria_slug || '').includes('gastro') || (i.categoria_slug || '').includes('restaurante'));
+        } else if (currentCategory === 'historico') {
+            list = list.filter(i => (i.categoria_slug || '').includes('cultura') || (i.categoria_slug || '').includes('monumento') || (i.categoria_slug || '').includes('histor'));
+        } else if (currentCategory === 'ecoturismo') {
+            list = list.filter(i => (i.categoria_slug || '').includes('aventura') || (i.categoria_slug || '').includes('eco') || (i.categoria_slug || '').includes('parque'));
+        } else if (currentCategory === 'acessivel') {
+            list = list.filter(i => i.acessibilidade && i.acessibilidade.length > 0);
+        }
+
+        // 2. Filtro de Acessibilidade
+        if (accessibilityFilters.length > 0) {
+            list = list.filter(i => {
+                if (!i.acessibilidade) return false;
+                return accessibilityFilters.every(f => i.acessibilidade.includes(f));
+            });
+        }
+
+        // 3. Filtro de Busca por Palavra-chave / Linguagem Natural
+        if (searchQuery.trim().length > 0) {
+            const q = searchQuery.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            list = list.filter(i => {
+                const nome = (i.nome || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const desc = (i.descricao || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const cat = (i.categoria || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                return nome.includes(q) || desc.includes(q) || cat.includes(q);
+            });
+        }
+
+        // 4. Filtro de Duração
+        if (maxDuration < 360) {
+            list = list.filter(i => !i.tempo_medio || i.tempo_medio <= maxDuration);
+        }
+
+        // 5. Cálculo de Distâncias
+        list.forEach(i => {
+            if (userLoc && i.lat && i.lng) {
+                const dist = window.LocationService.calculateDistanceKm(userLoc.lat, userLoc.lng, i.lat, i.lng);
+                i.distancia_km = dist;
+                i.distancia_formatada = window.LocationService.formatDistance(dist);
+            } else {
+                i.distancia_km = null;
+                i.distancia_formatada = null;
+            }
+        });
+
+        // 6. Ordenação
+        if (sortOrder === 'distancia') {
+            list.sort((a, b) => (a.distancia_km ?? 9999) - (b.distancia_km ?? 9999));
+        } else if (sortOrder === 'rating') {
+            list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        } else if (sortOrder === 'nome') {
+            list.sort((a, b) => a.nome.localeCompare(b.nome));
+        }
+
+        // Atualizar Contador
+        if (contadorResultados) contadorResultados.textContent = list.length;
+
+        // Renderizar Cards
+        if (list.length === 0) {
+            gridAtrativos.innerHTML = '';
+            emptyState.classList.remove('d-none');
+        } else {
+            emptyState.classList.add('d-none');
+            gridAtrativos.innerHTML = list.map(item => `
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="card h-100 border-0 rounded-4 overflow-hidden shadow-sm bg-white card-place">
+                        <div class="place-img-wrapper">
+                            <img src="${item.imagem || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80'}" alt="${item.nome}" loading="lazy">
+                            <div class="position-absolute top-0 start-0 m-3">
+                                <span class="badge bg-dark bg-opacity-75 text-white rounded-pill px-2.5 py-1 small fw-semibold" style="backdrop-filter: blur(4px);">
+                                    ${item.categoria || 'Atrativo'}
+                                </span>
+                            </div>
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <span class="badge bg-warning text-dark rounded-pill px-2.5 py-1 small fw-bold shadow-sm">
+                                    <i class="bi bi-star-fill small"></i> ${item.rating || '4.8'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body p-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <h3 class="fw-bold text-dark fs-6 mb-1">${item.nome}</h3>
+                                <p class="text-muted small mb-2" style="font-size: 0.78rem; line-height: 1.3;">
+                                    ${item.descricao ? item.descricao.substring(0, 85) + '...' : ''}
+                                </p>
+                            </div>
+                            <div class="pt-2 border-top d-flex align-items-center justify-content-between mt-2">
+                                <span class="small text-secondary fw-semibold">
+                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> ${item.distancia_formatada || 'Próximo'}
+                                </span>
+                                <a href="/atrativo/${item.id}" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold">
+                                    Conhecer <i class="bi bi-arrow-right small"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
-                @endforeach
-            </div>
-        </section>
+                </div>
+            `).join('');
+        }
+    }
 
-        <!-- SEÇÃO 2: BANNER -->
-        <section>
-            <div class="banner-experiencias">
-                <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 2.5rem; margin-bottom: 15px;"></i>
-                <h2>PLANEJE SEU PRÓXIMO LOCAL!</h2>
-                <p>Deixe nossa inteligência artificial montar o dia perfeito para você.</p>
-                <button class="btn-banner">CRIAR ROTEIRO PERSONALIZADO</button>
-            </div>
-        </section>
-
-        <!-- SEÇÃO 3 -->
-        <section>
-            <div class="section-header">
-                <h2>Atividades Gratuitas</h2>
-            </div>
-            <div class="free-scroll">
-                @foreach ($atividades_gratuitas as $atividade)
-                    <div class="free-card">
-                        <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=300&q=80&sig={{ $atividade->id }}" alt="{{ $atividade->nome }}">
-                        <div class="content">
-                            <h4>{{ $atividade->nome }}</h4>
-                            <a href="/atrativo/{{ $atividade->id }}" style="text-decoration:none;"><button style="width:100%;">Ver Detalhes</button></a>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </section>
-
-        <!-- SEÇÃO 4: EVENTOS -->
-        @if(isset($eventos) && $eventos->count() > 0)
-        <section>
-            <div class="section-header">
-                <h2>Eventos Próximos</h2>
-            </div>
-            <div class="free-scroll">
-                @foreach ($eventos as $evento)
-                    <div class="free-card" style="border-top: 4px solid var(--blue-accent);">
-                        <div style="padding: 15px; background: rgba(0, 102, 204, 0.05); text-align: center; border-bottom: 1px solid var(--border-light);">
-                            <span style="font-size: 0.85rem; color: var(--blue-accent); font-weight: 700; text-transform: uppercase;">
-                                <i class="fa-regular fa-calendar-check"></i> {{ \Carbon\Carbon::parse($evento->inicio)->format('d M, Y') }}
-                            </span>
-                        </div>
-                        <div class="content">
-                            <h4 style="margin-bottom: 5px;">{{ $evento->nome }}</h4>
-                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                {{ $evento->descricao }}
-                            </p>
-                            <a href="#" style="text-decoration:none;"><button style="width:100%; border-color: var(--blue-accent); color: var(--blue-accent);">Inscrever-se</button></a>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </section>
-        @endif
-    </div>
-</div>
-@endsection
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
-<script>
-    // 1. Inicializa o Calendário de verdade
-    flatpickr("#filtro-datas", {
-        mode: "range",
-        locale: "pt",
-        dateFormat: "d/m/Y",
-        placeholder: "Selecione as datas..."
+    // Eventos de Busca
+    inputBusca?.addEventListener('input', function() {
+        searchQuery = this.value;
+        if (searchQuery.length > 0) {
+            btnLimparBusca.classList.remove('d-none');
+        } else {
+            btnLimparBusca.classList.add('d-none');
+        }
+        renderAtrativos();
     });
 
-    // =========================================================================
-    // INSTRUÇÕES PARA EXTRAIR DADOS DO FILTRO (DEV)
-    // =========================================================================
-    document.querySelector('.btn-pesquisar').addEventListener('click', function() {
-        // A. Buscar Categorias Selecionadas
-        const categorias = Array.from(document.querySelectorAll('#filter-categories input:checked'))
-                                .map(el => el.value);
-
-        // B. Buscar Valor do Orçamento
-        const orcamento = document.querySelector('input[type=range]').value;
-
-        // C. Buscar Texto da Pesquisa Inteligente
-        const queryBusca = document.querySelector('.search-box textarea').value;
-
-        // D. Buscar Datas (ex: "10/08/2026 ao 15/08/2026")
-        const datas = document.querySelector('#filtro-datas').value;
-
-        // E. Buscar Acessibilidade
-        const acessibilidade = Array.from(document.querySelectorAll('.filter-section:nth-of-type(4) .checkbox-grid input:checked'))
-                                    .map(el => el.parentElement.textContent.trim());
-
-        // F. Exemplo de objeto JSON para enviar para a API (Axios/Fetch)
-        const payload = {
-            busca: queryBusca,
-            categorias: categorias,
-            orcamento_max: orcamento,
-            datas: datas,
-            acessibilidade: acessibilidade
-        };
-
-        // Você pode enviar o "payload" para a rota API do Laravel aqui
-        console.log("DADOS PRONTOS PARA API:", payload);
-        alert("Abra o Console (F12) para ver os dados dos filtros organizados em JSON!");
+    btnLimparBusca?.addEventListener('click', function() {
+        inputBusca.value = '';
+        searchQuery = '';
+        btnLimparBusca.classList.add('d-none');
+        renderAtrativos();
     });
+
+    // Eventos de Categorias
+    chipsContainer?.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            if (this.hasAttribute('data-bs-toggle')) return;
+            chipsContainer.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            currentCategory = this.getAttribute('data-cat');
+            renderAtrativos();
+        });
+    });
+
+    // Eventos de Ordenação
+    document.querySelectorAll('.opt-ordem').forEach(opt => {
+        opt.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.opt-ordem').forEach(o => o.classList.remove('active'));
+            this.classList.add('active');
+            sortOrder = this.getAttribute('data-ordem');
+            document.getElementById('label-ordem').textContent = this.textContent;
+            renderAtrativos();
+        });
+    });
+
+    // Filtros de Acessibilidade no Offcanvas
+    document.getElementById('btn-aplicar-offcanvas')?.addEventListener('click', function() {
+        accessibilityFilters = [];
+        document.querySelectorAll('.filter-check-ac:checked').forEach(chk => {
+            accessibilityFilters.push(chk.value);
+        });
+        maxDuration = parseInt(rangeDuracao.value, 10);
+        renderAtrativos();
+    });
+
+    rangeDuracao?.addEventListener('input', function() {
+        const val = parseInt(this.value, 10);
+        badgeDuracao.textContent = val >= 360 ? 'Qualquer tempo' : `Até ${Math.floor(val/60)}h ${val%60 > 0 ? (val%60)+'min' : ''}`;
+    });
+
+    document.getElementById('btn-limpar-offcanvas')?.addEventListener('click', function() {
+        document.querySelectorAll('.filter-check-ac').forEach(chk => chk.checked = false);
+        accessibilityFilters = [];
+        rangeDuracao.value = 360;
+        badgeDuracao.textContent = 'Qualquer tempo';
+        maxDuration = 360;
+        renderAtrativos();
+    });
+
+    document.getElementById('btn-reset-filtros')?.addEventListener('click', function() {
+        inputBusca.value = '';
+        searchQuery = '';
+        currentCategory = 'todos';
+        accessibilityFilters = [];
+        chipsContainer?.querySelectorAll('.filter-chip').forEach(c => {
+            if (c.getAttribute('data-cat') === 'todos') c.classList.add('active');
+            else c.classList.remove('active');
+        });
+        renderAtrativos();
+    });
+
+    // Ouvir troca de cidade global
+    window.addEventListener('turismo:location-changed', renderAtrativos);
+
+    renderAtrativos();
+});
 </script>
 @endpush
+@endsection

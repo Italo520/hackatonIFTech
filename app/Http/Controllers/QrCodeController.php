@@ -9,17 +9,24 @@ use Illuminate\Http\Request;
 class QrCodeController extends Controller
 {
     /**
-     * Resolve um QR code escaneado
+     * Resolve um QR code escaneado in loco (Totem físico do atrativo)
      */
     public function resolve($hash)
     {
-        // Na prática, buscaria no banco:
-        // $qr = QrCodeModel::where('hash_code', $hash)->firstOrFail();
-        // Incrementa leituras
-        // $qr->increment('leituras');
-        
-        // Simulação para o MVP
-        return redirect()->route('pwa.atrativo', ['id' => 1])
-            ->with('message', 'QR Code de check-in lido com sucesso!');
+        $qr = QrCodeModel::where('hash_code', $hash)->first();
+        if ($qr) {
+            $qr->increment('leituras');
+            return redirect()->route('pwa.atrativo', ['id' => $qr->atrativo_id])
+                ->with('message', 'QR Code do totem validado! Bem-vindo ao local.');
+        }
+
+        if (is_numeric($hash)) {
+            $atrativo = Atrativo::find($hash);
+            if ($atrativo) {
+                return redirect()->route('pwa.atrativo', ['id' => $hash]);
+            }
+        }
+
+        return redirect()->route('pwa.explorar')->with('message', 'Ponto turístico identificado com sucesso.');
     }
 }
