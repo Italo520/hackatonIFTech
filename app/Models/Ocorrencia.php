@@ -13,7 +13,10 @@ class Ocorrencia extends Model
 
     protected $fillable = [
         'tipo',
+        'entidade_id',
+        'entidade_type',
         'local_texto',
+        'local',
         'geo',
         'gravidade',
         'descricao',

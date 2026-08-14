@@ -11,8 +11,10 @@ return new class extends Migration
         Schema::create('ocorrencias', function (Blueprint $table) {
             $table->id();
             $table->string('tipo');
-            $table->string('entidade')->nullable();
+            $table->nullableMorphs('entidade');
+            $table->string('local_texto')->nullable();
             $table->string('local')->nullable();
+            $table->json('geo')->nullable();
             $table->string('gravidade')->default('baixa'); // baixa, media, alta
             $table->text('descricao');
             $table->string('status_atendimento')->default('aberto');

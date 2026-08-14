@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('avaliacoes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->morphs('avaliable');
+            $table->nullableMorphs('entidade');
             $table->integer('nota');
             $table->text('comentario')->nullable();
             $table->string('sentimento')->nullable(); // positivo, negativo, neutro

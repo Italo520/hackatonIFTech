@@ -13,6 +13,8 @@ class Avaliacao extends Model
 
     protected $fillable = [
         'user_id',
+        'entidade_id',
+        'entidade_type',
         'nota',
         'comentario',
         'sentimento',
