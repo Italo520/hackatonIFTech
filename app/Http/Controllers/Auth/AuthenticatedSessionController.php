@@ -28,7 +28,17 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = Auth::user();
+
+        if ($user && in_array($user->role, ['super_admin', 'prefeito', 'secretario', 'gestor_conteudo', 'gestor_cadastros', 'atendente'])) {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        }
+
+        if ($user && $user->role === 'empreendedor') {
+            return redirect()->intended(route('empreendedor.dashboard', absolute: false));
+        }
+
+        return redirect()->intended(route('pwa.home', absolute: false));
     }
 
     /**
@@ -42,6 +52,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/login')->with('status', 'Você encerrou sua sessão no painel com sucesso.');
+        return redirect('/')->with('status', 'Você encerrou sua sessão com sucesso.');
     }
 }

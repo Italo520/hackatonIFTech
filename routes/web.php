@@ -62,6 +62,7 @@ Route::get('/qr/{hash}', [QrCodeController::class, 'resolve'])->name('qr.resolve
 Route::get('/parceiro/cadastro', [EmpreendedorController::class, 'create'])->name('empreendedor.create');
 Route::post('/parceiro/cadastro', [EmpreendedorController::class, 'store'])->name('empreendedor.store');
 Route::get('/parceiro/painel', [EmpreendedorController::class, 'dashboard'])->name('empreendedor.dashboard');
+Route::post('/parceiro/atrativo', [EmpreendedorController::class, 'storeAtrativo'])->name('empreendedor.atrativo.store');
 
 /*
 |--------------------------------------------------------------------------

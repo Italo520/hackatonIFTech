@@ -54,8 +54,17 @@
 
         <!-- Botão Entrar -->
         <button type="submit" class="btn btn-primary w-100 py-2.5 rounded-3 fw-bold shadow-sm mt-1">
-            <i class="bi bi-box-arrow-in-right me-1"></i> Acessar Painel
+            <i class="bi bi-box-arrow-in-right me-1"></i> Acessar Painel / Entrar
         </button>
+
+        <div class="text-center mt-2 d-flex justify-content-between align-items-center">
+            <a href="{{ route('register') }}" class="small text-decoration-none text-primary fw-semibold">
+                Criar Conta de Turista
+            </a>
+            <a href="{{ route('empreendedor.create') }}" class="small text-decoration-none text-warning-emphasis">
+                Cadastrar Empresa
+            </a>
+        </div>
     </form>
 
     <!-- Contas de Demonstração Rápidas -->
@@ -72,6 +81,9 @@
             </button>
             <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-1 demo-login-btn" style="font-size: 0.72rem;" data-email="empreendedor@demo.com" data-pass="password" title="Empreendedor">
                 <i class="bi bi-shop text-warning"></i> Empreendedor
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-1 demo-login-btn" style="font-size: 0.72rem;" data-email="turista@demo.com" data-pass="password" title="Turista Oficial">
+                <i class="bi bi-person-fill text-info"></i> Turista
             </button>
         </div>
     </div>

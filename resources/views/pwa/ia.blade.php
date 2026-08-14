@@ -48,6 +48,24 @@
         </div>
 
         <div id="chat-messages-container" class="d-flex flex-column gap-3"></div>
+
+        @guest
+            <div class="card border-0 rounded-4 shadow-sm p-4 text-center my-2" style="background: linear-gradient(135deg, rgba(0,95,115,0.06), rgba(10,147,150,0.12)); border: 1px dashed rgba(0,95,115,0.3) !important;">
+                <div class="rounded-circle d-inline-flex p-3 mx-auto mb-2 text-primary" style="background: rgba(0,95,115,0.1); width: 52px; height: 52px; align-items: center; justify-content: center;">
+                    <i class="bi bi-stars fs-3"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">Guia IA com Inteligência Local</h5>
+                <p class="text-secondary small mb-3">Crie sua conta gratuita de <strong>Turista</strong> ou faça login para conversar em tempo real com a IA, pedir sugestões sob medida e salvar roteiros.</p>
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                    <a href="{{ route('login') }}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Fazer Login
+                    </a>
+                    <a href="{{ route('register') }}" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold bg-white">
+                        <i class="bi bi-person-plus me-1"></i> Criar Conta Grátis
+                    </a>
+                </div>
+            </div>
+        @endguest
     </div>
 
     <!-- View Gerar Roteiro -->
@@ -75,9 +93,18 @@
                 </select>
             </div>
 
-            <button class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm" id="btn-gerar-roteiro-ia">
-                <i class="bi bi-stars me-1"></i> Gerar Roteiro com IA
-            </button>
+            @auth
+                <button class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm" id="btn-gerar-roteiro-ia">
+                    <i class="bi bi-stars me-1"></i> Gerar Roteiro com IA
+                </button>
+            @else
+                <div class="text-center p-3 bg-light rounded-4 border">
+                    <p class="small text-muted mb-2">Faça login para gerar roteiros personalizados automaticamente.</p>
+                    <a href="{{ route('login') }}" class="btn btn-primary rounded-pill px-4 py-2 btn-sm fw-bold">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Entrar para Gerar Roteiro
+                    </a>
+                </div>
+            @endauth
 
             <div id="roteiro-resultado-box" class="mt-4 d-none"></div>
         </div>
@@ -85,15 +112,32 @@
 
     <!-- Input Area -->
     <div class="p-3 bg-white border-top pb-4" id="chat-input-wrapper">
-        <form id="ia-chat-form" class="position-relative d-flex align-items-center">
-            <input type="text" id="ia-prompt-input" class="form-control rounded-pill bg-light border-0 ps-4 pe-5 shadow-none" placeholder="Pergunte sobre praias, locais, dicas..." style="height: 48px;" required>
-            <button type="submit" id="ia-send-btn" class="btn btn-primary position-absolute end-0 rounded-circle d-flex align-items-center justify-content-center me-1" style="width: 40px; height: 40px; z-index: 5;">
-                <i class="bi bi-send-fill small"></i>
-            </button>
-        </form>
-        <div class="text-center mt-2">
-            <span class="text-secondary" style="font-size: 0.68rem;">Recomendações geradas com base na sua localização atual.</span>
-        </div>
+        @auth
+            <form id="ia-chat-form" class="position-relative d-flex align-items-center">
+                <input type="text" id="ia-prompt-input" class="form-control rounded-pill bg-light border-0 ps-4 pe-5 shadow-none" placeholder="Pergunte sobre praias, locais, dicas..." style="height: 48px;" required>
+                <button type="submit" id="ia-send-btn" class="btn btn-primary position-absolute end-0 rounded-circle d-flex align-items-center justify-content-center me-1" style="width: 40px; height: 40px; z-index: 5;">
+                    <i class="bi bi-send-fill small"></i>
+                </button>
+            </form>
+            <div class="text-center mt-2">
+                <span class="text-secondary" style="font-size: 0.68rem;">Recomendações geradas com base na sua localização atual.</span>
+            </div>
+        @else
+            <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between p-2.5 px-3 rounded-4 bg-light border gap-2">
+                <div class="d-flex align-items-center gap-2 text-muted small">
+                    <i class="bi bi-lock-fill text-primary fs-5"></i>
+                    <span>Cadastre-se como <strong>Turista</strong> para conversar com o Guia IA.</span>
+                </div>
+                <div class="d-flex gap-1">
+                    <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 fw-bold text-nowrap">
+                        Entrar
+                    </a>
+                    <a href="{{ route('register') }}" class="btn btn-primary btn-sm rounded-pill px-3 py-1 fw-bold text-nowrap shadow-sm">
+                        Cadastrar Grátis
+                    </a>
+                </div>
+            </div>
+        @endauth
     </div>
 </div>
 @endsection
@@ -307,14 +351,26 @@
             }
         }
 
-        chatForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleSend(promptInput.value);
-        });
+        if (chatForm && promptInput) {
+            chatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleSend(promptInput.value);
+            });
+        }
 
         document.querySelectorAll('.suggestion-chip').forEach(chip => {
             chip.addEventListener('click', function() {
-                handleSend(this.textContent.trim());
+                const text = this.textContent.trim();
+                @guest
+                    const guestCard = document.querySelector('#view-chat .card');
+                    if (guestCard) {
+                        guestCard.scrollIntoView({ behavior: 'smooth' });
+                        guestCard.classList.add('shadow', 'border-primary');
+                        setTimeout(() => guestCard.classList.remove('shadow', 'border-primary'), 1500);
+                    }
+                @else
+                    handleSend(text);
+                @endguest
             });
         });
 

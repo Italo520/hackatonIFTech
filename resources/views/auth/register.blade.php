@@ -1,4 +1,9 @@
 <x-guest-layout>
+    <div class="text-center mb-3">
+        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 fw-semibold small">Conta de Turista</span>
+        <p class="text-muted small mt-1 mb-0">Crie seu acesso para conversar com o Guia IA</p>
+    </div>
+
     @if ($errors->any())
         <div class="alert alert-danger alert-dismissible fade show rounded-3 small mb-3" role="alert">
             <ul class="mb-0 ps-3">
@@ -50,12 +55,15 @@
         </div>
 
         <button type="submit" class="btn btn-primary w-100 py-2.5 rounded-3 fw-bold shadow-sm mt-2">
-            Criar Conta
+            <i class="bi bi-person-check-fill me-1"></i> Criar Conta de Turista
         </button>
 
-        <div class="text-center mt-2">
+        <div class="text-center mt-2 d-flex justify-content-between align-items-center">
             <a href="{{ route('login') }}" class="small text-decoration-none text-primary">
-                Já possui uma conta? Entrar
+                Já tem conta? Entrar
+            </a>
+            <a href="{{ route('empreendedor.create') }}" class="small text-decoration-none text-warning-emphasis fw-semibold">
+                É Empreendedor?
             </a>
         </div>
     </form>

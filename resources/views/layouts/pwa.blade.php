@@ -203,9 +203,139 @@
                     <i class="bi bi-download"></i>
                     <span>Instalar</span>
                 </button>
-                <button class="btn btn-light rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 44px; height: 44px; border: none; background: rgba(0,0,0,0.05);" data-bs-toggle="modal" data-bs-target="#locationModal" title="Ver localização e busca avançada">
+                <button class="btn btn-light rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 38px; height: 38px; border: none; background: rgba(0,0,0,0.05);" data-bs-toggle="modal" data-bs-target="#locationModal" title="Ver localização e busca avançada">
                     <i class="bi bi-compass fs-5 text-primary"></i>
                 </button>
+
+                <!-- Profile / Access Component -->
+                @guest
+                    <div class="dropdown">
+                        <button class="btn btn-primary btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1 shadow-sm dropdown-toggle text-decoration-none" type="button" id="guestUserDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.82rem; min-height: 38px;">
+                            <i class="bi bi-person-circle fs-6"></i>
+                            <span>Entrar</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2 mt-2" aria-labelledby="guestUserDropdown" style="min-width: 240px; border: 1px solid rgba(0,0,0,0.08) !important;">
+                            <li class="px-3 pt-2 pb-1">
+                                <div class="fw-bold text-dark small">Acesse sua Conta</div>
+                                <div class="text-muted" style="font-size: 0.72rem;">Turistas, Gestores e Parceiros</div>
+                            </li>
+                            <li><hr class="dropdown-divider my-2"></li>
+                            <li>
+                                <a class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 text-primary fw-semibold" href="{{ route('login') }}">
+                                    <i class="bi bi-box-arrow-in-right fs-5"></i>
+                                    <div>
+                                        <div class="small">Entrar / Fazer Login</div>
+                                        <div class="text-muted" style="font-size: 0.68rem;">Acesse seu painel ou perfil</div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 text-dark" href="{{ route('register') }}">
+                                    <i class="bi bi-person-plus fs-5 text-secondary"></i>
+                                    <div>
+                                        <div class="small fw-semibold">Criar Conta de Turista</div>
+                                        <div class="text-muted" style="font-size: 0.68rem;">Para usar o Chat com IA</div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider my-2"></li>
+                            <li>
+                                <a class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 text-dark" href="{{ route('empreendedor.create') }}">
+                                    <i class="bi bi-shop fs-5 text-warning"></i>
+                                    <div>
+                                        <div class="small fw-semibold">Área do Empreendedor</div>
+                                        <div class="text-muted" style="font-size: 0.68rem;">Cadastrar estabelecimento / pousada</div>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                @endguest
+
+                @auth
+                    <div class="dropdown">
+                        <button class="btn btn-light rounded-pill p-1 ps-2 pe-3 d-flex align-items-center gap-2 shadow-sm border dropdown-toggle" type="button" id="authUserDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="min-height: 38px;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" style="width: 28px; height: 28px; font-size: 0.75rem; background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary));">
+                                {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                            </div>
+                            <div class="text-start d-none d-sm-block" style="line-height: 1.1;">
+                                <div class="fw-bold text-dark text-truncate" style="max-width: 100px; font-size: 0.78rem;">{{ explode(' ', auth()->user()->name)[0] }}</div>
+                                <div class="text-muted" style="font-size: 0.65rem; text-transform: uppercase;">
+                                    @if(auth()->user()->role === 'super_admin') Admin
+                                    @elseif(str_starts_with(auth()->user()->role, 'gestor') || in_array(auth()->user()->role, ['secretario', 'prefeito'])) Gestor
+                                    @elseif(auth()->user()->role === 'empreendedor') Parceiro
+                                    @else Turista @endif
+                                </div>
+                            </div>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2 mt-2" aria-labelledby="authUserDropdown" style="min-width: 260px; border: 1px solid rgba(0,0,0,0.08) !important;">
+                            <li class="px-3 pt-2 pb-2 border-bottom">
+                                <div class="fw-bold text-dark small text-truncate">{{ auth()->user()->name }}</div>
+                                <div class="text-muted text-truncate" style="font-size: 0.72rem;">{{ auth()->user()->email }}</div>
+                                <div class="mt-1">
+                                    @if(auth()->user()->role === 'super_admin')
+                                        <span class="badge bg-primary rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">Super Administrador</span>
+                                    @elseif(str_starts_with(auth()->user()->role, 'gestor') || in_array(auth()->user()->role, ['secretario', 'prefeito']))
+                                        <span class="badge bg-success rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">Gestor Municipal</span>
+                                    @elseif(auth()->user()->role === 'empreendedor')
+                                        <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">Empreendedor Credenciado</span>
+                                    @else
+                                        <span class="badge bg-info-subtle text-info-emphasis border rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">Turista Oficial</span>
+                                    @endif
+                                </div>
+                            </li>
+
+                            @if(in_array(auth()->user()->role, ['super_admin', 'prefeito', 'secretario', 'gestor_conteudo', 'gestor_cadastros', 'atendente']))
+                                <li class="pt-2">
+                                    <a class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 bg-primary text-white fw-bold shadow-sm" href="{{ route('admin.dashboard') }}">
+                                        <i class="bi bi-speedometer2 fs-5"></i>
+                                        <div>
+                                            <div class="small">Painel de Gestão</div>
+                                            <div class="text-white-50" style="font-size: 0.68rem;">Administração do Município</div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 text-dark mt-1" href="{{ route('admin.prestadores.index') }}">
+                                        <i class="bi bi-patch-check-fill text-success fs-5"></i>
+                                        <span class="small fw-semibold">Fila de Homologação</span>
+                                    </a>
+                                </li>
+                            @elseif(auth()->user()->role === 'empreendedor')
+                                <li class="pt-2">
+                                    <a class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 bg-warning-subtle text-dark fw-bold border border-warning" href="{{ route('empreendedor.dashboard') }}">
+                                        <i class="bi bi-shop fs-5 text-warning-emphasis"></i>
+                                        <div>
+                                            <div class="small">Painel do Parceiro</div>
+                                            <div class="text-muted" style="font-size: 0.68rem;">Gerenciar Estabelecimento</div>
+                                        </div>
+                                    </a>
+                                </li>
+                            @else
+                                <li class="pt-2">
+                                    <a class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 text-primary fw-semibold" href="{{ route('pwa.ia') }}">
+                                        <i class="bi bi-robot fs-5"></i>
+                                        <div>
+                                            <div class="small">Assistente de Viagem IA</div>
+                                            <div class="text-muted" style="font-size: 0.68rem;">Acesso liberado</div>
+                                        </div>
+                                    </a>
+                                </li>
+                            @endif
+
+                            <li><hr class="dropdown-divider my-2"></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}" class="m-0">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 text-danger fw-semibold">
+                                        <i class="bi bi-box-arrow-right fs-5"></i>
+                                        <span class="small">Sair da Conta (Logout)</span>
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                @endauth
             </div>
         </div>
     </header>

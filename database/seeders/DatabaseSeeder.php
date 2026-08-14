@@ -250,5 +250,24 @@ class DatabaseSeeder extends Seeder
         UtilidadePublica::create(['nome' => 'Corpo de Bombeiros', 'telefone' => '193', 'ordem' => 3]);
         UtilidadePublica::create(['nome' => 'Hospital Municipal Darci João Bigaton', 'telefone' => '(67) 3255-1100', 'ordem' => 4]);
         UtilidadePublica::create(['nome' => 'Centro de Atendimento ao Turista (CAT)', 'telefone' => '(67) 3255-2160', 'ordem' => 5]);
+
+        // 8. Prestadores / Empreendedores Demo
+        $userEmpreendedor = User::where('email', 'empreendedor@demo.com')->first();
+        if ($userEmpreendedor) {
+            \App\Models\Prestador::create([
+                'user_id' => $userEmpreendedor->id,
+                'tipo' => 'hospedagem',
+                'dados' => [
+                    'nome_negocio' => 'Pousada Encanto das Águas',
+                    'telefone' => '(83) 98888-7766',
+                    'endereco' => 'Av. Beira Mar, 450, Cabo Branco, João Pessoa - PB',
+                    'municipio_id' => $municipioJampa->id,
+                ],
+                'documentos' => ['doc' => 'CNPJ 12.345.678/0001-90 | Cadastur 15.001.234/2026'],
+                'status' => 'pendente',
+                'selo_validado' => false,
+                'ultima_atualizacao' => now(),
+            ]);
+        }
     }
 }
