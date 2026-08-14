@@ -50,20 +50,29 @@ Route::prefix('v1/system')->group(function () {
         if ($request->get('key') !== config('app.key')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        config(['audit.console' => false]);
-        \App\Models\User::unsetEventDispatcher();
-        
-        $exitCode = \Illuminate\Support\Facades\Artisan::call('migrate:fresh', [
-            '--force' => true,
-            '--seed' => true,
-        ]);
-        $output = \Illuminate\Support\Facades\Artisan::output();
-        
-        return response()->json([
-            'success' => $exitCode === 0,
-            'exit_code' => $exitCode,
-            'output' => $output,
-        ]);
+        try {
+            config(['audit.console' => false]);
+            \App\Models\User::unsetEventDispatcher();
+            
+            $exitCode = \Illuminate\Support\Facades\Artisan::call('migrate:fresh', [
+                '--force' => true,
+                '--seed' => true,
+            ]);
+            $output = \Illuminate\Support\Facades\Artisan::output();
+            
+            return response()->json([
+                'success' => $exitCode === 0,
+                'exit_code' => $exitCode,
+                'output' => $output,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ], 200);
+        }
     });
 });
 
