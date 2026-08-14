@@ -99,6 +99,9 @@
 @endsection
 
 @push('scripts')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const chatContainer = document.getElementById('chat-messages-container');
@@ -111,6 +114,22 @@
         const viewChat = document.getElementById('view-chat');
         const viewRoteiro = document.getElementById('view-roteiro');
         const chatInputWrapper = document.getElementById('chat-input-wrapper');
+
+        // Histórico de Conversa
+        let chatHistory = [];
+
+        // Função TTS
+        window.speakText = function(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const cleanText = text.replace(/\*\*/g, '').replace(/<[^>]*>?/gm, '');
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'pt-BR';
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('Seu navegador não suporta leitura em voz alta.');
+            }
+        };
 
         // Alternar abas
         tabChatBtn.addEventListener('click', function() {
@@ -133,10 +152,27 @@
             chatInputWrapper.classList.add('d-none');
         });
 
-        function appendMessage(text, isUser = false, fontes = []) {
+        function renderFontes(fontes) {
+            if (!fontes || fontes.length === 0) return '';
+            return `
+                <div class="mt-3 pt-2 border-top small text-secondary">
+                    <strong class="d-block mb-1 text-dark" style="font-size: 0.75rem;">Sugestões de locais:</strong>
+                    <div class="d-flex flex-column gap-1">
+                        ${fontes.map(f => `
+                            <a href="/atrativo/${f.id}" class="badge bg-light text-primary border text-decoration-none text-start p-2 rounded-3">
+                                <i class="bi bi-geo-alt-fill text-warning me-1"></i> ${f.nome} <span class="text-muted">(${f.cidade || f.tipo})</span>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function appendMessage(text, isUser = false, fontes = [], msgId = null) {
             const msgDiv = document.createElement('div');
             msgDiv.className = `d-flex gap-2 w-100 ${isUser ? 'align-self-end flex-row-reverse' : ''}`;
             msgDiv.style.maxWidth = '92%';
+            if (msgId) msgDiv.id = msgId;
 
             if (isUser) {
                 msgDiv.innerHTML = `
@@ -145,32 +181,20 @@
                     </div>
                 `;
             } else {
-                let fontesHtml = '';
-                if (fontes && fontes.length > 0) {
-                    fontesHtml = `
-                        <div class="mt-3 pt-2 border-top small text-secondary">
-                            <strong class="d-block mb-1 text-dark" style="font-size: 0.75rem;">Sugestões de locais:</strong>
-                            <div class="d-flex flex-column gap-1">
-                                ${fontes.map(f => `
-                                    <a href="/explorar" class="badge bg-light text-primary border text-decoration-none text-start p-2 rounded-3">
-                                        <i class="bi bi-geo-alt-fill text-warning me-1"></i> ${f.nome} <span class="text-muted">(${f.cidade || f.tipo})</span>
-                                    </a>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // Transforma **negrito** em tag <strong>
-                const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                const fontesHtml = renderFontes(fontes);
+                const formattedText = typeof marked !== 'undefined' ? marked.parse(text) : text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                const safeText = text ? escapeHtml(text).replace(/'/g, "\\'") : '';
 
                 msgDiv.innerHTML = `
                     <div class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width: 34px; height: 34px; background-color: #005f73; margin-top: 4px;">
                         <i class="bi bi-robot small"></i>
                     </div>
-                    <div class="bg-white p-3 shadow-sm border text-dark w-100" style="border-radius: 18px; border-top-left-radius: 4px; font-size: 0.9rem;">
-                        <div>${formattedText}</div>
-                        ${fontesHtml}
+                    <div class="bg-white p-3 shadow-sm border text-dark w-100 position-relative" style="border-radius: 18px; border-top-left-radius: 4px; font-size: 0.9rem;">
+                        <button onclick="window.speakText('${safeText}')" class="btn btn-sm btn-light border rounded-circle position-absolute top-0 end-0 m-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px; padding: 0;">
+                            <i class="bi bi-volume-up-fill text-primary" style="font-size: 0.9rem;"></i>
+                        </button>
+                        <div id="${msgId ? msgId + '-content' : ''}" class="pt-1 pe-4">${formattedText}</div>
+                        <div id="${msgId ? msgId + '-fontes' : ''}">${fontesHtml}</div>
                     </div>
                 `;
             }
@@ -189,6 +213,9 @@
 
             appendMessage(pergunta, true);
             promptInput.value = '';
+
+            chatHistory.push({ role: 'user', text: pergunta });
+            if (chatHistory.length > 8) chatHistory.shift(); // Manter apenas as últimas 8 mensagens (4 trocas)
 
             // Loading message
             const loadingDiv = document.createElement('div');
@@ -213,24 +240,64 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json',
+                        'Accept': 'text/event-stream',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                     },
                     body: JSON.stringify({
                         pergunta: pergunta,
-                        cidade: savedLoc?.city || 'João Pessoa',
-                        uf: savedLoc?.uf || 'PB',
-                        lat: savedLoc?.lat || -7.1153,
-                        lng: savedLoc?.lng || -34.8641,
-                        idioma: 'pt-BR'
+                        idioma: 'pt-BR',
+                        userLocation: savedLoc || {},
+                        historico: chatHistory
                     })
                 });
 
                 document.getElementById('ai-loading-indicator')?.remove();
 
                 if (res.ok) {
-                    const data = await res.json();
-                    appendMessage(data.resposta || 'Aqui estão algumas sugestões!', false, data.fontes || []);
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    let accumulatedText = "";
+                    let fontesData = [];
+                    
+                    const msgId = 'msg-' + Date.now();
+                    appendMessage('', false, [], msgId);
+                    const msgContentDiv = document.getElementById(msgId + '-content');
+                    const msgFontesDiv = document.getElementById(msgId + '-fontes');
+
+                    let isDone = false;
+                    while (!isDone) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        
+                        const chunk = decoder.decode(value, {stream: true});
+                        const lines = chunk.split('\n');
+                        
+                        for (let i = 0; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            if (line.startsWith('event: done')) {
+                                isDone = true;
+                            } else if (line.startsWith('data: ')) {
+                                const dataStr = line.substring(6);
+                                if (dataStr === 'done' || dataStr === '{}') continue;
+                                
+                                try {
+                                    const dataObj = JSON.parse(dataStr);
+                                    if (dataObj.fontes) {
+                                        fontesData = dataObj.fontes;
+                                        msgFontesDiv.innerHTML = renderFontes(fontesData);
+                                    } else if (dataObj.chunk) {
+                                        accumulatedText += dataObj.chunk + ' ';
+                                        msgContentDiv.innerHTML = typeof marked !== 'undefined' ? marked.parse(accumulatedText) : accumulatedText;
+                                        viewChat.scrollTop = viewChat.scrollHeight;
+                                    }
+                                } catch (e) {
+                                    // ignore parse errors for partial chunks if any
+                                }
+                            }
+                        }
+                    }
+                    
+                    chatHistory.push({ role: 'model', text: accumulatedText });
                 } else {
                     appendMessage('Desculpe, tive uma oscilação na consulta da IA. Mas você pode conferir as opções na aba Explorar!', false);
                 }
@@ -287,25 +354,69 @@
 
                 if (res.ok) {
                     const data = await res.json();
+                    let itensHtml = '';
+                    if (data.itens && data.itens.length > 0) {
+                        data.itens.forEach(item => {
+                            itensHtml += `
+                                <div class="bg-white p-3 rounded-3 small shadow-sm border-start border-4 border-primary">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="text-dark"><i class="bi bi-geo-alt text-primary me-1"></i> ${item.nome}</strong>
+                                        <span class="badge bg-light text-secondary"><i class="bi bi-clock me-1"></i> ${item.tempo_estimado} min</span>
+                                    </div>
+                                    <span class="text-muted" style="font-size: 0.75rem;">Recomendado pela IA</span>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        itensHtml = '<div class="alert alert-warning py-2 small">Nenhum local específico foi encontrado, mas você pode explorar a região livremente!</div>';
+                    }
+
                     box.innerHTML = `
-                        <div class="alert alert-success rounded-4 border-0 shadow-sm p-3">
-                            <h4 class="fw-bold fs-6 mb-1"><i class="bi bi-check-circle-fill me-1"></i> ${data.titulo}</h4>
-                            <p class="small text-secondary mb-2">Duração estimada: ${data.duracao} minutos em ${data.cidade}</p>
-                            <hr class="my-2">
+                        <div class="alert alert-success rounded-4 border-0 shadow-sm p-3" style="background-color: #f8f9fa;">
+                            <h4 class="fw-bold fs-6 mb-1 text-dark"><i class="bi bi-map-fill text-primary me-1"></i> ${data.titulo}</h4>
+                            <p class="small text-secondary mb-2">Duração: ${data.duracao} min | <i class="bi bi-cash"></i> Orçamento: R$ ${data.orcamento}</p>
+                            
+                            <!-- Mapa Leaflet Real -->
+                            <div id="mapa-roteiro-ia" class="w-100 bg-light border rounded-3 mt-3 shadow-inner" style="height: 200px; z-index: 1;"></div>
+
+                            <hr class="my-3 opacity-25">
                             <div class="d-flex flex-column gap-2 mt-2">
-                                <div class="bg-white p-2 rounded-3 small">
-                                    <strong>1. Manhã:</strong> Visita panorâmica aos pontos mais próximos do seu GPS
-                                </div>
-                                <div class="bg-white p-2 rounded-3 small">
-                                    <strong>2. Almoço:</strong> Parada gastronômica com culinária típica
-                                </div>
-                                <div class="bg-white p-2 rounded-3 small">
-                                    <strong>3. Tarde:</strong> Passeio histórico e pôr do sol
-                                </div>
+                                ${itensHtml}
                             </div>
-                            <a href="/roteiros" class="btn btn-dark w-100 rounded-pill btn-sm mt-3">Ver Roteiros Oficiais</a>
+                            <a href="/roteiros" class="btn btn-primary w-100 rounded-pill btn-sm mt-3 fw-bold shadow-sm">Salvar e Iniciar Roteiro</a>
                         </div>
                     `;
+
+                    // Inicializar o Leaflet Map se houver coordenadas
+                    setTimeout(() => {
+                        const mapContainer = document.getElementById('mapa-roteiro-ia');
+                        if (mapContainer && data.itens && data.itens.length > 0) {
+                            // Encontra a primeira coordenada válida
+                            const firstItem = data.itens.find(i => i.lat && i.lng);
+                            const center = firstItem ? [firstItem.lat, firstItem.lng] : [-7.1153, -34.8641];
+                            
+                            const map = L.map('mapa-roteiro-ia').setView(center, 13);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                maxZoom: 19,
+                                attribution: '© OpenStreetMap'
+                            }).addTo(map);
+
+                            // Adicionar Marcadores
+                            const bounds = [];
+                            data.itens.forEach((item, index) => {
+                                if (item.lat && item.lng) {
+                                    bounds.push([item.lat, item.lng]);
+                                    L.marker([item.lat, item.lng])
+                                     .bindPopup(`<b>${index + 1}. ${item.nome}</b><br>${item.tempo_estimado} min`)
+                                     .addTo(map);
+                                }
+                            });
+                            
+                            if (bounds.length > 1) {
+                                map.fitBounds(bounds, { padding: [20, 20] });
+                            }
+                        }
+                    }, 200);
                 }
             } catch (err) {
                 btn.disabled = false;
