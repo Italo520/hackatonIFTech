@@ -27,10 +27,10 @@ class IAController extends Controller
         ]);
 
         $userLocation = [
-            'cidade' => $request->input('cidade'),
-            'uf' => $request->input('uf'),
-            'lat' => $request->input('lat'),
-            'lng' => $request->input('lng'),
+            'cidade' => $request->input('cidade') ?? $request->input('userLocation.city') ?? $request->input('userLocation.cidade'),
+            'uf' => $request->input('uf') ?? $request->input('userLocation.state') ?? $request->input('userLocation.uf'),
+            'lat' => $request->input('lat') ?? $request->input('userLocation.lat'),
+            'lng' => $request->input('lng') ?? $request->input('userLocation.lng'),
         ];
 
         $historico = $request->input('historico', []);
