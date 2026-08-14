@@ -27,7 +27,7 @@ class SyncApiTest extends TestCase
         $response->assertStatus(200)
                  ->assertJsonPath('count', 1);
 
-        $this->assertDatabaseHas('avaliacaos', [
+        $this->assertDatabaseHas('avaliacoes', [
             'entidade_id' => 1,
             'nota' => 5,
             'origem_offline' => true
