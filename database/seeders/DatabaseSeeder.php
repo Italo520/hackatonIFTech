@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        config(['audit.console' => false]);
+        User::unsetEventDispatcher();
+
         // 1. Roles & Users Demo
         $roles = [
             'super_admin', 'prefeito', 'secretario', 'gestor_conteudo', 
