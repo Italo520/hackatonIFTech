@@ -63,7 +63,7 @@
                         </td>
                         <td class="text-end pe-4">
                             <div class="d-inline-flex gap-1 align-items-center">
-                                <a href="/roteiro/{{ $roteiro->id }}" class="btn btn-sm btn-light border rounded-pill px-3" target="_blank" title="Ver no PWA">
+                                <a href="/roteiro/{{ $roteiro->id }}?from=admin" class="btn btn-sm btn-light border rounded-pill px-3" title="Ver no PWA">
                                     <i class="bi bi-eye me-1"></i> Ver
                                 </a>
                                 <form action="{{ route('admin.roteiros.destroy', $roteiro->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este roteiro oficial?');">

@@ -123,7 +123,7 @@
                         </td>
                         <td class="text-end pe-4">
                             <div class="d-inline-flex gap-1 align-items-center">
-                                <a href="/atrativo/{{ $atrativo->id }}" class="btn btn-sm btn-light border rounded-circle p-2" target="_blank" title="Visualizar no PWA">
+                                <a href="/atrativo/{{ $atrativo->id }}?from=admin" class="btn btn-sm btn-light border rounded-circle p-2" title="Visualizar no PWA">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 <button type="button" class="btn btn-sm btn-light border rounded-circle p-2 text-primary" data-bs-toggle="modal" data-bs-target="#modalEditarAtrativo{{ $atrativo->id }}" title="Editar Atrativo">

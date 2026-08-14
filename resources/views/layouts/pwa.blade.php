@@ -216,6 +216,18 @@
                 @endguest
 
                 @auth
+                    @if(in_array(auth()->user()->role ?? '', ['super_admin', 'prefeito', 'secretario', 'gestor_conteudo', 'gestor_cadastros', 'atendente']))
+                        <a href="{{ route('admin.dashboard') }}" class="btn btn-dark btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1.5 shadow-sm text-decoration-none border border-warning" title="Voltar para o Painel de Gestão" style="font-size: 0.78rem; background: #003844; min-height: 38px;">
+                            <i class="bi bi-speedometer2 text-warning"></i>
+                            <span class="d-none d-md-inline">Painel Gestão</span>
+                        </a>
+                    @elseif(auth()->user()->role === 'empreendedor')
+                        <a href="{{ route('empreendedor.dashboard') }}" class="btn btn-warning btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1.5 shadow-sm text-decoration-none text-dark border" title="Voltar para o Painel do Parceiro" style="font-size: 0.78rem; min-height: 38px;">
+                            <i class="bi bi-shop"></i>
+                            <span class="d-none d-md-inline">Meu Painel</span>
+                        </a>
+                    @endif
+
                     <div class="dropdown">
                         <button class="btn btn-light rounded-pill p-1 ps-2 pe-3 d-flex align-items-center gap-2 shadow-sm border dropdown-toggle" type="button" id="authUserDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="min-height: 38px;">
                             <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" style="width: 28px; height: 28px; font-size: 0.75rem; background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary));">

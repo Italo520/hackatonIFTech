@@ -15,11 +15,23 @@
 {{-- Header flutuante com botão Voltar, Favoritar e Compartilhar --}}
 <div class="position-fixed top-0 start-0 w-100 p-3 d-flex justify-content-between align-items-center z-3"
      style="pointer-events: none;">
-    <a href="{{ route('pwa.explorar') }}"
-       class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center p-0"
-       style="width: 44px; height: 44px; pointer-events: auto; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);">
-        <i class="bi bi-chevron-left text-dark fs-5"></i>
-    </a>
+    <div class="d-flex align-items-center gap-2" style="pointer-events: auto;">
+        @if(request('from') === 'admin' || (auth()->check() && in_array(auth()->user()->role ?? '', ['super_admin', 'prefeito', 'secretario', 'gestor_conteudo', 'gestor_cadastros', 'atendente'])))
+            <a href="{{ route('admin.atrativos.index') }}"
+               class="btn btn-dark rounded-pill shadow-lg d-flex align-items-center gap-2 px-3 py-2 fw-bold text-white text-decoration-none border border-warning"
+               style="background: #003844; backdrop-filter: blur(10px); font-size: 0.85rem;">
+                <i class="bi bi-arrow-left text-warning fs-5"></i>
+                <span>Voltar ao Painel Admin</span>
+            </a>
+        @else
+            <a href="{{ route('pwa.explorar') }}"
+               onclick="if(history.length > 1) { history.back(); return false; }"
+               class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center p-0"
+               style="width: 44px; height: 44px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);">
+                <i class="bi bi-chevron-left text-dark fs-5"></i>
+            </a>
+        @endif
+    </div>
 
     <div class="d-flex gap-2" style="pointer-events: auto;">
         <button class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center p-0"

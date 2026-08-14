@@ -2,6 +2,14 @@
 
 @section('content')
 <div class="px-3 py-3 sticky-top bg-light border-bottom" style="z-index: 1020;">
+    @if(request('from') === 'admin' || (auth()->check() && in_array(auth()->user()->role ?? '', ['super_admin', 'prefeito', 'secretario', 'gestor_conteudo', 'gestor_cadastros', 'atendente'])))
+        <div class="mb-2">
+            <a href="{{ route('admin.roteiros.index') }}" class="btn btn-dark rounded-pill btn-sm px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1.5 text-white border border-warning shadow-sm" style="background: #003844; font-size: 0.8rem;">
+                <i class="bi bi-arrow-left text-warning"></i>
+                <span>Voltar ao Painel de Roteiros</span>
+            </a>
+        </div>
+    @endif
     <div class="d-flex justify-content-between align-items-center mb-2">
         <div>
             <h1 class="fw-bold fs-5 mb-0">Roteiros Prontos</h1>

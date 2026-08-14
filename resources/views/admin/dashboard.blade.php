@@ -202,8 +202,8 @@
                                 @endif
                             </td>
                             <td class="text-end pe-4">
-                                <a href="/atrativo/{{ $atrativo->id }}" class="btn btn-sm btn-light border rounded-pill px-3" target="_blank" title="Ver no PWA">
-                                    <i class="bi bi-box-arrow-up-right me-1"></i> Ver
+                                <a href="/atrativo/{{ $atrativo->id }}?from=admin" class="btn btn-sm btn-light border rounded-pill px-3" title="Ver no PWA">
+                                    <i class="bi bi-eye me-1"></i> Ver
                                 </a>
                             </td>
                         </tr>
