@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-08-14T03:07:00Z",
+  "phase": "05",
+  "phase_name": "deployment-and-ci-stabilization",
+  "phase_dir": ".planning",
+  "plan": 1,
+  "task": 1,
+  "total_tasks": 1,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": 1, "name": "Implementar Geolocalização Real OpenStreetMap/Leaflet no PWA", "status": "done", "commit": "fc2a627"},
+    {"id": 2, "name": "Corrigir Suíte de Testes PHPUnit e CI no GitHub Actions", "status": "done", "commit": "ae39b97"},
+    {"id": 3, "name": "Validar e Monitorar Deploy do Container no Coolify", "status": "done", "commit": "0552466"}
+  ],
+  "remaining_tasks": [],
+  "blockers": [],
+  "human_actions_pending": [
+    {
+      "action": "Configurar GEMINI_API_KEY no Coolify",
+      "context": "Necessário caso queira usar respostas ao vivo do Gemini em produção em vez do fallback integrado.",
+      "blocking": false
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "Usar OpenStreetMap Nominatim para geocodificação reversa sem chaves pagas",
+      "rationale": "Permite detecção dinâmica da cidade do visitante (ex: João Pessoa/PB) com suporte a cache",
+      "phase": "05"
+    },
+    {
+      "decision": "Executar php artisan test com SQLite :memory: no GitHub Actions",
+      "rationale": "Garante execução isolada e rápida de 100% dos testes sem depender de banco de dados externo",
+      "phase": "05"
+    }
+  ],
+  "uncommitted_files": [],
+  "next_action": "Interagir com o PWA em https://iftech.italohub.cloud ou iniciar novas funcionalidades de produto.",
+  "context_notes": "A aplicação está 100% operacional, CI verde no GitHub Actions e container online no Coolify."
+}
