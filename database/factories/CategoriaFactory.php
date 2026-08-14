@@ -14,10 +14,14 @@ class CategoriaFactory extends Factory
      *
      * @return array<string, mixed>
      */
+    protected $model = \App\Models\Categoria::class;
+
     public function definition(): array
     {
         return [
-            //
+            'nome' => $this->faker->word(),
+            'slug' => $this->faker->unique()->slug(),
+            'tipo' => 'atrativo',
         ];
     }
 }

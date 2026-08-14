@@ -9,6 +9,8 @@ class Prestador extends Model
 {
     use HasFactory;
 
+    protected $table = 'prestadores';
+
     protected $fillable = [
         'user_id',
         'tipo',

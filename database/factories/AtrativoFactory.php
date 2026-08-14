@@ -14,10 +14,16 @@ class AtrativoFactory extends Factory
      *
      * @return array<string, mixed>
      */
+    protected $model = \App\Models\Atrativo::class;
+
     public function definition(): array
     {
         return [
-            //
+            'municipio_id' => \App\Models\Municipio::factory(),
+            'categoria_id' => \App\Models\Categoria::factory(),
+            'nome' => $this->faker->sentence(3),
+            'descricao' => $this->faker->paragraph(),
+            'status' => 'ativo',
         ];
     }
 }

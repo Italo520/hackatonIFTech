@@ -32,9 +32,9 @@ class E2EDemoTest extends TestCase
         ]);
         $responseGen->assertStatus(200);
 
-        // Assume ID 1 is returned
-        \App\Models\Roteiro::create(['titulo' => 'Teste', 'origem' => 'ia']);
-        $responseExport = $this->getJson('/api/v1/roteiros/1/export');
+        // Assume ID is returned
+        $roteiro = \App\Models\Roteiro::create(['titulo' => 'Teste', 'origem' => 'ia']);
+        $responseExport = $this->getJson('/api/v1/roteiros/' . $roteiro->id . '/export');
         $responseExport->assertStatus(200)->assertJsonStructure(['roteiro', 'tiles_bbox']);
     }
 

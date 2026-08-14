@@ -77,6 +77,24 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     });
 });
 
+use App\Http\Controllers\Web\AdminController;
+use App\Http\Controllers\Web\EmpreendedorController;
+use App\Http\Controllers\Web\Admin\AlertaController;
+use App\Http\Controllers\Web\Admin\PrestadorValidationController;
+use App\Http\Controllers\Web\Admin\RelatorioController;
+
+// Parceiro / Empreendedor
+Route::get('/parceiro/cadastro', [EmpreendedorController::class, 'create'])->name('empreendedor.create');
+Route::post('/parceiro/cadastro', [EmpreendedorController::class, 'store'])->name('empreendedor.store');
+Route::get('/parceiro/painel', [EmpreendedorController::class, 'dashboard'])->name('empreendedor.dashboard');
+
+// Admin Public / Action Endpoints
+Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.index');
+Route::get('/admin/heatmap-data', [AdminController::class, 'heatmapData'])->name('admin.heatmap');
+Route::get('/admin/relatorios/exportar', [RelatorioController::class, 'exportCsv'])->name('admin.relatorios.export');
+Route::post('/admin/alertas', [AlertaController::class, 'store'])->name('admin.alertas.store');
+Route::put('/admin/prestadores/{id}', [PrestadorValidationController::class, 'update'])->name('admin.prestadores.update');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

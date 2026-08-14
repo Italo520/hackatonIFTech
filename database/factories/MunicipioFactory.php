@@ -14,10 +14,14 @@ class MunicipioFactory extends Factory
      *
      * @return array<string, mixed>
      */
+    protected $model = \App\Models\Municipio::class;
+
     public function definition(): array
     {
         return [
-            //
+            'nome' => $this->faker->city(),
+            'uf' => 'PB',
+            'tema_visual' => 'default',
         ];
     }
 }

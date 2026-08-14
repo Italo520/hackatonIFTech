@@ -22,7 +22,7 @@ class Sprint3Test extends TestCase
 
         $response->assertRedirect('/parceiro/painel');
         
-        $this->assertDatabaseHas('prestadors', [
+        $this->assertDatabaseHas('prestadores', [
             'tipo' => 'hospedagem',
             'status' => 'pendente'
         ]);
