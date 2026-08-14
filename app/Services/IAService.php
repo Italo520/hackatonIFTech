@@ -3,101 +3,186 @@
 namespace App\Services;
 
 use App\Models\AssistantLog;
+use App\Models\Atrativo;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class IAService
 {
-    /**
-     * Resposta de chat com inteligência contextual de localização geográfica
-     */
-    public function chat(string $pergunta, string $idioma = 'pt-BR', array $userLocation = []): array
+    private $apiKey;
+    private $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
+
+    public function __construct()
     {
-        // Sanitização de PII
+        $this->apiKey = env('GEMINI_API_KEY');
+    }
+
+    /**
+     * Helper para chamar a API do Gemini com suporte a histórico (Memória)
+     */
+    private function callGemini(string $prompt, array $historico = []): string
+    {
+        if (empty($this->apiKey)) {
+            Log::warning("Chave GEMINI_API_KEY não configurada.");
+            return '{"erro": "Chave da API do Gemini não configurada no .env."}';
+        }
+
+        $contents = [];
+        
+        // Mapear o histórico (Conversational Memory)
+        foreach ($historico as $msg) {
+            $contents[] = [
+                'role' => $msg['role'] === 'user' ? 'user' : 'model',
+                'parts' => [['text' => $msg['text']]]
+            ];
+        }
+
+        // Adicionar o prompt atual
+        $contents[] = [
+            'role' => 'user',
+            'parts' => [['text' => $prompt]]
+        ];
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post($this->apiUrl . '?key=' . $this->apiKey, [
+            'contents' => $contents,
+            // Força a resposta em JSON
+            'generationConfig' => [
+                'response_mime_type' => 'application/json',
+            ]
+        ]);
+
+        if ($response->successful()) {
+            $data = $response->json();
+            return $data['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+        }
+
+        Log::error("Erro na API do Gemini: " . $response->body());
+        return '{}';
+    }
+
+    /**
+     * Resposta de chat com inteligência contextual e RAG real
+     */
+    public function chat(string $pergunta, string $idioma = 'pt-BR', array $userLocation = [], array $historico = []): array
+    {
         $scrubbedPergunta = preg_replace('/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/', '[EMAIL]', $pergunta);
         
-        $cidade = $userLocation['cidade'] ?? $userLocation['city'] ?? null;
+        $cidade = $userLocation['cidade'] ?? $userLocation['city'] ?? 'Não especificada';
         $uf = $userLocation['uf'] ?? $userLocation['state'] ?? '';
-        $lat = $userLocation['lat'] ?? null;
-        $lng = $userLocation['lng'] ?? null;
 
-        $pLower = mb_strtolower($pergunta);
+        // RAG REAL: Buscando locais reais do nosso banco de dados
+        // Para o hackathon, vamos pegar até 10 atrativos ativos
+        $atrativosDb = Atrativo::where('status', 'ativo')
+                               ->orWhere('status', '!=', 'inativo') // Fallback caso status seja nulo
+                               ->take(10)
+                               ->get(['id', 'nome', 'descricao', 'categoria_id', 'lat', 'lng']);
+                               
+        $ragContext = "";
+        if ($atrativosDb->count() > 0) {
+            $ragContext = "LOCAIS DISPONÍVEIS NO SISTEMA (Use SOMENTE estes locais para dar recomendações reais):\n";
+            foreach ($atrativosDb as $atrativo) {
+                $ragContext .= "- ID {$atrativo->id}: {$atrativo->nome} (Lat: {$atrativo->lat}, Lng: {$atrativo->lng}). Descrição: {$atrativo->descricao}\n";
+            }
+        }
 
-        // Respostas contextuais com base na localização real
-        if ($cidade && (str_contains(mb_strtolower($cidade), 'joão pessoa') || str_contains(mb_strtolower($cidade), 'joao pessoa') || $uf === 'PB')) {
-            if (str_contains($pLower, 'comer') || str_contains($pLower, 'peixe') || str_contains($pLower, 'restaurante') || str_contains($pLower, 'gastronomia')) {
-                $resposta = "Em **João Pessoa - PB**, você encontra uma gastronomia incrível! Recomendo o **Mangai** (famoso pela autêntica culinária nordestina) e o **Nau Frutos do Mar** em Manaíra. Para um almoço à beira-mar, os quiosques de **Tambaú** e **Cabo Branco** são excelentes opções com peixes frescos e acessibilidade.";
-                $fontes = [
-                    ['id' => 101, 'nome' => 'Mangai João Pessoa', 'tipo' => 'gastronomia', 'cidade' => 'João Pessoa - PB'],
-                    ['id' => 102, 'nome' => 'Nau Frutos do Mar', 'tipo' => 'gastronomia', 'cidade' => 'João Pessoa - PB']
-                ];
-            } elseif (str_contains($pLower, 'criança') || str_contains($pLower, 'familia')) {
-                $resposta = "Para aproveitar com crianças em **João Pessoa**, as **Piscinas Naturais dos Seixas** na maré baixa são calmas como uma piscina de água morna! O **Jardim Botânico Benjamin Maranhão** e a orla fechada de Tambaú pela manhã também são ótimos para caminhar e brincar.";
-                $fontes = [
-                    ['id' => 103, 'nome' => 'Piscinas Naturais dos Seixas', 'tipo' => 'atrativo', 'cidade' => 'João Pessoa - PB'],
-                    ['id' => 104, 'nome' => 'Farol do Cabo Branco', 'tipo' => 'atrativo', 'cidade' => 'João Pessoa - PB']
-                ];
-            } else {
-                $resposta = "Como seu guia em **João Pessoa - PB**, recomendo começar o dia vendo o nascer do sol no **Farol do Cabo Branco** (ponto mais oriental das Américas), fazer um passeio às **Piscinas Naturais dos Seixas** e finalizar a tarde no **Centro Cultural São Francisco**.";
-                $fontes = [
-                    ['id' => 104, 'nome' => 'Farol do Cabo Branco', 'tipo' => 'atrativo', 'cidade' => 'João Pessoa - PB'],
-                    ['id' => 105, 'nome' => 'Centro Histórico São Francisco', 'tipo' => 'cultura', 'cidade' => 'João Pessoa - PB']
-                ];
-            }
-        } elseif ($cidade && str_contains(mb_strtolower($cidade), 'bonito')) {
-            if (str_contains($pLower, 'comer') || str_contains($pLower, 'peixe')) {
-                $resposta = "Em **Bonito - MS**, o restaurante **Casa do João** é parada obrigatória, famoso pelo clássico Traíra sem espinho e Pintado a Urucum, com ótima acessibilidade.";
-                $fontes = [
-                    ['id' => 4, 'nome' => 'Casa do João', 'tipo' => 'gastronomia', 'cidade' => 'Bonito - MS']
-                ];
-            } else {
-                $resposta = "Em **Bonito - MS**, as principais atrações são a **Flutuação no Rio Sucuri** (com águas ultra cristalinas) e a icônica **Gruta do Lago Azul**.";
-                $fontes = [
-                    ['id' => 1, 'nome' => 'Flutuação no Rio Sucuri', 'tipo' => 'atrativo', 'cidade' => 'Bonito - MS'],
-                    ['id' => 2, 'nome' => 'Gruta do Lago Azul', 'tipo' => 'atrativo', 'cidade' => 'Bonito - MS']
-                ];
-            }
-        } else {
-            $localNome = $cidade ? "{$cidade} {$uf}" : "sua localização atual";
-            $resposta = "Detectei que você está em **{$localNome}**! Analisando os atrativos e serviços mais próximos com base no seu GPS (" . ($lat ? "{$lat}, {$lng}" : "coordenadas em tempo real") . "), selecionei as melhores opções disponíveis na região para sua viagem.";
-            $fontes = [
-                ['id' => 1, 'nome' => 'Atrativo em Destaque', 'tipo' => 'atrativo', 'cidade' => $localNome]
+        $prompt = "Você é um assistente virtual turístico local muito simpático e inteligente. 
+A localização atual do usuário é: {$cidade} {$uf}. O idioma preferido é: {$idioma}.
+O usuário vai continuar a conversa abaixo. Mantenha o contexto do que já foi falado.
+
+{$ragContext}
+
+INSTRUÇÃO RÍGIDA:
+Você deve retornar EXATAMENTE UM JSON com os seguintes campos, e mais nada:
+{
+  \"resposta\": \"(Um texto amigável, em markdown, respondendo à pergunta do usuário e recomendando locais, mantendo o contexto se necessário)\",
+  \"fontes\": [
+     {\"id\": 999, \"nome\": \"Nome exato do local\", \"tipo\": \"atrativo\", \"cidade\": \"{$cidade}\"} // OBRIGATÓRIO: O 'id' e o 'nome' DEVEM ser EXATAMENTE os mesmos listados em 'LOCAIS DISPONÍVEIS NO SISTEMA'.
+  ],
+  \"cidade_detectada\": \"{$cidade}\"
+}
+
+Pergunta atual: '{$scrubbedPergunta}'";
+
+        $jsonResponse = $this->callGemini($prompt, $historico);
+        $dados = json_decode($jsonResponse, true);
+
+        if (!$dados || !isset($dados['resposta'])) {
+            $dados = [
+                'resposta' => "Desculpe, tive um problema de conexão com meus servidores de IA. Tente novamente!",
+                'fontes' => [],
+                'cidade_detectada' => $cidade
             ];
         }
 
         // Audit Log
         AssistantLog::create([
             'pergunta' => $scrubbedPergunta,
-            'resposta' => $resposta,
-            'fontes' => $fontes,
+            'resposta' => $dados['resposta'],
+            'fontes' => $dados['fontes'] ?? [],
             'idioma' => $idioma,
         ]);
 
         return [
-            'resposta' => $resposta,
-            'fontes' => $fontes,
-            'cidade_detectada' => $cidade,
+            'resposta' => $dados['resposta'],
+            'fontes' => $dados['fontes'] ?? [],
+            'cidade_detectada' => $dados['cidade_detectada'] ?? $cidade,
             'is_ia' => true
         ];
     }
 
     /**
-     * Gerador de Roteiro Inteligente baseado na Localização do Usuário
+     * Gerador de Roteiro Inteligente com RAG e Mapa Mock
      */
     public function gerarRoteiro(array $preferences): array
     {
         $cidade = $preferences['cidade'] ?? 'Sua Região';
-        $tema = $preferences['tema'] ?? 'Natureza & Cultura';
+        $tema = $preferences['tema'] ?? 'Turismo Geral';
+        $duracao = $preferences['duracao_max'] ?? 240;
+        $orcamento = $preferences['orcamento_max'] ?? 150.00;
 
-        return [
-            'titulo' => "Roteiro {$cidade}: {$tema}",
-            'cidade' => $cidade,
-            'duracao' => $preferences['duracao_max'] ?? 240,
-            'orcamento' => $preferences['orcamento_max'] ?? 150.00,
-            'itens' => [
-                ['atrativo_id' => 1, 'ordem' => 1, 'tempo_estimado' => 90, 'nome' => 'Parada 1: Ponto Panorâmico'],
-                ['atrativo_id' => 2, 'ordem' => 2, 'tempo_estimado' => 120, 'nome' => 'Parada 2: Experiência Principal & Gastronomia']
-            ],
-            'is_ia' => true
-        ];
+        // RAG REAL para roteiros
+        $atrativosDb = Atrativo::take(10)->get(['id', 'nome', 'descricao']);
+        $ragContext = "";
+        foreach ($atrativosDb as $atrativo) {
+            $ragContext .= "- ID {$atrativo->id}: {$atrativo->nome}\n";
+        }
+
+        $prompt = "Crie um roteiro turístico para a cidade de {$cidade} focado no tema: {$tema}.
+Duração máxima disponível: {$duracao} minutos. Orçamento máximo: R$ {$orcamento}.
+
+{$ragContext}
+
+INSTRUÇÃO RÍGIDA:
+Você deve retornar EXATAMENTE UM JSON com os seguintes campos, e mais nada:
+{
+  \"titulo\": \"(Um título atrativo para o roteiro)\",
+  \"cidade\": \"{$cidade}\",
+  \"duracao\": {$duracao},
+  \"orcamento\": {$orcamento},
+  \"itens\": [
+      {\"atrativo_id\": 999, \"ordem\": 1, \"tempo_estimado\": 60, \"nome\": \"(Nome da parada)\"} // OBRIGATÓRIO: O 'atrativo_id' DEVE ser o ID real correspondente ao local no banco de dados.
+  ]
+}";
+
+        $jsonResponse = $this->callGemini($prompt);
+        $dados = json_decode($jsonResponse, true);
+
+        if (!$dados || !isset($dados['itens'])) {
+            // Fallback
+            $dados = [
+                'titulo' => "Roteiro {$cidade}: {$tema}",
+                'cidade' => $cidade,
+                'duracao' => $duracao,
+                'orcamento' => $orcamento,
+                'itens' => [
+                    ['atrativo_id' => 1, 'ordem' => 1, 'tempo_estimado' => 90, 'nome' => 'Erro na IA: Usando Roteiro Padrão']
+                ]
+            ];
+        }
+
+        $dados['is_ia'] = true;
+        return $dados;
     }
 }
-

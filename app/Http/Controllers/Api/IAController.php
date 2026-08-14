@@ -33,7 +33,8 @@ class IAController extends Controller
             'lng' => $request->input('lng'),
         ];
 
-        $response = $this->iaService->chat($request->pergunta, $request->idioma ?? 'pt-BR', $userLocation);
+        $historico = $request->input('historico', []);
+        $response = $this->iaService->chat($request->pergunta, $request->idioma ?? 'pt-BR', $userLocation, $historico);
 
         return response()->json($response);
     }

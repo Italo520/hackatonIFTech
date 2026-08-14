@@ -99,6 +99,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const chatContainer = document.getElementById('chat-messages-container');
@@ -111,6 +112,22 @@
         const viewChat = document.getElementById('view-chat');
         const viewRoteiro = document.getElementById('view-roteiro');
         const chatInputWrapper = document.getElementById('chat-input-wrapper');
+
+        // Histórico de Conversa
+        let chatHistory = [];
+
+        // Função TTS
+        window.speakText = function(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const cleanText = text.replace(/\*\*/g, '').replace(/<[^>]*>?/gm, '');
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'pt-BR';
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('Seu navegador não suporta leitura em voz alta.');
+            }
+        };
 
         // Alternar abas
         tabChatBtn.addEventListener('click', function() {
@@ -152,7 +169,7 @@
                             <strong class="d-block mb-1 text-dark" style="font-size: 0.75rem;">Sugestões de locais:</strong>
                             <div class="d-flex flex-column gap-1">
                                 ${fontes.map(f => `
-                                    <a href="/explorar" class="badge bg-light text-primary border text-decoration-none text-start p-2 rounded-3">
+                                    <a href="/atrativo/${f.id}" class="badge bg-light text-primary border text-decoration-none text-start p-2 rounded-3">
                                         <i class="bi bi-geo-alt-fill text-warning me-1"></i> ${f.nome} <span class="text-muted">(${f.cidade || f.tipo})</span>
                                     </a>
                                 `).join('')}
@@ -161,15 +178,18 @@
                     `;
                 }
 
-                // Transforma **negrito** em tag <strong>
-                const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                // Utilizando marked.js para renderizar markdown completo (títulos, listas, negrito, etc)
+                const formattedText = typeof marked !== 'undefined' ? marked.parse(text) : text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
 
                 msgDiv.innerHTML = `
                     <div class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width: 34px; height: 34px; background-color: #005f73; margin-top: 4px;">
                         <i class="bi bi-robot small"></i>
                     </div>
-                    <div class="bg-white p-3 shadow-sm border text-dark w-100" style="border-radius: 18px; border-top-left-radius: 4px; font-size: 0.9rem;">
-                        <div>${formattedText}</div>
+                    <div class="bg-white p-3 shadow-sm border text-dark w-100 position-relative" style="border-radius: 18px; border-top-left-radius: 4px; font-size: 0.9rem;">
+                        <button onclick="window.speakText('${escapeHtml(text).replace(/'/g, "\\'")}')" class="btn btn-sm btn-light border rounded-circle position-absolute top-0 end-0 m-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px; padding: 0;">
+                            <i class="bi bi-volume-up-fill text-primary" style="font-size: 0.9rem;"></i>
+                        </button>
+                        <div class="pt-1 pe-4">${formattedText}</div>
                         ${fontesHtml}
                     </div>
                 `;
@@ -189,6 +209,9 @@
 
             appendMessage(pergunta, true);
             promptInput.value = '';
+
+            chatHistory.push({ role: 'user', text: pergunta });
+            if (chatHistory.length > 8) chatHistory.shift(); // Manter apenas as últimas 8 mensagens (4 trocas)
 
             // Loading message
             const loadingDiv = document.createElement('div');
@@ -218,6 +241,7 @@
                     },
                     body: JSON.stringify({
                         pergunta: pergunta,
+                        historico: chatHistory,
                         cidade: savedLoc?.city || 'João Pessoa',
                         uf: savedLoc?.uf || 'PB',
                         lat: savedLoc?.lat || -7.1153,
@@ -230,6 +254,7 @@
 
                 if (res.ok) {
                     const data = await res.json();
+                    chatHistory.push({ role: 'model', text: data.resposta || '' });
                     appendMessage(data.resposta || 'Aqui estão algumas sugestões!', false, data.fontes || []);
                 } else {
                     appendMessage('Desculpe, tive uma oscilação na consulta da IA. Mas você pode conferir as opções na aba Explorar!', false);
@@ -287,23 +312,41 @@
 
                 if (res.ok) {
                     const data = await res.json();
+                    let itensHtml = '';
+                    if (data.itens && data.itens.length > 0) {
+                        data.itens.forEach(item => {
+                            itensHtml += `
+                                <div class="bg-white p-3 rounded-3 small shadow-sm border-start border-4 border-primary">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="text-dark"><i class="bi bi-geo-alt text-primary me-1"></i> ${item.nome}</strong>
+                                        <span class="badge bg-light text-secondary"><i class="bi bi-clock me-1"></i> ${item.tempo_estimado} min</span>
+                                    </div>
+                                    <span class="text-muted" style="font-size: 0.75rem;">Recomendado pela IA</span>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        itensHtml = '<div class="alert alert-warning py-2 small">Nenhum local específico foi encontrado, mas você pode explorar a região livremente!</div>';
+                    }
+
                     box.innerHTML = `
-                        <div class="alert alert-success rounded-4 border-0 shadow-sm p-3">
-                            <h4 class="fw-bold fs-6 mb-1"><i class="bi bi-check-circle-fill me-1"></i> ${data.titulo}</h4>
-                            <p class="small text-secondary mb-2">Duração estimada: ${data.duracao} minutos em ${data.cidade}</p>
-                            <hr class="my-2">
-                            <div class="d-flex flex-column gap-2 mt-2">
-                                <div class="bg-white p-2 rounded-3 small">
-                                    <strong>1. Manhã:</strong> Visita panorâmica aos pontos mais próximos do seu GPS
-                                </div>
-                                <div class="bg-white p-2 rounded-3 small">
-                                    <strong>2. Almoço:</strong> Parada gastronômica com culinária típica
-                                </div>
-                                <div class="bg-white p-2 rounded-3 small">
-                                    <strong>3. Tarde:</strong> Passeio histórico e pôr do sol
-                                </div>
+                        <div class="alert alert-success rounded-4 border-0 shadow-sm p-3" style="background-color: #f8f9fa;">
+                            <h4 class="fw-bold fs-6 mb-1 text-dark"><i class="bi bi-map-fill text-primary me-1"></i> ${data.titulo}</h4>
+                            <p class="small text-secondary mb-2">Duração: ${data.duracao} min | <i class="bi bi-cash"></i> Orçamento: R$ ${data.orcamento}</p>
+                            
+                            <!-- Mock de Mapa (Leaflet Placeholder) -->
+                            <div class="w-100 bg-light border rounded-3 mt-3 d-flex flex-column align-items-center justify-content-center text-secondary position-relative shadow-inner" style="height: 180px; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 15px 15px; overflow: hidden;">
+                                <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.9));"></div>
+                                <i class="bi bi-pin-map-fill fs-2 mb-1 text-primary opacity-75" style="z-index: 2;"></i>
+                                <span class="small fw-bold text-dark" style="z-index: 2;">Integração Leaflet/Mapbox</span>
+                                <span class="text-muted text-center px-2" style="font-size: 0.65rem; z-index: 2;">(Seu amigo inserirá o código do mapa interativo aqui)</span>
                             </div>
-                            <a href="/roteiros" class="btn btn-dark w-100 rounded-pill btn-sm mt-3">Ver Roteiros Oficiais</a>
+
+                            <hr class="my-3 opacity-25">
+                            <div class="d-flex flex-column gap-2 mt-2">
+                                ${itensHtml}
+                            </div>
+                            <a href="/roteiros" class="btn btn-primary w-100 rounded-pill btn-sm mt-3 fw-bold shadow-sm">Salvar e Iniciar Roteiro</a>
                         </div>
                     `;
                 }
