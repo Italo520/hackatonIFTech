@@ -9,6 +9,8 @@ class Ocorrencia extends Model
 {
     use HasFactory;
 
+    protected $table = 'ocorrencias';
+
     protected $fillable = [
         'tipo',
         'local_texto',
