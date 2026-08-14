@@ -14,39 +14,45 @@
 
 {{-- Header flutuante com botão Voltar, Favoritar e Compartilhar --}}
 <div class="position-fixed top-0 start-0 w-100 p-3 d-flex justify-content-between align-items-center z-3"
-     style="pointer-events: none;">
+     style="pointer-events: none;" role="toolbar" aria-label="Ações Rápidas">
     <div class="d-flex align-items-center gap-2" style="pointer-events: auto;">
         @if(request('from') === 'admin' || (auth()->check() && in_array(auth()->user()->role ?? '', ['super_admin', 'prefeito', 'secretario', 'gestor_conteudo', 'gestor_cadastros', 'atendente'])))
             <a href="{{ route('admin.atrativos.index') }}"
                class="btn btn-dark rounded-pill shadow-lg d-flex align-items-center gap-2 px-3 py-2 fw-bold text-white text-decoration-none border border-warning"
-               style="background: #003844; backdrop-filter: blur(10px); font-size: 0.85rem;">
-                <i class="bi bi-arrow-left text-warning fs-5"></i>
+               style="background: #003844; backdrop-filter: blur(10px); font-size: 0.85rem;"
+               aria-label="Voltar ao Painel Administrativo">
+                <i class="bi bi-arrow-left text-warning fs-5" aria-hidden="true"></i>
                 <span>Voltar ao Painel Admin</span>
             </a>
         @else
             <a href="{{ route('pwa.explorar') }}"
                onclick="if(history.length > 1) { history.back(); return false; }"
                class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center p-0"
-               style="width: 44px; height: 44px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);">
-                <i class="bi bi-chevron-left text-dark fs-5"></i>
+               style="width: 44px; height: 44px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);"
+               aria-label="Voltar para a página anterior">
+                <i class="bi bi-chevron-left text-dark fs-5" aria-hidden="true"></i>
             </a>
         @endif
     </div>
 
     <div class="d-flex gap-2" style="pointer-events: auto;">
         <button class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center p-0"
-                style="width: 44px; height: 44px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);">
-            <i class="bi bi-heart text-danger fs-5"></i>
+                style="width: 44px; height: 44px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);"
+                aria-label="Salvar nos Favoritos"
+                title="Favoritar local">
+            <i class="bi bi-heart text-danger fs-5" aria-hidden="true"></i>
         </button>
         <button class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center p-0"
                 id="btn-share"
-                style="width: 44px; height: 44px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);">
-            <i class="bi bi-share text-dark fs-5"></i>
+                style="width: 44px; height: 44px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);"
+                aria-label="Compartilhar este atrativo"
+                title="Compartilhar">
+            <i class="bi bi-share text-dark fs-5" aria-hidden="true"></i>
         </button>
     </div>
 </div>
 
-<div class="container-fluid px-3 pt-5 pb-5 mt-2 mb-5">
+<div class="container-fluid px-3 pt-5 mt-2" style="padding-bottom: 140px !important;">
 
     {{-- Hero Image --}}
     <div class="position-relative w-100 rounded-5 overflow-hidden shadow-sm mb-4" style="height: 320px;">

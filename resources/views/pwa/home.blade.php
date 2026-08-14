@@ -41,47 +41,16 @@
             @foreach($alertasDefesaCivil as $alerta)
                 @php
                     $isUrgente = in_array($alerta->urgencia, ['urgente', 'emergencia', 'perigo']);
-                    $bgClass = $isUrgente ? 'bg-danger text-white' : ($alerta->urgencia === 'aviso' ? 'bg-warning-subtle text-dark border border-warning' : 'bg-primary-subtle text-dark border border-primary-subtle');
-                    $badgeClass = $isUrgente ? 'bg-white text-danger' : ($alerta->urgencia === 'aviso' ? 'bg-warning text-dark' : 'bg-primary text-white');
-                    $icon = $isUrgente ? 'bi-exclamation-triangle-fill text-warning' : 'bi-megaphone-fill text-primary';
                 @endphp
-                <div class="card border-0 rounded-4 p-3 shadow-sm mb-2 {{ $bgClass }}" id="alerta-card-{{ $alerta->id }}">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div class="d-flex gap-2.5 align-items-start">
-                            <div class="fs-4 flex-shrink-0 mt-1">
-                                <i class="bi {{ $icon }}"></i>
-                            </div>
-                            <div>
-                                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                                    <span class="badge {{ $badgeClass }} rounded-pill px-2.5 py-1 text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">
-                                        {{ $alerta->responsavel ?? 'Defesa Civil' }} • {{ ucfirst($alerta->urgencia) }}
-                                    </span>
-                                    <span class="small opacity-75 font-monospace" style="font-size: 0.7rem;">
-                                        {{ $alerta->created_at ? $alerta->created_at->diffForHumans() : 'Hoje' }}
-                                    </span>
-                                </div>
-                                <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">{{ $alerta->titulo }}</h6>
-                                <p class="small mb-2 opacity-90" style="font-size: 0.82rem; line-height: 1.35;">{{ Str::limit($alerta->corpo, 110) }}</p>
-                                
-                                @if($alerta->contato_emergencia)
-                                    <div class="small fw-semibold mb-2 opacity-90" style="font-size: 0.78rem;">
-                                        <i class="bi bi-telephone-fill me-1"></i> {{ $alerta->contato_emergencia }}
-                                    </div>
-                                @endif
-
-                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <button type="button" class="btn btn-sm {{ $isUrgente ? 'btn-light text-danger' : 'btn-primary' }} rounded-pill px-3 py-1 fw-bold" data-bs-toggle="modal" data-bs-target="#modalAlerta{{ $alerta->id }}" style="font-size: 0.75rem;">
-                                        <i class="bi bi-shield-exclamation me-1"></i> Ver Orientações Oficiais
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 {{ $isUrgente ? 'text-white' : 'text-secondary' }} opacity-75 small" onclick="if(window.AlertasManager) window.AlertasManager.dismissHomeBanner({{ $alerta->id }}); else document.getElementById('alerta-card-{{ $alerta->id }}').remove();" style="font-size: 0.75rem;">
-                                        Dispensar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn-close {{ $isUrgente ? 'btn-close-white' : '' }} opacity-50" onclick="if(window.AlertasManager) window.AlertasManager.dismissHomeBanner({{ $alerta->id }}); else document.getElementById('alerta-card-{{ $alerta->id }}').remove();" aria-label="Fechar" title="Marcar como visto"></button>
-                    </div>
-                </div>
+                <x-pwa.alerta-banner 
+                    :id="$alerta->id"
+                    :titulo="$alerta->titulo"
+                    :descricao="Str::limit($alerta->corpo, 110)"
+                    :urgencia="$alerta->urgencia"
+                    :responsavel="$alerta->responsavel ?? 'Defesa Civil'"
+                    :contatoEmergencia="$alerta->contato_emergencia"
+                    :validoAte="$alerta->valido_ate ? $alerta->valido_ate->format('d/m H:i') : null"
+                />
 
                 <!-- Modal de Detalhes do Alerta -->
                 <div class="modal fade" id="modalAlerta{{ $alerta->id }}" tabindex="-1" aria-hidden="true">

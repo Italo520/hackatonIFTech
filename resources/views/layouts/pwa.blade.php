@@ -595,37 +595,37 @@
     </div>
 
     <!-- Main Content Area -->
-    <main class="flex-grow-1 overflow-auto no-scrollbar pt-5 pb-5 mt-3 safe-area-pb">
+    <main class="flex-grow-1 overflow-auto no-scrollbar pt-5 pb-5 mt-3 safe-area-pb" id="main-content" role="main">
         @yield('content')
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="glass-nav fixed-bottom w-100 z-3 pb-safe border-top">
+    <nav class="glass-nav fixed-bottom w-100 z-3 pb-safe border-top" role="navigation" aria-label="Navegação Principal do Aplicativo">
         <div class="d-flex justify-content-around align-items-center" style="height: 64px;">
-            <a href="{{ route('pwa.home') }}" class="bottom-nav-item {{ request()->routeIs('pwa.home') ? 'active' : '' }}">
-                <i class="bi bi-house-door-fill"></i>
+            <a href="{{ route('pwa.home') }}" class="bottom-nav-item {{ request()->routeIs('pwa.home') ? 'active' : '' }}" aria-label="Página Inicial" {!! request()->routeIs('pwa.home') ? 'aria-current="page"' : '' !!}>
+                <i class="bi bi-house-door-fill" aria-hidden="true"></i>
                 <span>Início</span>
             </a>
             
-            <a href="{{ route('pwa.explorar') }}" class="bottom-nav-item {{ request()->routeIs('pwa.explorar') ? 'active' : '' }}">
-                <i class="bi bi-compass-fill"></i>
+            <a href="{{ route('pwa.explorar') }}" class="bottom-nav-item {{ request()->routeIs('pwa.explorar') ? 'active' : '' }}" aria-label="Explorar Catálogo e Categorias" {!! request()->routeIs('pwa.explorar') ? 'aria-current="page"' : '' !!}>
+                <i class="bi bi-compass-fill" aria-hidden="true"></i>
                 <span>Explorar</span>
             </a>
 
-            <a href="{{ route('pwa.ia') }}" class="bottom-nav-item position-relative text-decoration-none">
-                <div class="floating-action-button">
+            <a href="{{ route('pwa.ia') }}" class="bottom-nav-item position-relative text-decoration-none" aria-label="Assistente Inteligente de Viagem IA" {!! request()->routeIs('pwa.ia') ? 'aria-current="page"' : '' !!}>
+                <div class="floating-action-button" aria-hidden="true">
                     <i class="bi bi-stars"></i>
                 </div>
                 <span class="position-absolute bottom-0 mb-1 {{ request()->routeIs('pwa.ia') ? 'text-primary fw-bold' : 'text-secondary' }}" style="font-size: 0.75rem;">Assistente</span>
             </a>
 
-            <a href="{{ route('pwa.roteiros') }}" class="bottom-nav-item {{ request()->routeIs('pwa.roteiros') ? 'active' : '' }}">
-                <i class="bi bi-map-fill"></i>
+            <a href="{{ route('pwa.roteiros') }}" class="bottom-nav-item {{ request()->routeIs('pwa.roteiros') ? 'active' : '' }}" aria-label="Roteiros e Itinerários" {!! request()->routeIs('pwa.roteiros') ? 'aria-current="page"' : '' !!}>
+                <i class="bi bi-map-fill" aria-hidden="true"></i>
                 <span>Roteiros</span>
             </a>
 
-            <a href="{{ route('pwa.utilidade') }}" class="bottom-nav-item {{ request()->routeIs('pwa.utilidade') ? 'active' : '' }}">
-                <i class="bi bi-shield-fill-check"></i>
+            <a href="{{ route('pwa.utilidade') }}" class="bottom-nav-item {{ request()->routeIs('pwa.utilidade') ? 'active' : '' }}" aria-label="Serviços Úteis e Emergência" {!! request()->routeIs('pwa.utilidade') ? 'aria-current="page"' : '' !!}>
+                <i class="bi bi-shield-fill-check" aria-hidden="true"></i>
                 <span>Útil</span>
             </a>
         </div>

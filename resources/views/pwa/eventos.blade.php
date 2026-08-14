@@ -13,7 +13,7 @@
         </div>
     @endif
     <div class="position-relative">
-        <div class="position-absolute top-50 start-0 translate-middle-y ps-3">
+        <div class="position-absolute top-50 start-0 translate-middle-y ps-3" aria-hidden="true">
             <i class="bi bi-search text-secondary"></i>
         </div>
         <input
@@ -21,6 +21,7 @@
             id="eventos-search-input"
             class="form-control rounded-pill border-0 shadow-sm ps-5 bg-white"
             placeholder="Buscar eventos, festivais, feiras..."
+            aria-label="Buscar eventos por nome ou tema"
             style="height: 48px;"
             autocomplete="off"
         >

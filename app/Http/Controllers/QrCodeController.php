@@ -15,7 +15,7 @@ class QrCodeController extends Controller
     {
         $qr = QrCodeModel::where('hash_code', $hash)->first();
         if ($qr) {
-            $qr->increment('leituras');
+            $qr->increment('scans');
             return redirect()->route('pwa.atrativo', ['id' => $qr->atrativo_id])
                 ->with('message', 'QR Code do totem validado! Bem-vindo ao local.');
         }
