@@ -28,7 +28,7 @@ return new class extends Migration
             $table->id();
             $table->string('nome');
             $table->char('uf', 2);
-            $table->geometry('bbox_geo', 'POLYGON', 4326)->nullable();
+            $table->text('bbox_geo')->nullable();
             $table->string('tema_visual')->nullable();
             $table->jsonb('config')->nullable();
             $table->timestamps();

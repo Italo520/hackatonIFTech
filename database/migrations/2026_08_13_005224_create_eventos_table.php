@@ -38,7 +38,9 @@ return new class extends Migration
             $table->string('nome');
             $table->text('descricao');
             $table->string('local')->nullable();
-            $table->geometry('geo', 'POINT', 4326)->nullable();
+            $table->text('geo')->nullable();
+            $table->decimal('lat', 10, 8)->nullable();
+            $table->decimal('lng', 11, 8)->nullable();
             $table->dateTime('inicio');
             $table->dateTime('fim')->nullable();
             $table->string('organizador')->nullable();

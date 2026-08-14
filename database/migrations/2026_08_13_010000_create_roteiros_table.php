@@ -38,7 +38,7 @@ return new class extends Migration
             $table->decimal('orcamento', 10, 2)->nullable();
             $table->string('perfil')->nullable();
             $table->enum('origem', ['oficial', 'ia', 'usuario'])->default('oficial');
-            $table->geometry('geo', 'LINESTRING', 4326)->nullable();
+            $table->text('geo')->nullable();
             $table->decimal('distancia_total', 10, 2)->nullable();
             $table->boolean('publico')->default(true);
             $table->timestamps();
