@@ -16,12 +16,12 @@ class E2EDemoTest extends TestCase
     public function test_flow_1_turista_busca_linguagem_natural(): void
     {
         // Setup mock data
-        $response = $this->postJson('/api/v1/ia/chat', [
+        $response = $this->post('/api/v1/ia/chat', [
             'pergunta' => 'roteiro gratuito em família',
             'idioma' => 'pt-BR'
         ]);
 
-        $response->assertStatus(200)->assertJsonPath('is_ia', true);
+        $response->assertStatus(200)->assertHeader('Content-Type', 'text/event-stream; charset=UTF-8');
     }
 
     public function test_flow_2_turista_gera_roteiro_ia_baixa_offline(): void
@@ -40,7 +40,8 @@ class E2EDemoTest extends TestCase
 
     public function test_flow_3_turista_escaneia_qr(): void
     {
-        $qr = \App\Models\QrCode::factory()->create(['hash_code' => 'DEMOQR']);
+        $atrativo = \App\Models\Atrativo::factory()->create();
+        $qr = \App\Models\QrCode::create(['hash_code' => 'DEMOQR', 'atrativo_id' => $atrativo->id]);
         $response = $this->getJson('/api/v1/qr/DEMOQR');
         $response->assertStatus(200);
         $this->assertEquals(1, $qr->fresh()->scans);
