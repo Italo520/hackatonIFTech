@@ -26,6 +26,20 @@ class E2EDemoTest extends TestCase
 
     public function test_flow_2_turista_gera_roteiro_ia_baixa_offline(): void
     {
+        $atrativo = \App\Models\Atrativo::factory()->create();
+
+        \Illuminate\Support\Facades\Http::fake([
+            'generativelanguage.googleapis.com/*' => \Illuminate\Support\Facades\Http::response([
+                'steps' => [['type' => 'model_output', 'content' => [['text' => json_encode([
+                    'titulo' => 'Teste IA',
+                    'cidade' => 'IA',
+                    'duracao' => 120,
+                    'orcamento' => 100,
+                    'itens' => [['atrativo_id' => $atrativo->id, 'ordem' => 1, 'tempo_estimado' => 60]]
+                ])]]]]
+            ], 200)
+        ]);
+
         $responseGen = $this->postJson('/api/v1/ia/roteiro', [
             'tema' => 'Aventura',
             'duracao_max' => 120

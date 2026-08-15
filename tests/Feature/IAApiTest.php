@@ -27,6 +27,20 @@ class IAApiTest extends TestCase
 
     public function test_can_generate_roteiro(): void
     {
+        $atrativo = \App\Models\Atrativo::factory()->create();
+
+        \Illuminate\Support\Facades\Http::fake([
+            'generativelanguage.googleapis.com/*' => \Illuminate\Support\Facades\Http::response([
+                'steps' => [['type' => 'model_output', 'content' => [['text' => json_encode([
+                    'titulo' => 'Roteiro IA: Aventura',
+                    'cidade' => 'IA',
+                    'duracao' => 180,
+                    'orcamento' => 100,
+                    'itens' => [['atrativo_id' => $atrativo->id, 'ordem' => 1, 'tempo_estimado' => 60]]
+                ])]]]]
+            ], 200)
+        ]);
+
         $response = $this->postJson('/api/v1/ia/roteiro', [
             'tema' => 'Aventura',
             'duracao_max' => 180,
