@@ -1,8 +1,8 @@
 {
     "id": "/",
-    "name": "Guia Turístico Inteligente",
-    "short_name": "Turismo PWA",
-    "description": "Seu guia turístico completo com roteiros inteligentes, assistente IA e mapas interativos",
+    "name": "Destino Inteligente",
+    "short_name": "Destino Inteligente",
+    "description": "Destino Inteligente - Plataforma de Gestão, Turismo e Roteiros Inteligentes",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",

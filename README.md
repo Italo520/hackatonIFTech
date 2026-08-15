@@ -1,4 +1,4 @@
-# 🏛️ Destino Turístico Municipal — Turismo Inteligente (IFTech)
+# 🏛️ Destino Inteligente — Plataforma de Gestão e Inteligência Turística Municipal
 > **Desafio Destino Turístico Municipal:** Transformando territórios em experiências turísticas inteligentes por meio da Inteligência Artificial, Inovação e Governança Orientada por Dados.  
 > **Patrocinador Oficial:** Máxima Tecnologia LTDA
 

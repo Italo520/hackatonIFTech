@@ -530,7 +530,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (navigator.share) {
             navigator.share({
                 title: @json($atrativo->nome),
-                text: `Conheça {{ $atrativo->nome }} no Guia de Turismo!`,
+                text: `Conheça {{ $atrativo->nome }} no Destino Inteligente!`,
                 url: window.location.href,
             }).catch(() => {});
         } else {

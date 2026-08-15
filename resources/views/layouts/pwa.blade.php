@@ -4,13 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#005f73">
-    <title>Turismo Inteligente</title>
+    <title>{{ config('app.name', 'Destino Inteligente') }}</title>
 
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Turismo PWA">
-    <meta name="application-name" content="Turismo PWA">
+    <meta name="apple-mobile-web-app-title" content="Destino Inteligente">
+    <meta name="application-name" content="Destino Inteligente">
     
     <!-- PWA Manifest & Icons -->
     <link rel="manifest" href="/manifest.json">
