@@ -1,6 +1,7 @@
 const CACHE_NAME = 'turismo-pwa-v3';
 const PRECACHE_ASSETS = [
   '/',
+  '/offline',
   '/explorar',
   '/mapa',
   '/ia',
@@ -66,7 +67,7 @@ self.addEventListener('fetch', (event) => {
             return cachedResponse;
           }
           if (event.request.headers.get('accept')?.includes('text/html')) {
-            return caches.match('/');
+            return caches.match('/offline');
           }
         });
       })

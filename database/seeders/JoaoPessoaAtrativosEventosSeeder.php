@@ -47,7 +47,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['deficiencia_auditiva'],
                 'lat' => -7.1085,
                 'lng' => -34.8080,
-                'foto' => 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa1/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -59,7 +59,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.0682,
                 'lng' => -34.8290,
-                'foto' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa2/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -71,7 +71,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.0984,
                 'lng' => -34.8276,
-                'foto' => 'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa3/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -83,7 +83,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1350,
                 'lng' => -34.8190,
-                'foto' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa4/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -95,7 +95,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1720,
                 'lng' => -34.7950,
-                'foto' => 'https://images.unsplash.com/photo-1548625149-fc4a29cf7092?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa5/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -107,7 +107,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => [],
                 'lat' => -7.1930,
                 'lng' => -34.8020,
-                'foto' => 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa6/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -119,7 +119,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => [],
                 'lat' => -7.2150,
                 'lng' => -34.8080,
-                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa7/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -131,7 +131,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.2340,
                 'lng' => -34.8150,
-                'foto' => 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa8/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -143,7 +143,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.0380,
                 'lng' => -34.8560,
-                'foto' => 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa9/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -155,7 +155,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['deficiencia_auditiva'],
                 'lat' => -7.0180,
                 'lng' => -34.8250,
-                'foto' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa10/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -167,7 +167,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.0420,
                 'lng' => -34.8320,
-                'foto' => 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa11/800/500',
             ],
 
             // --- PATRIMÔNIO HISTÓRICO, ARQUITETURA SACRA & MUSEUS ---
@@ -181,7 +181,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1162,
                 'lng' => -34.8845,
-                'foto' => 'https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa12/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -193,7 +193,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1142,
                 'lng' => -34.8872,
-                'foto' => 'https://images.unsplash.com/photo-1548625149-fc4a29cf7092?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa13/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -205,7 +205,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1135,
                 'lng' => -34.8885,
-                'foto' => 'https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa14/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -217,7 +217,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1158,
                 'lng' => -34.8860,
-                'foto' => 'https://images.unsplash.com/photo-1548625149-fc4a29cf7092?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa15/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -229,7 +229,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1120,
                 'lng' => -34.8910,
-                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa16/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -241,7 +241,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1115,
                 'lng' => -34.8920,
-                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa17/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -253,7 +253,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => [],
                 'lat' => -7.1148,
                 'lng' => -34.8878,
-                'foto' => 'https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa18/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -265,7 +265,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1152,
                 'lng' => -34.8858,
-                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa19/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -277,7 +277,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1175,
                 'lng' => -34.8835,
-                'foto' => 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa20/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -289,7 +289,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1170,
                 'lng' => -34.8840,
-                'foto' => 'https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa21/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -301,7 +301,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1235,
                 'lng' => -34.8770,
-                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa22/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -313,7 +313,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1154,
                 'lng' => -34.8863,
-                'foto' => 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa23/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -325,7 +325,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -6.9740,
                 'lng' => -34.8340,
-                'foto' => 'https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa24/800/500',
             ],
 
             // --- PARQUES, NATUREZA, MIRANTES & ESPAÇOS URBANOS ---
@@ -339,7 +339,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1485,
                 'lng' => -34.7995,
-                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa25/800/500',
             ],
             [
                 'cat' => $catGrutas,
@@ -351,7 +351,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['deficiencia_auditiva'],
                 'lat' => -7.1380,
                 'lng' => -34.8610,
-                'foto' => 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa26/800/500',
             ],
             [
                 'cat' => $catGrutas,
@@ -363,7 +363,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1210,
                 'lng' => -34.8820,
-                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa27/800/500',
             ],
             [
                 'cat' => $catGrutas,
@@ -375,7 +375,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1105,
                 'lng' => -34.8770,
-                'foto' => 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa28/800/500',
             ],
             [
                 'cat' => $catGrutas,
@@ -387,7 +387,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1472,
                 'lng' => -34.7968,
-                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa29/800/500',
             ],
             [
                 'cat' => $catGrutas,
@@ -399,7 +399,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.0780,
                 'lng' => -34.8380,
-                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa30/800/500',
             ],
             [
                 'cat' => $catGrutas,
@@ -411,7 +411,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1240,
                 'lng' => -34.8750,
-                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa31/800/500',
             ],
             [
                 'cat' => $catGrutas,
@@ -423,7 +423,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1265,
                 'lng' => -34.8480,
-                'foto' => 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa32/800/500',
             ],
             [
                 'cat' => $catGrutas,
@@ -435,7 +435,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1780,
                 'lng' => -34.8210,
-                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa33/800/500',
             ],
             [
                 'cat' => $catGrutas,
@@ -447,7 +447,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1270,
                 'lng' => -34.8680,
-                'foto' => 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa34/800/500',
             ],
 
             // --- ARTESANATO, COMPRAS & FEIRAS TÍPICAS ---
@@ -461,7 +461,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1128,
                 'lng' => -34.8295,
-                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa35/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -473,7 +473,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1140,
                 'lng' => -34.8235,
-                'foto' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa36/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -485,7 +485,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1215,
                 'lng' => -34.8790,
-                'foto' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa37/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -497,7 +497,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1430,
                 'lng' => -34.8110,
-                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa38/800/500',
             ],
 
             // --- GASTRONOMIA REGIONAL & POLOS GOURMET ---
@@ -511,7 +511,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1280,
                 'lng' => -34.8215,
-                'foto' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa39/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -523,7 +523,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1090,
                 'lng' => -34.8320,
-                'foto' => 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa40/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -535,7 +535,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1320,
                 'lng' => -34.8205,
-                'foto' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa41/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -547,7 +547,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1110,
                 'lng' => -34.8260,
-                'foto' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa42/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -559,7 +559,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.3150,
                 'lng' => -34.7980,
-                'foto' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa43/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -571,7 +571,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1118,
                 'lng' => -34.8915,
-                'foto' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa44/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -583,7 +583,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.0850,
                 'lng' => -34.8350,
-                'foto' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa45/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -595,7 +595,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.0950,
                 'lng' => -34.8360,
-                'foto' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa46/800/500',
             ],
 
             // --- AVENTURA, TRILHAS, MIRANTES & ESPORTES NÁUTICOS ---
@@ -609,7 +609,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => [],
                 'lat' => -7.1490,
                 'lng' => -34.7955,
-                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa47/800/500',
             ],
             [
                 'cat' => $catAventura,
@@ -621,7 +621,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => [],
                 'lat' => -7.0800,
                 'lng' => -34.7800,
-                'foto' => 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa48/800/500',
             ],
             [
                 'cat' => $catAventura,
@@ -633,7 +633,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['deficiencia_auditiva'],
                 'lat' => -7.1100,
                 'lng' => -34.8940,
-                'foto' => 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa49/800/500',
             ],
             [
                 'cat' => $catAventura,
@@ -645,7 +645,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.0720,
                 'lng' => -34.8360,
-                'foto' => 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa50/800/500',
             ],
             [
                 'cat' => $catAventura,
@@ -657,7 +657,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1150,
                 'lng' => -34.8230,
-                'foto' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa51/800/500',
             ],
 
             // --- PONTOS ADICIONAIS DA CAPITAL PARAIBANA ---
@@ -671,7 +671,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1360,
                 'lng' => -34.8185,
-                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa52/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -683,7 +683,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1180,
                 'lng' => -34.8830,
-                'foto' => 'https://images.unsplash.com/photo-1548625149-fc4a29cf7092?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa53/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -695,7 +695,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => [],
                 'lat' => -7.1090,
                 'lng' => -34.8935,
-                'foto' => 'https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa54/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -707,7 +707,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1165,
                 'lng' => -34.8850,
-                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa55/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -719,7 +719,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1168,
                 'lng' => -34.8844,
-                'foto' => 'https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa56/800/500',
             ],
             [
                 'cat' => $catGrutas,
@@ -731,7 +731,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1410,
                 'lng' => -34.8100,
-                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa57/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -743,7 +743,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1040,
                 'lng' => -34.8325,
-                'foto' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa58/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -755,7 +755,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1130,
                 'lng' => -34.8240,
-                'foto' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa59/800/500',
             ],
             [
                 'cat' => $catHospedagem,
@@ -767,7 +767,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1145,
                 'lng' => -34.8225,
-                'foto' => 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa60/800/500',
             ],
 
             // --- PONTOS TURÍSTICOS E PRAIAS EXPANDIDAS DE JOÃO PESSOA & LITORAL ---
@@ -781,7 +781,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.0150,
                 'lng' => -34.8280,
-                'foto' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa61/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -793,7 +793,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.0280,
                 'lng' => -34.8310,
-                'foto' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa62/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -805,7 +805,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['deficiencia_auditiva'],
                 'lat' => -6.9680,
                 'lng' => -34.8320,
-                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa63/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -817,7 +817,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => [],
                 'lat' => -7.2900,
                 'lng' => -34.7990,
-                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa64/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -829,7 +829,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.2980,
                 'lng' => -34.8010,
-                'foto' => 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa65/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -841,7 +841,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => [],
                 'lat' => -7.3050,
                 'lng' => -34.7995,
-                'foto' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa66/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -853,7 +853,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['deficiencia_auditiva'],
                 'lat' => -7.3180,
                 'lng' => -34.7960,
-                'foto' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa67/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -865,7 +865,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => [],
                 'lat' => -7.3550,
                 'lng' => -34.7980,
-                'foto' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa68/800/500',
             ],
             [
                 'cat' => $catAgua,
@@ -877,7 +877,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.4200,
                 'lng' => -34.8050,
-                'foto' => 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa69/800/500',
             ],
 
             // --- PATRIMÔNIO CULTURAL & ESPAÇOS ARTÍSTICOS ADICIONAIS ---
@@ -891,7 +891,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1125,
                 'lng' => -34.8890,
-                'foto' => 'https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa70/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -903,7 +903,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1145,
                 'lng' => -34.8870,
-                'foto' => 'https://images.unsplash.com/photo-1548625149-fc4a29cf7092?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa71/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -915,7 +915,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1150,
                 'lng' => -34.8855,
-                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa72/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -927,7 +927,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1260,
                 'lng' => -34.8475,
-                'foto' => 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa73/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -939,7 +939,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1268,
                 'lng' => -34.8482,
-                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa74/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -951,7 +951,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.1272,
                 'lng' => -34.8478,
-                'foto' => 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa75/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -963,7 +963,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1172,
                 'lng' => -34.8838,
-                'foto' => 'https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa76/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -975,7 +975,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => [],
                 'lat' => -7.1110,
                 'lng' => -34.8760,
-                'foto' => 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa77/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -987,7 +987,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => [],
                 'lat' => -7.1130,
                 'lng' => -34.8905,
-                'foto' => 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa78/800/500',
             ],
             [
                 'cat' => $catCultura,
@@ -999,7 +999,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1098,
                 'lng' => -34.8765,
-                'foto' => 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa79/800/500',
             ],
 
             // --- GASTRONOMIA ADICIONAL DE JOÃO PESSOA ---
@@ -1013,7 +1013,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante', 'deficiencia_auditiva'],
                 'lat' => -7.0200,
                 'lng' => -34.8290,
-                'foto' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa80/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -1025,7 +1025,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1135,
                 'lng' => -34.8230,
-                'foto' => 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa81/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -1037,7 +1037,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1260,
                 'lng' => -34.8210,
-                'foto' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa82/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -1049,7 +1049,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1245,
                 'lng' => -34.8380,
-                'foto' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa83/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -1061,7 +1061,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1238,
                 'lng' => -34.8745,
-                'foto' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa84/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -1073,7 +1073,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.1240,
                 'lng' => -34.8218,
-                'foto' => 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa85/800/500',
             ],
             [
                 'cat' => $catGastronomia,
@@ -1085,7 +1085,7 @@ class JoaoPessoaAtrativosEventosSeeder extends Seeder
                 'acess' => ['cadeirante'],
                 'lat' => -7.0690,
                 'lng' => -34.8295,
-                'foto' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
+                'foto' => 'https://picsum.photos/seed/pwa86/800/500',
             ]
         ];
 
