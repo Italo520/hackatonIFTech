@@ -49,7 +49,7 @@ export const LocationService = {
             p.cidade.toLowerCase().includes(normalized) || 
             normalized.includes(p.cidade.toLowerCase())
         );
-        return filtered.length > 0 ? filtered : pool;
+        return filtered;
     },
 
     /**
@@ -57,7 +57,7 @@ export const LocationService = {
      */
     async fetchAttractionsFromApi(cityName, lat = null, lng = null) {
         try {
-            let url = `/api/v1/atrativos?status=ativo`;
+            let url = `/api/v1/atrativos?status=ativo&per_page=250`;
             if (cityName) {
                 url += `&cidade=${encodeURIComponent(cityName)}`;
             }
@@ -159,8 +159,10 @@ export const LocationService = {
     async saveLocation(data) {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            // Salva a cidade num cookie para o PHP poder acessar e filtrar server-side (ex: Explorar)
+            document.cookie = `turismo_user_city=${encodeURIComponent(data.city)}; path=/; max-age=31536000`;
         } catch (e) {
-            console.warn('Erro ao salvar localização no storage:', e);
+            console.warn('Erro ao salvar localização no storage/cookie:', e);
         }
         this.updateDOM(data);
 
@@ -175,7 +177,19 @@ export const LocationService = {
             detail: {
                 ...data,
                 attractions,
-                roteiros
+                roteiros,
+                isUserAction: true,
+                isInitial: false
+            } 
+        }));
+
+        window.dispatchEvent(new CustomEvent('turismo:location-user-selected', { 
+            detail: {
+                ...data,
+                attractions,
+                roteiros,
+                isUserAction: true,
+                isInitial: false
             } 
         }));
     },
@@ -546,7 +560,9 @@ export const LocationService = {
                 detail: {
                     ...saved,
                     attractions: attractions || this.getAttractionsByCity(saved.city),
-                    roteiros
+                    roteiros,
+                    isInitial: true,
+                    isUserAction: false
                 } 
             }));
         });

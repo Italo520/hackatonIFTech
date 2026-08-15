@@ -23,9 +23,10 @@ class IndexAtrativoRequest extends FormRequest
             'lng' => ['nullable', 'numeric', 'between:-180,180'],
             'lon' => ['nullable', 'numeric', 'between:-180,180'],
             'raio_km' => ['nullable', 'numeric', 'min:0.1', 'max:5000'],
-            'radius' => ['nullable', 'numeric', 'min:0.1', 'max:5000'],
             'sort_by' => ['nullable', 'string', 'in:nome,duracao,distancia,mais_proximos'],
             'cidade' => ['nullable', 'string', 'max:100'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:500'],
+            'limit' => ['nullable', 'integer', 'min:1', 'max:500'],
         ];
     }
 }

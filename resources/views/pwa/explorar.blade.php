@@ -318,6 +318,15 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // Atualiza a página APENAS se o usuário mudar explicitamente de cidade pelo cabeçalho
+    window.addEventListener('turismo:location-user-selected', function(e) {
+        const newCity = e.detail?.city;
+        const currentRenderedCity = '{{ $municipioNome ?? "" }}';
+        if (newCity && (!currentRenderedCity || newCity.toLowerCase() !== currentRenderedCity.toLowerCase())) {
+            window.location.href = '{{ route("pwa.explorar") }}?municipio=' + encodeURIComponent(newCity);
+        }
+    });
 });
 </script>
 @endpush

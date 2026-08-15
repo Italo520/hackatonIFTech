@@ -121,65 +121,29 @@
                     </div>
                     
                     <div class="py-1" id="dropdown-cities-list">
-                        <!-- João Pessoa -->
-                        <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center justify-content-between btn-select-city" data-city="João Pessoa" data-uf="PB" data-lat="-7.1153" data-lng="-34.8641">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="rounded-circle bg-primary d-inline-block" style="width: 8px; height: 8px;"></span>
-                                <div>
-                                    <div class="fw-bold text-dark small">João Pessoa</div>
-                                    <div class="text-muted" style="font-size: 0.7rem;">Paraíba • 6 atrações</div>
+                        @forelse($municipiosDropdown ?? [] as $m)
+                            <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center justify-content-between btn-select-city" data-city="{{ $m->nome }}" data-uf="{{ $m->uf }}" data-lat="{{ $m->lat }}" data-lng="{{ $m->lng }}">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="rounded-circle {{ $m->color_badge ?? 'bg-primary' }} d-inline-block" style="width: 8px; height: 8px;"></span>
+                                    <div>
+                                        <div class="fw-bold text-dark small">{{ $m->nome }}</div>
+                                        <div class="text-muted" style="font-size: 0.7rem;">{{ $m->estado_nome ?? $m->uf }} • {{ $m->atrativos_count }} {{ $m->atrativos_count == 1 ? 'atração' : 'atrações' }}</div>
+                                    </div>
                                 </div>
-                            </div>
-                            <i class="bi bi-check2 text-primary fs-5 active-check"></i>
-                        </button>
-                        
-                        <!-- Bonito -->
-                        <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center justify-content-between btn-select-city" data-city="Bonito" data-uf="MS" data-lat="-21.1275" data-lng="-56.4831">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="rounded-circle bg-success d-inline-block" style="width: 8px; height: 8px;"></span>
-                                <div>
-                                    <div class="fw-bold text-dark small">Bonito</div>
-                                    <div class="text-muted" style="font-size: 0.7rem;">Mato Grosso do Sul • 4 atrações</div>
+                                <i class="bi bi-check2 text-primary fs-5 d-none active-check"></i>
+                            </button>
+                        @empty
+                            <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center justify-content-between btn-select-city" data-city="João Pessoa" data-uf="PB" data-lat="-7.1153" data-lng="-34.8641">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="rounded-circle bg-primary d-inline-block" style="width: 8px; height: 8px;"></span>
+                                    <div>
+                                        <div class="fw-bold text-dark small">João Pessoa</div>
+                                        <div class="text-muted" style="font-size: 0.7rem;">Paraíba</div>
+                                    </div>
                                 </div>
-                            </div>
-                            <i class="bi bi-check2 text-primary fs-5 d-none active-check"></i>
-                        </button>
-                        
-                        <!-- Recife -->
-                        <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center justify-content-between btn-select-city" data-city="Recife" data-uf="PE" data-lat="-8.0476" data-lng="-34.8770">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="rounded-circle bg-warning d-inline-block" style="width: 8px; height: 8px;"></span>
-                                <div>
-                                    <div class="fw-bold text-dark small">Recife</div>
-                                    <div class="text-muted" style="font-size: 0.7rem;">Pernambuco • 3 atrações</div>
-                                </div>
-                            </div>
-                            <i class="bi bi-check2 text-primary fs-5 d-none active-check"></i>
-                        </button>
-
-                        <!-- Natal -->
-                        <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center justify-content-between btn-select-city" data-city="Natal" data-uf="RN" data-lat="-5.7945" data-lng="-35.2110">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="rounded-circle bg-info d-inline-block" style="width: 8px; height: 8px;"></span>
-                                <div>
-                                    <div class="fw-bold text-dark small">Natal</div>
-                                    <div class="text-muted" style="font-size: 0.7rem;">Rio Grande do Norte • 3 atrações</div>
-                                </div>
-                            </div>
-                            <i class="bi bi-check2 text-primary fs-5 d-none active-check"></i>
-                        </button>
-
-                        <!-- São Paulo -->
-                        <button type="button" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center justify-content-between btn-select-city" data-city="São Paulo" data-uf="SP" data-lat="-23.5505" data-lng="-46.6333">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="rounded-circle bg-danger d-inline-block" style="width: 8px; height: 8px;"></span>
-                                <div>
-                                    <div class="fw-bold text-dark small">São Paulo</div>
-                                    <div class="text-muted" style="font-size: 0.7rem;">São Paulo • 3 atrações</div>
-                                </div>
-                            </div>
-                            <i class="bi bi-check2 text-primary fs-5 d-none active-check"></i>
-                        </button>
+                                <i class="bi bi-check2 text-primary fs-5 active-check"></i>
+                            </button>
+                        @endforelse
                     </div>
 
                     <div class="dropdown-divider my-2"></div>
@@ -202,9 +166,6 @@
                 <button id="btn-header-install" type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 fw-bold d-none d-flex align-items-center gap-1 shadow-sm btn-trigger-pwa-install" title="Instalar Aplicativo" style="font-size: 0.8rem; min-height: 36px;">
                     <i class="bi bi-download"></i>
                     <span>Instalar</span>
-                </button>
-                <button class="btn btn-light rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 38px; height: 38px; border: none; background: rgba(0,0,0,0.05);" data-bs-toggle="modal" data-bs-target="#locationModal" title="Ver localização e busca avançada">
-                    <i class="bi bi-compass fs-5 text-primary"></i>
                 </button>
 
                 <!-- Botão Central de Notificações / Alertas Oficiais -->
@@ -376,21 +337,11 @@
                     <div>
                         <div class="text-muted fw-semibold small mb-2" style="font-size: 0.75rem; text-transform: uppercase;">Cidades em Destaque</div>
                         <div class="d-flex flex-wrap gap-2">
-                            <button type="button" class="btn btn-outline-primary rounded-pill btn-sm px-3 fw-semibold btn-quick-location" data-city="João Pessoa" data-uf="PB" data-lat="-7.1153" data-lng="-34.8641">
-                                📍 João Pessoa - PB
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary rounded-pill btn-sm px-3 fw-semibold btn-quick-location" data-city="Bonito" data-uf="MS" data-lat="-21.1275" data-lng="-56.4831">
-                                Bonito - MS
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary rounded-pill btn-sm px-3 fw-semibold btn-quick-location" data-city="Recife" data-uf="PE" data-lat="-8.0476" data-lng="-34.8770">
-                                Recife - PE
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary rounded-pill btn-sm px-3 fw-semibold btn-quick-location" data-city="Natal" data-uf="RN" data-lat="-5.7945" data-lng="-35.2110">
-                                Natal - RN
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary rounded-pill btn-sm px-3 fw-semibold btn-quick-location" data-city="São Paulo" data-uf="SP" data-lat="-23.5505" data-lng="-46.6333">
-                                São Paulo - SP
-                            </button>
+                            @foreach($municipiosDropdown ?? [] as $m)
+                                <button type="button" class="btn btn-outline-secondary rounded-pill btn-sm px-3 fw-semibold btn-quick-location" data-city="{{ $m->nome }}" data-uf="{{ $m->uf }}" data-lat="{{ $m->lat }}" data-lng="{{ $m->lng }}">
+                                    📍 {{ $m->nome }} - {{ $m->uf }} <span class="badge bg-light text-dark ms-1">{{ $m->atrativos_count }}</span>
+                                </button>
+                            @endforeach
                         </div>
                     </div>
                 </div>

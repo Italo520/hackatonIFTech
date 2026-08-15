@@ -97,7 +97,8 @@ class AtrativoController extends Controller
         }
 
         // Paginação manual para preservar distâncias calculadas
-        $perPage = 15;
+        $perPage = (int) $request->query('per_page', $request->query('limit', 15));
+        $perPage = max(1, min($perPage, 500));
         $page = (int) $request->query('page', 1);
         $total = $atrativosPaginados->count();
         $items = $atrativosPaginados->forPage($page, $perPage)->values();

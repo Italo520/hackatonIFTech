@@ -21,8 +21,16 @@ class ExplorarController extends Controller
             ->orderBy('nome')
             ->get(['id', 'nome', 'slug', 'icone']);
 
-        $query = \App\Models\Atrativo::with('categoria');
+        $query = \App\Models\Atrativo::with('categoria', 'municipio');
         $is_search = false;
+
+        // Filtro por Município (cidade selecionada pelo LocationService via cookie ou query)
+        $municipioNome = $request->query('municipio', $request->cookie('turismo_user_city'));
+        if ($municipioNome) {
+            $query->whereHas('municipio', function ($m) use ($municipioNome) {
+                $m->where('nome', 'like', "%{$municipioNome}%");
+            });
+        }
 
         // Filtro por texto (Busca Inteligente)
         if ($request->filled('q')) {
@@ -68,14 +76,28 @@ class ExplorarController extends Controller
             // Comportamento da tela de explorar: todos os atrativos paginados em 9 por página
             $principais_lugares = (clone $query)->orderBy('id', 'asc')->paginate(9);
             
-            $atividades_gratuitas = \App\Models\Atrativo::with('categoria')->inRandomOrder()->limit(4)->get();
+            $gratuitasQuery = \App\Models\Atrativo::with('categoria');
+            if ($municipioNome) {
+                $gratuitasQuery->whereHas('municipio', function ($m) use ($municipioNome) {
+                    $m->where('nome', 'like', "%{$municipioNome}%");
+                });
+            }
+            $atividades_gratuitas = $gratuitasQuery->inRandomOrder()->limit(4)->get();
             
-            $eventos = \App\Models\Evento::where('status', 'ativo')
-                ->orderBy('inicio', 'asc')
-                ->limit(4)
-                ->get();
+            $eventosQuery = \App\Models\Evento::where('status', 'ativo');
+            if ($municipioNome) {
+                $eventosQuery->where(function ($q) use ($municipioNome) {
+                    $q->where('local', 'like', "%{$municipioNome}%")
+                      ->orWhere('descricao', 'like', "%{$municipioNome}%")
+                      ->orWhere('nome', 'like', "%{$municipioNome}%");
+                });
+            }
+            $eventos = $eventosQuery->orderBy('inicio', 'asc')->limit(4)->get();
+            if ($eventos->isEmpty() && $municipioNome) {
+                $eventos = \App\Models\Evento::where('status', 'ativo')->orderBy('inicio', 'asc')->limit(4)->get();
+            }
         }
 
-        return view('pwa.explorar', compact('categorias', 'principais_lugares', 'atividades_gratuitas', 'eventos', 'is_search'));
+        return view('pwa.explorar', compact('categorias', 'principais_lugares', 'atividades_gratuitas', 'eventos', 'is_search', 'municipioNome'));
     }
 }

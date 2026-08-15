@@ -180,7 +180,7 @@
         <div class="d-flex justify-content-between align-items-end mb-3">
             <div>
                 <h2 class="fs-5 fw-bold text-dark m-0">Atrações em <span class="current-city-name text-primary">João Pessoa</span></h2>
-                <div class="text-muted small" style="font-size: 0.75rem;"><span id="home-attractions-count">6 atrações</span> disponíveis no mapa</div>
+                <div class="text-muted small" style="font-size: 0.75rem;"><span id="home-attractions-count">Carregando atrações...</span> disponíveis no mapa</div>
             </div>
             <a href="{{ route('pwa.mapa') }}" class="small fw-semibold text-primary text-decoration-none d-flex align-items-center gap-1">
                 <i class="bi bi-map"></i> Ver no Mapa
