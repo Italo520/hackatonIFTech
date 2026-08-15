@@ -1,7 +1,7 @@
 @extends('layouts.pwa')
 
 @section('content')
-<div class="px-3 py-3 sticky-top bg-light border-bottom" style="z-index: 1020; top: -10px !important;">
+<div class="px-3 py-3 sticky-top bg-light border-bottom" style="z-index: 100; top: 0;">
     @if(request('from') === 'admin' || (auth()->check() && in_array(auth()->user()->role ?? '', ['super_admin', 'prefeito', 'secretario', 'gestor_conteudo', 'gestor_cadastros', 'atendente'])))
         <div class="mb-2">
             <a href="{{ route('admin.roteiros.index') }}" class="btn btn-dark rounded-pill btn-sm px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1.5 text-white border border-warning shadow-sm" style="background: #003844; font-size: 0.8rem;">

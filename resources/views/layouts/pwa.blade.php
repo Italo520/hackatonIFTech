@@ -103,7 +103,7 @@
 <body class="bg-light text-dark vh-100 overflow-hidden d-flex flex-col">
     
     <!-- Topbar -->
-    <header class="glass-nav fixed-top w-100 z-3 safe-area-pt">
+    <header class="glass-nav fixed-top w-100 safe-area-pt" style="z-index: 1040;">
         <div class="container-fluid px-3 py-2 d-flex justify-content-between align-items-center" style="min-height: 56px;">
             <!-- Dropdown / Toggle de Seleção de Cidade -->
             <div class="dropdown">
@@ -459,7 +459,7 @@
     </div>
 
     <!-- Floating PWA Install Prompt Banner -->
-    <div id="pwa-install-banner" class="position-fixed start-50 translate-middle-x w-100 px-3 z-3 d-none" style="bottom: 76px; max-width: 460px; z-index: 1050;">
+    <div id="pwa-install-banner" class="position-fixed start-50 translate-middle-x w-100 px-3 d-none" style="bottom: 76px; max-width: 460px; z-index: 1050;">
         <div class="card border-0 rounded-4 shadow-lg p-3 text-white overflow-hidden position-relative" style="background: linear-gradient(135deg, #005f73, #0a9396); border: 1px solid rgba(255,255,255,0.2) !important; backdrop-filter: blur(10px);">
             <button type="button" id="btn-dismiss-install-banner" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 shadow-none" style="font-size: 0.75rem;" aria-label="Dispensar"></button>
             <div class="d-flex align-items-center gap-3">
@@ -467,13 +467,16 @@
                     <img src="/icons/icon-192x192.png" alt="App Icon" style="width: 34px; height: 34px;" class="rounded-3">
                 </div>
                 <div class="flex-grow-1 pe-4">
-                    <div class="fw-bold fs-6 mb-0 text-white">Instalar Turismo App</div>
-                    <div class="text-white-50 small" style="font-size: 0.75rem;">Acesso rápido com mapas e roteiros offline</div>
+                    <div class="fw-bold fs-6 mb-0 text-white">Instalar Destino Inteligente</div>
+                    <div class="text-white-50 small" style="font-size: 0.78rem;">Acesse mais rápido direto da tela de início do seu celular</div>
                 </div>
             </div>
-            <div class="d-flex gap-2 mt-3 pt-2 border-top border-white border-opacity-15">
-                <button type="button" class="btn btn-light text-primary fw-bold rounded-pill flex-grow-1 btn-trigger-pwa-install py-2 shadow-sm" id="btn-install-banner" style="font-size: 0.9rem;">
-                    <i class="bi bi-download me-1"></i> Instalar Aplicativo
+            <div class="d-flex gap-2 mt-3">
+                <button type="button" class="btn btn-light btn-sm rounded-pill px-3 fw-bold flex-grow-1 text-primary btn-trigger-pwa-install shadow-sm">
+                    <i class="bi bi-download me-1"></i> Instalar Agora
+                </button>
+                <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3" id="btn-dismiss-install-banner-2">
+                    Depois
                 </button>
             </div>
         </div>
@@ -551,7 +554,7 @@
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="glass-nav fixed-bottom w-100 z-3 pb-safe border-top" role="navigation" aria-label="Navegação Principal do Aplicativo">
+    <nav class="glass-nav fixed-bottom w-100 pb-safe border-top" style="z-index: 1030;" role="navigation" aria-label="Navegação Principal do Aplicativo">
         <div class="d-flex justify-content-around align-items-center" style="height: 64px;">
             <a href="{{ route('pwa.home') }}" class="bottom-nav-item {{ request()->routeIs('pwa.home') ? 'active' : '' }}" aria-label="Página Inicial" {!! request()->routeIs('pwa.home') ? 'aria-current="page"' : '' !!}>
                 <i class="bi bi-house-door-fill" aria-hidden="true"></i>

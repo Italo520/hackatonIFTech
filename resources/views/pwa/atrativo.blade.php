@@ -12,59 +12,54 @@
 
 @section('content')
 
-{{-- Header flutuante com botão Voltar, Favoritar e Compartilhar --}}
-<div class="position-fixed top-0 start-0 w-100 p-3 d-flex justify-content-between align-items-center z-3"
-     style="pointer-events: none;" role="toolbar" aria-label="Ações Rápidas">
-    <div class="d-flex align-items-center gap-2" style="pointer-events: auto;">
-        @if(request('from') === 'admin' || (auth()->check() && in_array(auth()->user()->role ?? '', ['super_admin', 'prefeito', 'secretario', 'gestor_conteudo', 'gestor_cadastros', 'atendente'])))
-            <a href="{{ route('admin.atrativos.index') }}"
-               class="btn btn-dark rounded-pill shadow-lg d-flex align-items-center gap-2 px-3 py-2 fw-bold text-white text-decoration-none border border-warning"
-               style="background: #003844; backdrop-filter: blur(10px); font-size: 0.85rem;"
-               aria-label="Voltar ao Painel Administrativo">
-                <i class="bi bi-arrow-left text-warning fs-5" aria-hidden="true"></i>
-                <span>Voltar ao Painel Admin</span>
-            </a>
-        @else
-            <a href="{{ route('pwa.explorar') }}"
-               onclick="if(history.length > 1) { history.back(); return false; }"
-               class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center p-0"
-               style="width: 44px; height: 44px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);"
-               aria-label="Voltar para a página anterior">
-                <i class="bi bi-chevron-left text-dark fs-5" aria-hidden="true"></i>
-            </a>
-        @endif
-    </div>
-
-    <div class="d-flex gap-2" style="pointer-events: auto;">
-        <button class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center p-0"
-                style="width: 44px; height: 44px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);"
-                aria-label="Salvar nos Favoritos"
-                title="Favoritar local">
-            <i class="bi bi-heart text-danger fs-5" aria-hidden="true"></i>
-        </button>
-        <button class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center p-0"
-                id="btn-share"
-                style="width: 44px; height: 44px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);"
-                aria-label="Compartilhar este atrativo"
-                title="Compartilhar">
-            <i class="bi bi-share text-dark fs-5" aria-hidden="true"></i>
-        </button>
-    </div>
-</div>
-
-<div class="container-fluid px-3 pt-5 mt-2" style="padding-bottom: 140px !important;">
+<div class="container-fluid px-3 pt-2" style="padding-bottom: 160px !important;">
 
     {{-- Hero Image --}}
     <div class="position-relative w-100 rounded-5 overflow-hidden shadow-sm mb-4" style="height: 320px;">
+        {{-- Botões de Voltar, Favoritar e Compartilhar sobre a Foto --}}
+        <div class="position-absolute top-0 start-0 w-100 p-3 d-flex justify-content-between align-items-center" style="z-index: 5;" role="toolbar" aria-label="Ações Rápidas">
+            <div>
+                @if(request('from') === 'admin' || (auth()->check() && in_array(auth()->user()->role ?? '', ['super_admin', 'prefeito', 'secretario', 'gestor_conteudo', 'gestor_cadastros', 'atendente'])))
+                    <a href="{{ route('admin.atrativos.index') }}"
+                       class="btn btn-dark rounded-pill shadow-sm d-flex align-items-center gap-2 px-3 py-1.5 fw-bold text-white text-decoration-none border border-warning"
+                       style="background: rgba(0, 56, 68, 0.85); backdrop-filter: blur(8px); font-size: 0.8rem;"
+                       aria-label="Voltar ao Painel Administrativo">
+                        <i class="bi bi-arrow-left text-warning fs-5" aria-hidden="true"></i>
+                        <span>Admin</span>
+                    </a>
+                @else
+                    <a href="{{ route('pwa.explorar') }}"
+                       onclick="if(history.length > 1) { history.back(); return false; }"
+                       class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center p-0"
+                       style="width: 40px; height: 40px; background: rgba(255,255,255,0.9); backdrop-filter: blur(8px);"
+                       aria-label="Voltar para a página anterior">
+                        <i class="bi bi-chevron-left text-dark fs-5" aria-hidden="true"></i>
+                    </a>
+                @endif
+            </div>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center p-0"
+                        style="width: 40px; height: 40px; background: rgba(255,255,255,0.9); backdrop-filter: blur(8px);"
+                        aria-label="Salvar nos Favoritos"
+                        title="Favoritar local">
+                    <i class="bi bi-heart text-danger fs-5" aria-hidden="true"></i>
+                </button>
+                <button class="btn btn-light rounded-circle shadow-sm d-flex justify-content-center align-items-center p-0"
+                        id="btn-share"
+                        style="width: 40px; height: 40px; background: rgba(255,255,255,0.9); backdrop-filter: blur(8px);"
+                        aria-label="Compartilhar este atrativo"
+                        title="Compartilhar">
+                    <i class="bi bi-share text-dark fs-5" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+
         @if ($imagemPrincipal)
             <img src="{{ $imagemPrincipal }}"
                  class="w-100 h-100 object-fit-cover"
                  alt="{{ $atrativo->nome }}">
         @else
-            {{--
-                Fallback: imagem do Unsplash baseada na categoria.
-                Será substituída quando mídias reais forem cadastradas no admin.
-            --}}
             @php
                 $fallbackImages = [
                     'rios'        => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80',
@@ -233,10 +228,10 @@
             <div class="col-6">
                 <div id="map-container"
                      class="rounded-4 overflow-hidden position-relative border shadow-sm"
-                     style="min-height: 160px; height: 100%; background-color: #e9ecef; cursor: pointer;">
+                     style="min-height: 160px; height: 100%; background-color: #e9ecef; cursor: pointer; isolation: isolate; z-index: 1;">
                     <div id="map" class="w-100 h-100 position-absolute top-0 start-0"></div>
                     <div class="position-absolute bottom-0 start-50 translate-middle-x mb-2 text-center w-100 px-2"
-                         style="pointer-events: none; z-index: 1000;">
+                         style="pointer-events: none; z-index: 2;">
                         <span class="badge bg-dark bg-opacity-75 text-white shadow-sm border border-secondary px-3 py-2 rounded-pill"
                               style="font-size: 0.7rem; backdrop-filter: blur(4px);">
                             <i class="bi bi-cursor-fill text-warning me-1"></i>Abrir Navegação
@@ -418,10 +413,10 @@
 </div>
 
 {{-- FAB: Adicionar ao Roteiro --}}
-<div class="position-fixed start-50 translate-middle-x w-100 px-4 z-3 d-flex justify-content-center"
-     style="bottom: 80px; max-width: 400px; pointer-events: none;">
+<div class="position-fixed start-50 translate-middle-x w-100 px-4 d-flex justify-content-center"
+     style="bottom: 80px; max-width: 420px; pointer-events: none; z-index: 1020;">
     <button id="btn-add-roteiro" class="btn fw-bold py-3 px-4 rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2 text-white w-100"
-            style="background-color: rgba(0, 95, 115, 0.95); font-size: 1.1rem; backdrop-filter: blur(10px); pointer-events: auto; border: 2px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">
+            style="background-color: rgba(0, 95, 115, 0.95); font-size: 1.05rem; backdrop-filter: blur(10px); pointer-events: auto; border: 2px solid rgba(255,255,255,0.15); transition: all 0.3s ease;">
         <i class="bi bi-plus-circle-fill fs-4 text-warning" id="icon-add-roteiro"></i>
         <span id="text-add-roteiro">Adicionar ao Roteiro</span>
     </button>
