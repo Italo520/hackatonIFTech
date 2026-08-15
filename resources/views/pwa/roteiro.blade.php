@@ -134,7 +134,7 @@
                 'atrativo_id' => $it->atrativo_id,
                 'nome' => $it->atrativo?->nome ?? ('Parada ' . ($idx + 1)),
                 'tipo' => $it->tipo_atividade ?? 'Visitação',
-                'tempo' => $it->tempo_sugerido ? ($it->tempo_sugerido . ' min') : '1 hora',
+                'tempo' => $it->tempo_estimado ? ($it->tempo_estimado . ' min') : '1 hora',
                 'descricao' => $it->observacoes ?? ($it->atrativo?->descricao ?? 'Visita ao atrativo turístico.'),
                 'lat' => $it->atrativo?->lat ?? -7.1153,
                 'lng' => $it->atrativo?->lng ?? -34.8641,
@@ -143,11 +143,11 @@
         $item = [
             'id' => $dbRoteiro->id,
             'titulo' => $dbRoteiro->titulo,
-            'cidade' => $dbRoteiro->municipio?->nome ?? 'Destino Inteligente',
-            'duracao' => $dbRoteiro->duracao_estimada ? ($dbRoteiro->duracao_estimada . ' Horas') : '1 Dia',
+            'cidade' => $dbRoteiro->municipio?->nome ?? 'Sua Viagem',
+            'duracao' => $dbRoteiro->duracao ? ($dbRoteiro->duracao . ' min') : '1 Dia',
             'descricao' => $dbRoteiro->descricao ?? 'Roteiro turístico oficial.',
             'imagem' => $dbRoteiro->imagem ?? 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80',
-            'orcamento' => $dbRoteiro->orcamento_estimado ? ('R$ ' . number_format($dbRoteiro->orcamento_estimado, 2, ',', '.')) : 'Consultar',
+            'orcamento' => $dbRoteiro->orcamento ? ('R$ ' . number_format((float)$dbRoteiro->orcamento, 2, ',', '.')) : 'Consultar',
             'paradas' => $paradas
         ];
     } else {
