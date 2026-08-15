@@ -116,7 +116,15 @@ Route::middleware(['auth', 'role:super_admin,prefeito,secretario,gestor_conteudo
         Route::get('/admin/auditoria', [AdminController::class, 'auditoria'])->name('admin.auditoria.index');
     });
 
-    // 7. Documentação do Projeto & Swagger (Super Admin)
+    // 7. Gestão de Usuários & Matriz RBAC (Super Admin Exclusivo)
+    Route::middleware('role:super_admin')->group(function () {
+        Route::get('/admin/usuarios', [AdminController::class, 'usuarios'])->name('admin.usuarios.index');
+        Route::post('/admin/usuarios', [AdminController::class, 'storeUsuario'])->name('admin.usuarios.store');
+        Route::put('/admin/usuarios/{id}/role', [AdminController::class, 'updateRoleUsuario'])->name('admin.usuarios.update-role');
+        Route::delete('/admin/usuarios/{id}', [AdminController::class, 'destroyUsuario'])->name('admin.usuarios.destroy');
+    });
+
+    // 8. Documentação do Projeto & Swagger (Super Admin)
     Route::middleware('role:super_admin')->group(function () {
         Route::get('/admin/documentacao', [AdminController::class, 'documentacao'])->name('admin.documentacao');
         Route::get('/admin/swagger', [AdminController::class, 'swagger'])->name('admin.swagger');

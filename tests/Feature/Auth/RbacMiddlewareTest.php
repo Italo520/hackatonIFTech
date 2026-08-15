@@ -75,6 +75,7 @@ class RbacMiddlewareTest extends TestCase
         $this->actingAs($prefeito)->get('/admin/prestadores')->assertStatus(403);
         $this->actingAs($prefeito)->get('/admin/auditoria')->assertStatus(403);
         $this->actingAs($prefeito)->get('/admin/documentacao')->assertStatus(403);
+        $this->actingAs($prefeito)->get('/admin/usuarios')->assertStatus(403);
     }
 
     public function test_secretario_permissions(): void
@@ -93,6 +94,7 @@ class RbacMiddlewareTest extends TestCase
         // Acessos negados
         $this->actingAs($secretario)->get('/admin/auditoria')->assertStatus(403);
         $this->actingAs($secretario)->get('/admin/documentacao')->assertStatus(403);
+        $this->actingAs($secretario)->get('/admin/usuarios')->assertStatus(403);
     }
 
     public function test_gestor_conteudo_permissions(): void
@@ -110,6 +112,7 @@ class RbacMiddlewareTest extends TestCase
         $this->actingAs($gestor)->get('/admin/alertas')->assertStatus(403);
         $this->actingAs($gestor)->get('/admin/auditoria')->assertStatus(403);
         $this->actingAs($gestor)->get('/admin/documentacao')->assertStatus(403);
+        $this->actingAs($gestor)->get('/admin/usuarios')->assertStatus(403);
     }
 
     public function test_gestor_cadastros_permissions(): void
@@ -127,5 +130,15 @@ class RbacMiddlewareTest extends TestCase
         $this->actingAs($gestor)->get('/admin/alertas')->assertStatus(403);
         $this->actingAs($gestor)->get('/admin/auditoria')->assertStatus(403);
         $this->actingAs($gestor)->get('/admin/documentacao')->assertStatus(403);
+        $this->actingAs($gestor)->get('/admin/usuarios')->assertStatus(403);
+    }
+
+    public function test_super_admin_can_access_usuarios_management(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+
+        $response = $this->actingAs($admin)->get('/admin/usuarios');
+        $response->assertStatus(200);
+        $response->assertSee('Gestão de Usuários');
     }
 }

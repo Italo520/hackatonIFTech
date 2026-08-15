@@ -230,6 +230,12 @@
                     @endif
                     @if($canVerAuditoria)
                         <li class="nav-item">
+                            <a href="{{ route('admin.usuarios.index') }}" class="nav-link {{ request()->is('admin/usuarios*') ? 'active' : '' }}">
+                                <i class="bi bi-people-fill text-warning"></i>
+                                <span>Usuários & RBAC</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('admin.auditoria.index') }}" class="nav-link {{ request()->is('admin/auditoria*') ? 'active' : '' }}">
                                 <i class="bi bi-shield-lock"></i>
                                 <span>Auditoria & Logs</span>

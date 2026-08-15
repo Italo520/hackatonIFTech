@@ -369,4 +369,159 @@ class AdminController extends Controller
     {
         return view('admin.swagger');
     }
+
+    /**
+     * Gestão de Usuários & Matriz de Controle de Acesso (RBAC) - Exclusivo Super Admin
+     */
+    public function usuarios(Request $request)
+    {
+        $query = \App\Models\User::query();
+
+        // Busca por nome ou e-mail
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($qb) use ($q) {
+                $qb->where('name', 'like', "%{$q}%")
+                   ->orWhere('email', 'like', "%{$q}%");
+            });
+        }
+
+        // Filtro por Perfil / Role
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        $usuarios = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
+        // Contagens para os cards de estatística
+        $stats = [
+            'total' => \App\Models\User::count(),
+            'super_admin' => \App\Models\User::where('role', 'super_admin')->count(),
+            'gestores' => \App\Models\User::whereIn('role', ['prefeito', 'secretario', 'gestor_conteudo', 'gestor_cadastros', 'atendente'])->count(),
+            'empreendedores' => \App\Models\User::where('role', 'empreendedor')->count(),
+            'turistas' => \App\Models\User::where('role', 'turista')->count(),
+        ];
+
+        $rolesDisponiveis = [
+            'super_admin' => [
+                'nome' => 'Super Administrador',
+                'badge' => 'bg-primary text-white',
+                'descricao' => 'Acesso total a todos os módulos, auditoria, configurações e documentação técnica.',
+                'icone' => 'bi-shield-fill-check',
+            ],
+            'prefeito' => [
+                'nome' => 'Prefeito Municipal',
+                'badge' => 'bg-info text-dark',
+                'descricao' => 'Visão executiva com KPIs, Dashboard, Mapa de Calor, Alertas e Relatórios.',
+                'icone' => 'bi-building-gear',
+            ],
+            'secretario' => [
+                'nome' => 'Secretário de Turismo',
+                'badge' => 'bg-success text-white',
+                'descricao' => 'Gestão de atrativos, eventos, roteiros, validação de parceiros e relatórios.',
+                'icone' => 'bi-briefcase-fill',
+            ],
+            'gestor_conteudo' => [
+                'nome' => 'Gestor de Conteúdo',
+                'badge' => 'bg-secondary text-white',
+                'descricao' => 'CMS de atrativos turísticos, calendário de eventos e roteiros temáticos.',
+                'icone' => 'bi-pencil-square',
+            ],
+            'gestor_cadastros' => [
+                'nome' => 'Gestor de Cadastros',
+                'badge' => 'bg-warning text-dark',
+                'descricao' => 'Fila de análise e homologação de parceiros e estabelecimentos turísticos.',
+                'icone' => 'bi-patch-check-fill',
+            ],
+            'atendente' => [
+                'nome' => 'Atendente',
+                'badge' => 'bg-light text-dark border',
+                'descricao' => 'Visualização de dashboard, atrativos e consulta operacional ao turista.',
+                'icone' => 'bi-headset',
+            ],
+            'empreendedor' => [
+                'nome' => 'Empreendedor / Parceiro',
+                'badge' => 'bg-warning text-dark border border-warning',
+                'descricao' => 'Painel do Parceiro com gestão do próprio estabelecimento e atrativos cadastrados.',
+                'icone' => 'bi-shop',
+            ],
+            'turista' => [
+                'nome' => 'Turista (PWA)',
+                'badge' => 'bg-dark text-white',
+                'descricao' => 'Acesso ao aplicativo do turista, itinerários IA, mapa e privacidade LGPD.',
+                'icone' => 'bi-compass',
+            ],
+        ];
+
+        return view('admin.usuarios.index', compact('usuarios', 'stats', 'rolesDisponiveis'));
+    }
+
+    /**
+     * Cadastra um novo usuário no sistema
+     */
+    public function storeUsuario(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'role' => 'required|string|in:super_admin,prefeito,secretario,gestor_conteudo,gestor_cadastros,atendente,empreendedor,turista',
+            'password' => 'required|string|min:6',
+        ], [
+            'email.unique' => 'Este e-mail já está cadastrado no sistema.',
+            'password.min' => 'A senha deve ter no mínimo 6 caracteres.',
+            'role.in' => 'Perfil de usuário inválido.',
+        ]);
+
+        \App\Models\User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'role' => $request->role,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+        ]);
+
+        return redirect()->route('admin.usuarios.index')->with('success', "Usuário '{$request->name}' criado com sucesso com o perfil selecionado.");
+    }
+
+    /**
+     * Atualiza o papel/perfil RBAC de um usuário
+     */
+    public function updateRoleUsuario(Request $request, $id)
+    {
+        $request->validate([
+            'role' => 'required|string|in:super_admin,prefeito,secretario,gestor_conteudo,gestor_cadastros,atendente,empreendedor,turista',
+        ]);
+
+        $usuario = \App\Models\User::findOrFail($id);
+
+        // Previne que o super_admin logado desative seu próprio acesso se for o único super admin
+        if ($usuario->id === auth()->id() && $request->role !== 'super_admin') {
+            $totalSuperAdmins = \App\Models\User::where('role', 'super_admin')->count();
+            if ($totalSuperAdmins <= 1) {
+                return redirect()->back()->with('error', 'Você não pode rebaixar seu próprio perfil porque você é o único Super Administrador cadastrado no sistema.');
+            }
+        }
+
+        $antigoRole = $usuario->role;
+        $usuario->role = $request->role;
+        $usuario->save();
+
+        return redirect()->route('admin.usuarios.index')->with('success', "Perfil de '{$usuario->name}' atualizado de '{$antigoRole}' para '{$request->role}' com sucesso.");
+    }
+
+    /**
+     * Exclui um usuário do sistema
+     */
+    public function destroyUsuario($id)
+    {
+        $usuario = \App\Models\User::findOrFail($id);
+
+        if ($usuario->id === auth()->id()) {
+            return redirect()->back()->with('error', 'Você não pode excluir sua própria conta de Super Administrador em sessão ativa.');
+        }
+
+        $nome = $usuario->name;
+        $usuario->delete();
+
+        return redirect()->route('admin.usuarios.index')->with('success', "Usuário '{$nome}' excluído com sucesso.");
+    }
 }
