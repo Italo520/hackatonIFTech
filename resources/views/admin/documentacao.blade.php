@@ -710,12 +710,30 @@
                     <h3 class="doc-subsection__title">2.1. Casos de Uso e Histórias de Usuário</h3>
                 </div>
                 <div class="doc-subsection__body">
-                    <p>Descrição detalhada das principais jornadas do usuário dentro da aplicação.</p>
+                    <p>Histórias de usuário completas extraídas dos fluxos implementados no código-fonte.</p>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">🧳 Persona: Turista</p>
                     <ul>
-                        <li><strong>Turista:</strong> Explorar atrativos → Visualizar detalhes → Consultar IA → Seguir roteiro → Navegar no mapa.</li>
-                        <li><strong>Empreendedor:</strong> Cadastrar-se como parceiro → Submeter atrativo/negócio → Aguardar validação → Gerenciar listagem.</li>
-                        <li><strong>Gestor Público:</strong> Login → Dashboard KPIs → Gerenciar atrativos/eventos/roteiros → Emitir alertas → Validar prestadores → Exportar relatórios.</li>
-                        <li><strong>Administrador:</strong> Todas as funções do gestor + gerenciamento de usuários + auditoria de logs + configurações do sistema.</li>
+                        <li><strong>US-001 — Explorar Atrativos:</strong> <em>Como turista, quero explorar atrativos turísticos filtrando por categoria e localização, para encontrar pontos de interesse próximos a mim.</em> Implementado em <code>ExplorarController@index</code> + API <code>GET /api/v1/atrativos</code> com filtros por <code>categoria_id</code>, <code>municipio_id</code>, busca textual e ordenação por distância (fórmula Haversine).</li>
+                        <li><strong>US-002 — Assistente de IA:</strong> <em>Como turista, quero conversar com um assistente de IA para receber recomendações personalizadas de pontos turísticos e serviços.</em> Implementado em <code>IAController@chat</code> via <code>IAService::chat()</code> com RAG (Retrieval-Augmented Generation) — a IA recebe dados reais do banco (atrativos, eventos, prestadores validados) e guardrails contra alucinação e fuga de escopo.</li>
+                        <li><strong>US-003 — Roteiro Inteligente:</strong> <em>Como turista, quero gerar um roteiro personalizado pela IA com base na minha localização, tempo disponível e orçamento.</em> Implementado em <code>IAService::gerarRoteiro()</code> — ponto de partida na localização do usuário, sequenciamento por proximidade geográfica, fallback resiliente se a IA falhar.</li>
+                        <li><strong>US-004 — Mapa Interativo:</strong> <em>Como turista, quero navegar no mapa interativo para visualizar atrativos, eventos e rotas geolocalizadas.</em> Implementado via Leaflet + OpenStreetMap tiles. Rota <code>GET /pwa/mapa</code> com marcadores dinâmicos carregados da API.</li>
+                        <li><strong>US-005 — QR Code:</strong> <em>Como turista, quero escanear QR Codes em placas turísticas para acessar informações detalhadas do atrativo diretamente no celular.</em> Implementado em <code>QrCodeController@resolve</code> — redireciona <code>/qr/{hash}</code> para a página do atrativo correspondente, registrando o scan na tabela <code>qrcodes</code>.</li>
+                        <li><strong>US-006 — Controle LGPD:</strong> <em>Como turista, quero controlar meus consentimentos de privacidade (GPS, alertas, métricas) e poder exportar ou excluir meus dados pessoais.</em> Implementado em <code>LGPDController</code> com 3 endpoints: <code>POST /api/v1/lgpd/consentimentos</code>, <code>POST /api/v1/lgpd/exportar</code> (auth), <code>POST /api/v1/lgpd/excluir</code> (auth + confirmação de senha).</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">🏪 Persona: Empreendedor</p>
+                    <ul>
+                        <li><strong>US-007 — Cadastro de Parceiro:</strong> <em>Como empreendedor local, quero cadastrar meu negócio (hospedagem, gastronomia ou guia turístico) para ser listado na plataforma.</em> Implementado em <code>EmpreendedorController@store</code> — cria conta com role <code>empreendedor</code>, registra Prestador com status <code>pendente</code>, documentos e dados do negócio em JSON.</li>
+                        <li><strong>US-008 — Painel do Parceiro:</strong> <em>Como empreendedor aprovado, quero acessar meu painel para gerenciar meus atrativos/serviços cadastrados.</em> Implementado em <code>EmpreendedorController@dashboard</code> com rota <code>/parceiro/painel</code>. Permite submeter novos atrativos em status <code>rascunho</code> via <code>storeAtrativo()</code>.</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">🏛️ Persona: Gestor Público</p>
+                    <ul>
+                        <li><strong>US-009 — Dashboard de KPIs:</strong> <em>Como gestor público, quero visualizar indicadores-chave (atrativos ativos, eventos, interações IA, parceiros pendentes, taxa de acessibilidade, QR scans) no dashboard para tomar decisões baseadas em dados.</em> Implementado em <code>AdminController@dashboard</code> — agrega dados de 6 models + heatmap de fluxo turístico.</li>
+                        <li><strong>US-010 — Alertas de Defesa Civil:</strong> <em>Como gestor, quero emitir alertas de segurança com níveis de urgência (info/aviso/urgente) e duração configurável para notificar turistas em tempo real.</em> Implementado em <code>AlertaController@store</code> — campos: título, corpo, urgência, contato de emergência, responsável, duração em horas. Vigência automática via <code>valido_ate = now() + duracao_horas</code>.</li>
+                        <li><strong>US-011 — Validação de Prestadores:</strong> <em>Como gestor de cadastros, quero aprovar ou rejeitar cadastros de empreendedores locais, concedendo selo de validação aos aprovados.</em> Implementado em <code>PrestadorValidationController@update</code> — transição de status para <code>aprovado</code>, <code>rejeitado</code>, <code>suspenso</code> ou <code>complementar</code>. Selo automático: <code>selo_validado = (status === 'aprovado')</code>.</li>
+                        <li><strong>US-012 — Relatórios CSV:</strong> <em>Como gestor, quero exportar relatórios consolidados em CSV com catálogo de atrativos, telemetria de analytics e métricas de IA para prestação de contas e captação de recursos.</em> Implementado em <code>RelatorioController@exportCsv</code> — gera CSV com BOM UTF-8 (compatível Excel), cabeçalho executivo, tabela de atrativos e eventos analíticos anonimizados (LGPD).</li>
                     </ul>
                 </div>
             </div>
@@ -762,13 +780,79 @@
                     <h3 class="doc-subsection__title">2.4. Dicionário de Regras de Negócio</h3>
                 </div>
                 <div class="doc-subsection__body">
-                    <p>Documentação de cálculos específicos, validações, fluxos e políticas restritivas embutidas no código.</p>
+                    <p>Cálculos, validações, fluxos de estado e políticas restritivas extraídas diretamente do código-fonte.</p>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">📐 RN-001 — Cálculo de Distância Haversine</p>
                     <ul>
-                        <li><strong>Validação de Prestadores:</strong> Fluxo pendente → aprovado/rejeitado, com registro de auditoria obrigatório.</li>
-                        <li><strong>Controle de Acesso (RBAC):</strong> Roles <code>super_admin</code>, <code>prefeito</code>, <code>secretario</code>, <code>gestor_conteudo</code>, <code>gestor_cadastros</code>, <code>empreendedor</code>.</li>
-                        <li><strong>Geolocalização:</strong> Validação de coordenadas via API Nominatim/OpenStreetMap antes de persistir.</li>
-                        <li><strong>Cálculo de KPIs:</strong> Contagem ativa de atrativos, eventos vigentes, interações de IA e prestadores validados.</li>
-                        <li><strong>Heatmap de Fluxo:</strong> Agregação de dados de analytics por coordenada para visualização de calor no mapa.</li>
+                        <li><strong>Arquivo:</strong> <code>app/Models/Atrativo.php → calcularDistanciaKm()</code></li>
+                        <li><strong>Fórmula:</strong> <code>d = 6371 × 2 × atan2(√a, √(1-a))</code> onde <code>a = sin²(Δlat/2) + cos(lat1) × cos(lat2) × sin²(Δlng/2)</code></li>
+                        <li><strong>Uso:</strong> Ordenação de atrativos por proximidade ao turista. Em PostgreSQL, cálculo via SQL raw; em SQLite (dev), cálculo via PHP helper.</li>
+                        <li><strong>Formatação:</strong> <code>formatarDistancia()</code> — valores &lt; 1 km exibidos em metros (ex: "450 m"), &gt;= 1 km em quilômetros (ex: "3,2 km").</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">🤖 RN-002 — IA com RAG e Guardrails Anti-Alucinação</p>
+                    <ul>
+                        <li><strong>Arquivo:</strong> <code>app/Services/IAService.php → chat()</code></li>
+                        <li><strong>RAG (Retrieval-Augmented Generation):</strong> Antes de cada prompt, o sistema busca até 10 atrativos (ordenados por proximidade), 10 eventos ativos e 10 prestadores aprovados com selo. Os dados reais são injetados no prompt como "DADOS OFICIAIS DO SISTEMA".</li>
+                        <li><strong>Guardrail 1 (Anti-Alucinação):</strong> A IA é instruída a responder SOMENTE com dados oficiais listados. Se o usuário perguntar sobre local/evento/serviço não cadastrado, deve dizer que "não encontrou no sistema".</li>
+                        <li><strong>Guardrail 2 (Escopo):</strong> Se a pergunta não tiver relação com turismo, viagens, cultura ou lazer, a IA recusa educadamente. Nunca ensina código, não aceita injeção de prompt.</li>
+                        <li><strong>Sanitização:</strong> E-mails do usuário são substituídos por <code>[EMAIL]</code> antes de enviar à API (<code>preg_replace</code>).</li>
+                        <li><strong>Retry:</strong> 3 tentativas com espera de 2s em caso de rate limit (HTTP 429). Mensagem amigável se cota diária esgotada.</li>
+                        <li><strong>Histórico (Memória):</strong> Conversas anteriores são enviadas como contexto para manter coerência na sessão.</li>
+                        <li><strong>API:</strong> Google Gemini 3.5 Flash via <code>generativelanguage.googleapis.com/v1beta/interactions</code>.</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">🔄 RN-003 — Fluxo de Status de Prestadores</p>
+                    <ul>
+                        <li><strong>Arquivo:</strong> <code>app/Http/Controllers/Web/Admin/PrestadorValidationController.php</code></li>
+                        <li><strong>Estados válidos:</strong> <code>pendente</code> → <code>aprovado</code> | <code>rejeitado</code> | <code>suspenso</code> | <code>complementar</code></li>
+                        <li><strong>Selo automático:</strong> <code>selo_validado = true</code> apenas quando <code>status === 'aprovado'</code>. Qualquer outro status revoga o selo.</li>
+                        <li><strong>Auditoria:</strong> Toda alteração de status é registrada automaticamente via <code>OwenIt\Auditing</code> (trait <code>Auditable</code> no model).</li>
+                        <li><strong>Acesso restrito:</strong> Middleware <code>role:super_admin,gestor_cadastros,secretario,prefeito</code>.</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">🗺️ RN-004 — Heatmap de Interesse Turístico</p>
+                    <ul>
+                        <li><strong>Arquivo:</strong> <code>app/Http/Controllers/Web/AdminController.php → heatmapData()</code></li>
+                        <li><strong>Fórmula de intensidade:</strong> <code>I = 0.5 + min(0.5, (eventosCount × 0.1) + (tempo_medio_visita / 360))</code></li>
+                        <li><strong>Range:</strong> <code>0.3 ≤ I ≤ 1.0</code> (clamp via <code>min/max</code>).</li>
+                        <li><strong>Dados:</strong> Cruza coordenadas de atrativos com contagem de <code>analytic_events</code> associados.</li>
+                        <li><strong>Fallback:</strong> Se não houver dados, exibe pontos pré-configurados de cidades turísticas (João Pessoa, Bonito, Recife, Natal).</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">⏰ RN-005 — Vigência de Alertas</p>
+                    <ul>
+                        <li><strong>Arquivo:</strong> <code>app/Models/Alerta.php</code></li>
+                        <li><strong>Criação:</strong> <code>valido_ate = now() + duracao_horas</code> (padrão: 24h, máximo: 720h/30 dias).</li>
+                        <li><strong>Scope <code>ativos</code>:</strong> Filtra alertas com <code>status = 'ativo'</code> E (<code>valido_ate IS NULL</code> OU <code>valido_ate >= now()</code>).</li>
+                        <li><strong>Método <code>estaVigente()</code>:</strong> Retorna <code>false</code> se status ≠ 'ativo' ou se <code>valido_ate</code> já passou.</li>
+                        <li><strong>Urgência:</strong> Enum <code>info</code> | <code>aviso</code> | <code>urgente</code> — define prioridade visual no frontend.</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">🔐 RN-006 — Controle de Acesso (RBAC)</p>
+                    <ul>
+                        <li><strong>Arquivo:</strong> <code>app/Http/Middleware/CheckRole.php</code></li>
+                        <li><strong>8 Roles:</strong> <code>super_admin</code>, <code>prefeito</code>, <code>secretario</code>, <code>gestor_conteudo</code>, <code>gestor_cadastros</code>, <code>atendente</code>, <code>empreendedor</code>, <code>turista</code> (definidas como ENUM na migration <code>users</code>).</li>
+                        <li><strong>Bypass:</strong> <code>super_admin</code> ignora TODAS as verificações de role — acesso irrestrito a qualquer rota protegida.</li>
+                        <li><strong>Lógica:</strong> Se o usuário não estiver autenticado, redireciona para <code>/login</code>. Se autenticado mas sem role adequada, retorna HTTP 403 "Acesso Negado".</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">📊 RN-007 — Cálculo de KPIs do Dashboard</p>
+                    <ul>
+                        <li><strong>Arquivo:</strong> <code>app/Http/Controllers/Web/AdminController.php → dashboard()</code></li>
+                        <li><strong><code>atrativos_ativos</code>:</strong> <code>Atrativo::where('status', 'ativo')->count()</code></li>
+                        <li><strong><code>eventos_ativos</code>:</strong> <code>Evento::where('status', 'ativo')->count()</code></li>
+                        <li><strong><code>ia_interacoes</code>:</strong> <code>AssistantLog::count()</code> — total de conversas com a IA</li>
+                        <li><strong><code>taxa_acessibilidade</code>:</strong> <code>round((atrativos_com_acessibilidade / total_atrativos) × 100)</code> — percentual de atrativos com recursos de acessibilidade.</li>
+                        <li><strong><code>folhas_economizadas</code>:</strong> <code>qr_scans_total × 5</code> — estimativa de folhetos impressos substituídos por acesso digital.</li>
+                        <li><strong>Gráfico IA:</strong> Interações por dia nos últimos 7 dias via <code>selectRaw("DATE(created_at) as data, count(*) as total")</code>.</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">🔍 RN-008 — Full-Text Search (PostgreSQL)</p>
+                    <ul>
+                        <li><strong>Arquivo:</strong> Migration <code>create_atrativos_table.php</code></li>
+                        <li><strong>Implementação:</strong> Coluna gerada <code>search_vector tsvector</code> com índice GIN — <code>to_tsvector('portuguese', nome || ' ' || descricao)</code>.</li>
+                        <li><strong>Disponível apenas em PostgreSQL</strong> (produção). Em SQLite (dev), fallback para <code>LIKE %query%</code>.</li>
                     </ul>
                 </div>
             </div>
@@ -811,25 +895,60 @@
                             <ul>
                                 <li>Turistas acessam o PWA via navegador mobile</li>
                                 <li>Gestores acessam o Painel Admin via navegador desktop/tablet</li>
-                                <li>Integrações externas: OpenStreetMap (geocoding), API de IA (chatbot), SMTP (emails)</li>
+                                <li>Empreendedores acessam o Painel do Parceiro via navegador</li>
+                                <li>Integrações externas: OpenStreetMap/Nominatim (geocoding + tiles), Google Gemini API (chatbot IA), SMTP (emails)</li>
                             </ul>
                         </li>
-                        <li><strong>Nível 2 (Containers):</strong> Aplicações web, APIs, bancos de dados e filas de mensagens.
+                        <li><strong>Nível 2 (Containers):</strong> Aplicações, APIs, bancos de dados e serviços auxiliares.
                             <ul>
-                                <li>Container Web (Laravel): Serve PWA + Admin + API</li>
-                                <li>Container DB: PostgreSQL</li>
-                                <li>Container Nginx: Reverse proxy + serving de assets estáticos</li>
-                                <li>Container Queue Worker: Jobs assíncronos (Laravel Queue)</li>
+                                <li><strong>Container Web (Laravel Sail / PHP-FPM Alpine):</strong> Serve PWA + Admin + API REST. Porta 80.</li>
+                                <li><strong>Container DB (PostgreSQL 15+):</strong> SGBD principal com extensões <code>unaccent</code> e <code>pg_trgm</code>. Porta 5432 (interna), 5436 (host).</li>
+                                <li><strong>Container Redis (Alpine):</strong> Cache, sessões e fila de jobs assíncronos. Porta 6379 (interna), 6381 (host).</li>
+                                <li><strong>Container Nginx:</strong> Reverse proxy + serving de assets estáticos em produção.</li>
                             </ul>
                         </li>
-                        <li><strong>Nível 3 (Componentes):</strong> Estrutura interna das APIs e interfaces.
+                        <li><strong>Nível 3 (Componentes):</strong> Estrutura interna do Laravel.
                             <ul>
-                                <li>Controllers: Web (admin/pwa) + API (v1)</li>
-                                <li>Services: IA, Geocoding, Analytics, QRCode</li>
-                                <li>Models: Atrativo, Evento, Roteiro, Prestador, Alerta, User</li>
+                                <li><strong>Controllers Web Admin (4):</strong> <code>AdminController</code> (dashboard, CRUD atrativos/eventos/roteiros, auditoria, heatmap), <code>AlertaController</code>, <code>PrestadorValidationController</code>, <code>RelatorioController</code></li>
+                                <li><strong>Controllers Web PWA (5):</strong> <code>HomeController</code>, <code>ExplorarController</code>, <code>AtrativoWebController</code>, <code>RoteiroWebController</code>, <code>EmpreendedorController</code></li>
+                                <li><strong>Controllers API v1 (12):</strong> <code>AtrativoController</code>, <code>EventoController</code>, <code>RoteiroController</code>, <code>IAController</code>, <code>LocationController</code>, <code>RoutingApiController</code>, <code>AnalyticsController</code>, <code>LGPDController</code>, <code>OcorrenciaController</code>, <code>SyncController</code>, <code>QrCodeController</code>, <code>UtilidadePublicaController</code></li>
+                                <li><strong>Services (1):</strong> <code>IAService</code> — Orquestra RAG + chamadas à Google Gemini API com retry, guardrails e logging.</li>
+                                <li><strong>Middleware (2):</strong> <code>CheckRole</code> (RBAC com bypass para super_admin), <code>SecurityHeaders</code> (CSP, X-Frame-Options, X-XSS-Protection)</li>
+                                <li><strong>Models (18):</strong> <code>User</code>, <code>Atrativo</code>, <code>Evento</code>, <code>Roteiro</code>, <code>RoteiroItem</code>, <code>Prestador</code>, <code>Alerta</code>, <code>Avaliacao</code>, <code>Ocorrencia</code>, <code>AnalyticEvent</code>, <code>AssistantLog</code>, <code>Categoria</code>, <code>Municipio</code>, <code>Midia</code>, <code>QrCode</code>, <code>Embedding</code>, <code>SyncPacket</code>, <code>UtilidadePublica</code></li>
                             </ul>
                         </li>
                     </ul>
+
+                    <div class="doc-mermaid-wrapper" style="margin-top: 24px;">
+                        <p style="color: var(--doc-accent); font-weight: 700; margin-bottom: 12px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">📐 Diagrama C4 — Nível 2 (Containers)</p>
+                        <pre class="mermaid" style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; overflow-x: auto;">graph TB
+    subgraph Usuários
+        T["🧳 Turista<br/>(PWA Mobile)"]
+        G["🏛️ Gestor Público<br/>(Admin Desktop)"]
+        E["🏪 Empreendedor<br/>(Painel Parceiro)"]
+    end
+
+    subgraph Docker["Docker Compose Network"]
+        APP["📦 Laravel App<br/>PHP 8.2-FPM Alpine<br/>:80"]
+        PG[("🗄️ PostgreSQL 15+<br/>unaccent + pg_trgm<br/>:5432")]
+        RD[("⚡ Redis Alpine<br/>Cache + Queue<br/>:6379")]
+    end
+
+    subgraph Externos
+        OSM["🗺️ OpenStreetMap<br/>Tiles + Nominatim"]
+        GEM["🤖 Google Gemini API<br/>3.5 Flash"]
+        SMTP["📧 SMTP Server"]
+    end
+
+    T --"HTTPS"--> APP
+    G --"HTTPS"--> APP
+    E --"HTTPS"--> APP
+    APP --"SQL"--> PG
+    APP --"Cache/Queue"--> RD
+    APP --"REST API"--> OSM
+    APP --"REST API"--> GEM
+    APP --"SMTP"--> SMTP</pre>
+                    </div>
                 </div>
             </div>
 
@@ -857,21 +976,98 @@
                 </div>
                 <div class="doc-subsection__body">
                     <ul>
-                        <li><strong>Diagrama Entidade-Relacionamento (DER):</strong> Disponível via ferramenta de DB ou gerado a partir das migrations Laravel.</li>
-                        <li><strong>Tabelas Principais:</strong>
+                        <li><strong>Diagrama Entidade-Relacionamento (DER):</strong> Gerado a partir das 23 migrations Laravel (diretório <code>database/migrations/</code>).</li>
+                        <li><strong>15 Tabelas de domínio + 5 tabelas de sistema:</strong>
                             <ul>
-                                <li><code>users</code> — Usuários com role-based access</li>
-                                <li><code>atrativos</code> — Pontos turísticos com lat/lng e metadados</li>
-                                <li><code>eventos</code> — Agenda cultural com datas e localização</li>
-                                <li><code>roteiros</code> / <code>roteiro_items</code> — Roteiros compostos</li>
-                                <li><code>prestadores</code> — Empreendedores parceiros com status de validação</li>
-                                <li><code>alertas</code> — Alertas de defesa civil</li>
-                                <li><code>analytic_events</code> — Rastreamento de interações</li>
-                                <li><code>assistant_logs</code> — Logs de interação com IA</li>
+                                <li><code>users</code> — id, name, email, password (hash bcrypt), role (ENUM 8 valores), 2fa_secret, idioma, consentimentos (JSON), soft deletes</li>
+                                <li><code>atrativos</code> — id, municipio_id (FK), categoria_id (FK), nome, descricao, historia, endereco, lat/lng (decimal 10,8/11,8), geo, horarios (JSON), tempo_medio_visita, precos (JSON), contatos (JSON), acessibilidade (JSON), restricoes, seguranca, status, validado_por (FK → users), validado_em, search_vector (tsvector, PostgreSQL only, com índice GIN)</li>
+                                <li><code>categorias</code> — id, nome, slug, icone, timestamps</li>
+                                <li><code>municipios</code> — id, nome, uf, lat, lng, timestamps</li>
+                                <li><code>eventos</code> — id, nome, descricao, local, geo, lat/lng, inicio (datetime), fim (datetime), organizador, ingressos, capacidade, faixa_etaria, gratuito (boolean), acessibilidade (JSON), status (ENUM: ativo/alterado/cancelado)</li>
+                                <li><code>roteiros</code> — id, titulo, tema, duracao (minutos), dificuldade, transporte, orcamento (decimal), perfil, origem (ENUM: oficial/ia/usuario), geo, distancia_total, publico (boolean), user_id (FK opcional)</li>
+                                <li><code>roteiro_itens</code> — id, roteiro_id (FK), atrativo_id (FK), ordem (int), tempo_estimado</li>
+                                <li><code>prestadores</code> — id, user_id (FK), tipo (hospedagem/gastronomia/guia), dados (JSONB), documentos (JSONB), validade_documentos, status (pendente/aprovado/rejeitado/suspenso/complementar), selo_validado (boolean), ultima_atualizacao</li>
+                                <li><code>alertas</code> — id, titulo, corpo, segmentacao (JSON), urgencia (info/aviso/urgente), contato_emergencia, responsavel, duracao_horas, valido_ate, status, vigencia_inicio, vigencia_fim, criado_por (FK → users)</li>
+                                <li><code>avaliacoes</code> — id, user_id (FK nullable), entidade_id/entidade_type (morphs polimórfico → Atrativo/Prestador/Evento), nota (int), comentario, sentimento (positivo/negativo/neutro), status_moderacao (pendente/aprovada/rejeitada), origem_offline (boolean)</li>
+                                <li><code>ocorrencias</code> — id, tipo, entidade_id/entidade_type (morphs), local_texto, local, geo (JSON), gravidade (baixa/media/alta), descricao, status_atendimento (aberto/...), origem</li>
+                                <li><code>analytic_events</code> — id, tipo, geo (JSON), metadados (JSON), entidade_id/entidade_type (morphs), timestamps</li>
+                                <li><code>assistant_logs</code> — id, pergunta, resposta, fontes (JSON), idioma, feedback_util (boolean nullable)</li>
+                                <li><code>consentimentos</code> — id, user_id (FK), finalidade, versao_termo, aceito_em, revogado_em</li>
+                                <li><code>midias</code> — id, entidade_id/entidade_type (morphs → Atrativo/Evento), tipo (foto/video), url, timestamps</li>
                             </ul>
                         </li>
-                        <li><strong>Versionamento de schema:</strong> Laravel Migrations (diretório <code>database/migrations/</code>).</li>
+                        <li><strong>Tabelas de sistema:</strong> <code>sessions</code>, <code>password_reset_tokens</code>, <code>cache</code>, <code>jobs</code>/<code>job_batches</code>/<code>failed_jobs</code>, <code>personal_access_tokens</code> (Sanctum), <code>audits</code> (OwenIt Auditing)</li>
+                        <li><strong>Relacionamentos polimórficos:</strong> <code>midias</code>, <code>avaliacoes</code>, <code>ocorrencias</code> e <code>analytic_events</code> usam <code>morphMany/morphTo</code> para se relacionar com múltiplas entidades (Atrativo, Evento, Prestador).</li>
+                        <li><strong>Versionamento de schema:</strong> 23 migrations sequenciais em <code>database/migrations/</code>.</li>
                     </ul>
+
+                    <div class="doc-mermaid-wrapper" style="margin-top: 24px;">
+                        <p style="color: var(--doc-accent); font-weight: 700; margin-bottom: 12px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">📐 Diagrama ER — Entidades Principais</p>
+                        <pre class="mermaid" style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; overflow-x: auto;">erDiagram
+    USERS ||--o{ PRESTADORES : "has"
+    USERS ||--o{ AVALIACOES : "writes"
+    USERS ||--o{ CONSENTIMENTOS : "grants"
+    USERS ||--o{ ALERTAS : "creates"
+
+    MUNICIPIOS ||--o{ ATRATIVOS : "contains"
+    CATEGORIAS ||--o{ ATRATIVOS : "classifies"
+    USERS ||--o{ ATRATIVOS : "validates"
+
+    ATRATIVOS ||--o{ MIDIAS : "has photos"
+    ATRATIVOS ||--o{ AVALIACOES : "receives"
+    ATRATIVOS ||--o{ ANALYTIC_EVENTS : "tracks"
+    ATRATIVOS ||--o{ ROTEIRO_ITENS : "included in"
+
+    ROTEIROS ||--o{ ROTEIRO_ITENS : "contains"
+    ROTEIRO_ITENS }o--|| ATRATIVOS : "references"
+
+    ALERTAS }o--|| USERS : "criado_por"
+
+    USERS {
+        bigint id PK
+        string name
+        string email UK
+        enum role "8 values"
+        json consentimentos
+    }
+    ATRATIVOS {
+        bigint id PK
+        bigint municipio_id FK
+        bigint categoria_id FK
+        string nome
+        decimal lat
+        decimal lng
+        string status
+        tsvector search_vector
+    }
+    EVENTOS {
+        bigint id PK
+        string nome
+        datetime inicio
+        datetime fim
+        enum status "ativo|alterado|cancelado"
+    }
+    ROTEIROS {
+        bigint id PK
+        string titulo
+        enum origem "oficial|ia|usuario"
+        integer duracao
+    }
+    PRESTADORES {
+        bigint id PK
+        bigint user_id FK
+        string tipo
+        jsonb dados
+        string status
+        boolean selo_validado
+    }
+    ALERTAS {
+        bigint id PK
+        string titulo
+        string urgencia
+        datetime valido_ate
+    }</pre>
+                    </div>
                 </div>
             </div>
         </section>
@@ -897,12 +1093,17 @@
                         <li><strong>Backend:</strong> PHP 8.2+ / Laravel 11.x</li>
                         <li><strong>Frontend Admin:</strong> Bootstrap 5.3.3 / Bootstrap Icons 1.11.3</li>
                         <li><strong>Frontend PWA:</strong> HTML5 / Vanilla JS / Alpine.js 3.x</li>
-                        <li><strong>Mapas:</strong> Leaflet 1.9.4 / OpenStreetMap tiles</li>
-                        <li><strong>Banco de Dados:</strong> PostgreSQL 15+</li>
+                        <li><strong>Mapas:</strong> Leaflet 1.9.4 / OpenStreetMap tiles / Leaflet Routing Machine</li>
+                        <li><strong>Banco de Dados:</strong> PostgreSQL 15+ (produção) / SQLite (desenvolvimento)</li>
+                        <li><strong>Cache e Filas:</strong> Redis Alpine (via Docker, porta 6381)</li>
+                        <li><strong>IA:</strong> Google Gemini 3.5 Flash API (chave via <code>GEMINI_API_KEY</code>)</li>
+                        <li><strong>Auditoria:</strong> owen-it/laravel-auditing — registra alterações em models Auditable</li>
+                        <li><strong>Autenticação:</strong> Laravel Breeze (web) + Laravel Sanctum (API tokens)</li>
                         <li><strong>Build Tools:</strong> Vite 6.x / Laravel Vite Plugin</li>
                         <li><strong>CSS:</strong> TailwindCSS 3.x (PWA) + Bootstrap 5 (Admin) — build via PostCSS</li>
                         <li><strong>Tipografia:</strong> Plus Jakarta Sans + Work Sans (Google Fonts via Bunny)</li>
-                        <li><strong>Containerização:</strong> Docker + Docker Compose</li>
+                        <li><strong>Animações:</strong> GSAP 3.12.5 (ScrollTrigger + ScrollToPlugin)</li>
+                        <li><strong>Containerização:</strong> Docker + Docker Compose (Laravel Sail para dev)</li>
                     </ul>
                 </div>
             </div>
@@ -985,16 +1186,39 @@
                     <h3 class="doc-subsection__title">5.1. Documentação de APIs Internas e Públicas</h3>
                 </div>
                 <div class="doc-subsection__body">
-                    <p>Especificações no padrão OpenAPI/Swagger com detalhamento de endpoints.</p>
+                    <p>Catálogo completo de endpoints REST extraídos de <code>routes/api.php</code>.</p>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">📍 Endpoints Públicos (sem autenticação)</p>
                     <ul>
                         <li><strong>Base URL:</strong> <code>/api/v1/</code></li>
-                        <li><strong>Atrativos:</strong> <code>GET /api/v1/atrativos</code> — Lista paginada com filtros; <code>GET /api/v1/atrativos/{id}</code> — Detalhes.</li>
-                        <li><strong>Eventos:</strong> <code>GET /api/v1/eventos</code> — Eventos ativos com filtro de data.</li>
-                        <li><strong>Roteiros:</strong> <code>GET /api/v1/roteiros</code> — Roteiros com itens relacionados.</li>
-                        <li><strong>IA/Chat:</strong> <code>POST /api/v1/assistant</code> — Envio de mensagem ao assistente IA.</li>
-                        <li><strong>Geocoding:</strong> <code>GET /api/v1/location/search</code> — Proxy para OpenStreetMap Nominatim.</li>
-                        <li><strong>Analytics:</strong> <code>POST /api/v1/analytics/event</code> — Registro de evento de analytics.</li>
-                        <li><strong>Documentação Scribe:</strong> Disponível em <code>/docs</code> (gerada via Laravel Scribe).</li>
+                        <li><code>GET /api/v1/atrativos</code> — Lista paginada com filtros por categoria, município, busca textual e ordenação por distância.</li>
+                        <li><code>GET /api/v1/atrativos/{id}</code> — Detalhes do atrativo com mídias, categoria e município.</li>
+                        <li><code>GET /api/v1/eventos</code> — Lista de eventos ativos. <code>GET /api/v1/eventos/{id}</code> — Detalhes.</li>
+                        <li><code>GET /api/v1/roteiros</code> — Roteiros com itens (atrativos) relacionados. <code>GET /api/v1/roteiros/{id}</code> — Detalhes.</li>
+                        <li><code>GET /api/v1/roteiros/{id}/export</code> — Exportação de roteiro (JSON estruturado).</li>
+                        <li><code>GET /api/v1/utilidades-publicas</code> — Lista de utilidades públicas (hospitais, polícia, etc).</li>
+                        <li><code>POST /api/v1/ia/chat</code> — Chat com assistente IA (RAG + Gemini). Body: <code>{"pergunta", "idioma", "userLocation", "historico"}</code>.</li>
+                        <li><code>POST /api/v1/ia/roteiro</code> — Geração de roteiro inteligente pela IA. Body: <code>{"cidade", "tema", "duracao_max", "orcamento_max", "lat", "lng"}</code>.</li>
+                        <li><code>GET /api/v1/location/search</code> — Geocodificação (busca → coordenadas) via proxy Nominatim/OpenStreetMap.</li>
+                        <li><code>GET /api/v1/location/reverse</code> — Geocodificação reversa (coordenadas → endereço).</li>
+                        <li><code>GET /api/v1/routes/directions</code> — Roteamento entre pontos (direções para navegação).</li>
+                        <li><code>POST /api/v1/analytics</code> — Registro de evento de analytics (page_view, atrativo_view, etc).</li>
+                        <li><code>POST /api/v1/ocorrencias</code> — Registro de ocorrência turística (tipo, gravidade, localização).</li>
+                        <li><code>POST /api/v1/sync/avaliacoes</code> — Sincronização offline de avaliações em lote.</li>
+                        <li><code>GET /api/v1/qr/{hash}</code> — Scan de QR Code — resolve hash para atrativo e registra contagem.</li>
+                        <li><code>POST /api/v1/lgpd/consentimentos</code> — Salvar preferências de privacidade (GPS, alertas, métricas).</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">🔒 Endpoints Protegidos (auth:sanctum)</p>
+                    <ul>
+                        <li><code>GET /api/user</code> — Retorna dados do usuário autenticado.</li>
+                        <li><code>POST /api/v1/lgpd/exportar</code> — Exporta todos os dados pessoais do usuário (portabilidade LGPD).</li>
+                        <li><code>POST /api/v1/lgpd/excluir</code> — Exclui conta e anonimiza dados (direito ao esquecimento LGPD). Requer confirmação de senha.</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">📝 Documentação Automática</p>
+                    <ul>
+                        <li><strong>Laravel Scribe:</strong> Documentação interativa disponível em <code>/docs</code> (gerada automaticamente a partir das rotas e anotações).</li>
                     </ul>
                 </div>
             </div>
@@ -1005,14 +1229,44 @@
                     <h3 class="doc-subsection__title">5.2. Fluxo de Autenticação / Autorização</h3>
                 </div>
                 <div class="doc-subsection__body">
-                    <p>Como os tokens são gerados, validados e renovados.</p>
+                    <p>Fluxos completos de autenticação e autorização implementados no sistema.</p>
                     <ul>
-                        <li><strong>Web (Admin/PWA):</strong> Autenticação session-based via Laravel Breeze (cookies + CSRF).</li>
-                        <li><strong>API:</strong> Laravel Sanctum com tokens de API para consumo mobile/SPA.</li>
-                        <li><strong>Roles/Permissions:</strong> Middleware customizado <code>role:</code> verificando a coluna <code>role</code> na tabela <code>users</code>.</li>
-                        <li><strong>Fluxo de Login:</strong> POST <code>/login</code> → validação de credenciais → criação de sessão → redirect para dashboard.</li>
-                        <li><strong>Logout:</strong> POST <code>/logout</code> → invalidação de sessão/token.</li>
+                        <li><strong>Web (Admin/PWA):</strong> Autenticação session-based via Laravel Breeze (cookies + CSRF token).</li>
+                        <li><strong>API:</strong> Laravel Sanctum com tokens de API (<code>personal_access_tokens</code>) para consumo mobile/SPA.</li>
+                        <li><strong>Roles/Permissions:</strong> Middleware customizado <code>CheckRole</code> em <code>app/Http/Middleware/CheckRole.php</code>. Verifica coluna <code>role</code> (ENUM) na tabela <code>users</code>. <code>super_admin</code> bypassa todas as verificações.</li>
+                        <li><strong>Fluxo de Login Web:</strong> <code>GET /login</code> → formulário → <code>POST /login</code> → validação de credenciais (bcrypt cost 12) → criação de sessão → redirect baseado em role (dashboard admin ou parceiro).</li>
+                        <li><strong>Fluxo de Registro:</strong> <code>POST /register</code> → role padrão <code>turista</code>. Empreendedores se cadastram via <code>/parceiro/cadastro</code> com role <code>empreendedor</code>.</li>
+                        <li><strong>Logout:</strong> <code>POST /logout</code> → invalidação de sessão + revogação de tokens Sanctum.</li>
+                        <li><strong>Proteção de Rotas:</strong> Grupo admin usa <code>middleware(['auth', 'role:super_admin,prefeito,secretario,gestor_conteudo,gestor_cadastros'])</code>. Parceiro usa <code>middleware(['auth', 'role:empreendedor,super_admin'])</code>.</li>
+                        <li><strong>2FA:</strong> Coluna <code>2fa_secret</code> na tabela <code>users</code> (preparado para implementação futura).</li>
                     </ul>
+
+                    <div class="doc-mermaid-wrapper" style="margin-top: 24px;">
+                        <p style="color: var(--doc-accent); font-weight: 700; margin-bottom: 12px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">📐 Diagrama — Fluxo de Autenticação</p>
+                        <pre class="mermaid" style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; overflow-x: auto;">sequenceDiagram
+    participant U as Usuário
+    participant B as Browser
+    participant L as Laravel App
+    participant DB as PostgreSQL
+
+    U->>B: Acessa /login
+    B->>L: GET /login
+    L-->>B: Formulário (CSRF token)
+    U->>B: Preenche email + senha
+    B->>L: POST /login (email, password, _token)
+    L->>DB: SELECT * FROM users WHERE email = ?
+    DB-->>L: User record
+    L->>L: Hash::check(password, user.password)
+    alt Credenciais válidas
+        L->>DB: INSERT INTO sessions
+        L-->>B: 302 Redirect /dashboard
+        B->>L: GET /dashboard
+        L->>L: CheckRole middleware
+        L-->>B: Dashboard HTML
+    else Credenciais inválidas
+        L-->>B: 422 Validation Error
+    end</pre>
+                    </div>
                 </div>
             </div>
 
@@ -1219,13 +1473,38 @@
                     <h3 class="doc-subsection__title">8.1. Estratégia de Testes</h3>
                 </div>
                 <div class="doc-subsection__body">
-                    <p>Como o projeto divide testes unitários, de integração e de ponta a ponta (E2E).</p>
+                    <p>Estratégia de testes com <strong>15 feature tests</strong> e <strong>1 unit test</strong> implementados. Framework: PHPUnit (configuração em <code>phpunit.xml</code>).</p>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">🧪 Feature Tests (tests/Feature/)</p>
                     <ul>
-                        <li><strong>Framework:</strong> PHPUnit (configuração em <code>phpunit.xml</code>).</li>
-                        <li><strong>Testes Unitários:</strong> Models, Services e helpers com mocks de dependências externas.</li>
-                        <li><strong>Testes de Integração:</strong> Feature tests com banco de dados em memória (SQLite) para validar fluxos completos de request/response.</li>
-                        <li><strong>Testes E2E:</strong> Não implementados na fase atual — recomendado para expansão futura (Laravel Dusk ou Playwright).</li>
-                        <li><strong>Execução:</strong> <code>php artisan test</code> ou <code>vendor/bin/phpunit</code>.</li>
+                        <li><code>AtrativoApiTest.php</code> — Testa CRUD de atrativos via API (listagem, detalhes, filtros por categoria/município, busca textual).</li>
+                        <li><code>EventoApiTest.php</code> — Testa listagem e detalhes de eventos via API.</li>
+                        <li><code>IAApiTest.php</code> — Testa chat com assistente IA (mock do Gemini API), geração de roteiros e validação de guardrails.</li>
+                        <li><code>RoteiroApiTest.php</code> — Testa listagem e detalhes de roteiros com itens relacionados.</li>
+                        <li><code>RoutingApiTest.php</code> — Testa endpoints de roteamento e geocodificação.</li>
+                        <li><code>QrCodeApiTest.php</code> — Testa resolução de QR Code e contagem de scans.</li>
+                        <li><code>LgpdConsentTest.php</code> — Testa fluxo de consentimentos LGPD (salvar preferências).</li>
+                        <li><code>SyncApiTest.php</code> — Testa sincronização offline de avaliações em lote.</li>
+                        <li><code>UtilidadePublicaApiTest.php</code> — Testa listagem de utilidades públicas.</li>
+                        <li><code>OsmImportCommandTest.php</code> — Testa comando Artisan de importação de dados do OpenStreetMap.</li>
+                        <li><code>Sprint3Test.php</code> — Testes de aceitação da Sprint 3 (funcionalidades de mapa e IA).</li>
+                        <li><code>Sprint4Test.php</code> — Testes de aceitação da Sprint 4 (prestadores e alertas).</li>
+                        <li><code>E2EDemoTest.php</code> — Testes de fluxo completo (demo end-to-end com navegação).</li>
+                        <li><code>ProfileTest.php</code> — Testa edição de perfil e exclusão de conta.</li>
+                        <li><code>Auth/</code> (diretório) — Testes de autenticação (login, registro, logout, password reset).</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">🔧 Unit Tests (tests/Unit/)</p>
+                    <ul>
+                        <li><code>ExampleTest.php</code> — Teste de exemplo padrão do Laravel.</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">▶️ Execução</p>
+                    <ul>
+                        <li><strong>Todos os testes:</strong> <code>php artisan test</code> ou <code>vendor/bin/phpunit</code></li>
+                        <li><strong>Suite específica:</strong> <code>php artisan test --filter=AtrativoApiTest</code></li>
+                        <li><strong>Com cobertura:</strong> <code>php artisan test --coverage</code> (requer Xdebug/PCOV)</li>
+                        <li><strong>Banco de testes:</strong> SQLite em memória (definido em <code>phpunit.xml</code>)</li>
                     </ul>
                 </div>
             </div>
@@ -1284,7 +1563,16 @@
                         <li><strong>PHP (Composer):</strong> <code>composer audit</code> — verificar vulnerabilidades conhecidas em pacotes.</li>
                         <li><strong>Node (npm):</strong> <code>npm audit</code> — verificar CVEs em dependências JavaScript.</li>
                         <li><strong>Docker Images:</strong> Recomendado usar <code>docker scout</code> ou Trivy para varredura de imagens.</li>
-                        <li><strong>OWASP Top 10:</strong> Laravel provê proteção nativa contra CSRF, XSS (Blade escaping), SQL Injection (Eloquent ORM). Verificar headers de segurança (CSP, X-Frame-Options).</li>
+                        <li><strong>OWASP Top 10:</strong> Laravel provê proteção nativa contra CSRF, XSS (Blade escaping), SQL Injection (Eloquent ORM).</li>
+                        <li><strong>Security Headers (middleware):</strong> Implementado em <code>app/Http/Middleware/SecurityHeaders.php</code>:
+                            <ul>
+                                <li><code>X-Frame-Options: SAMEORIGIN</code> — Proteção contra clickjacking.</li>
+                                <li><code>X-XSS-Protection: 1; mode=block</code> — Filtro XSS do navegador.</li>
+                                <li><code>X-Content-Type-Options: nosniff</code> — Previne MIME type sniffing.</li>
+                                <li><code>Referrer-Policy: strict-origin-when-cross-origin</code></li>
+                                <li><code>Content-Security-Policy</code> — Permite scripts apenas de <code>'self'</code>, <code>cdn.jsdelivr.net</code> e <code>unpkg.com</code>. Imagens de <code>*.tile.openstreetmap.org</code>.</li>
+                            </ul>
+                        </li>
                         <li><strong>Periodicidade:</strong> Audit de dependências a cada deploy; varredura de imagens semanalmente.</li>
                     </ul>
                 </div>
@@ -1296,15 +1584,16 @@
                     <h3 class="doc-subsection__title">9.2. Matriz de Permissões</h3>
                 </div>
                 <div class="doc-subsection__body">
-                    <p>Mapeamento de perfis de usuário (RBAC) e o que cada nível tem permissão para acessar.</p>
+                    <p>Mapeamento completo das 8 roles definidas como ENUM na tabela <code>users</code> e o que cada nível tem permissão para acessar. Middleware: <code>app/Http/Middleware/CheckRole.php</code>.</p>
                     <ul>
-                        <li><strong><code>super_admin</code>:</strong> Acesso total — dashboard, CRUD de atrativos/eventos/roteiros, alertas, auditoria, validação de prestadores, relatórios, documentação.</li>
-                        <li><strong><code>prefeito</code>:</strong> Acesso a dashboard, relatórios, alertas e validação de prestadores.</li>
-                        <li><strong><code>secretario</code>:</strong> Acesso a dashboard, gestão completa e validação de prestadores.</li>
-                        <li><strong><code>gestor_conteudo</code>:</strong> CRUD de atrativos, eventos e roteiros.</li>
-                        <li><strong><code>gestor_cadastros</code>:</strong> Validação de prestadores e gerenciamento de cadastros.</li>
-                        <li><strong><code>empreendedor</code>:</strong> Acesso ao painel do parceiro — cadastro e gerenciamento de seus próprios atrativos/negócios.</li>
-                        <li><strong>Middleware:</strong> <code>role:super_admin,prefeito,secretario,...</code> aplicado nas rotas do <code>web.php</code>.</li>
+                        <li><strong><code>super_admin</code>:</strong> Acesso TOTAL irrestrito — <strong>bypassa todas as verificações de role</strong> (lógica hardcoded no middleware). Dashboard, CRUD completo, alertas, auditoria, validação de prestadores, relatórios, documentação, gerenciamento de usuários.</li>
+                        <li><strong><code>prefeito</code>:</strong> Acesso a dashboard de KPIs, relatórios executivos, alertas de defesa civil, validação de prestadores. Visão estratégica sem necessidade de CRUD operacional.</li>
+                        <li><strong><code>secretario</code>:</strong> Acesso completo ao painel admin — dashboard, gestão de atrativos/eventos/roteiros, emissão de alertas, validação de prestadores, exportação de relatórios.</li>
+                        <li><strong><code>gestor_conteudo</code>:</strong> CRUD de atrativos, eventos e roteiros. Dashboard de KPIs para monitoramento. Sem acesso a validação de prestadores ou relatórios executivos.</li>
+                        <li><strong><code>gestor_cadastros</code>:</strong> Validação de prestadores parceiros (aprovar/rejeitar/suspender), gerenciamento de cadastros de empreendedores. Dashboard com fila de pendências.</li>
+                        <li><strong><code>atendente</code>:</strong> Acesso limitado ao dashboard para consultas e suporte aos turistas. Pode visualizar atrativos e eventos, mas sem permissão de edição.</li>
+                        <li><strong><code>empreendedor</code>:</strong> Acesso ao Painel do Parceiro (<code>/parceiro/painel</code>). Pode cadastrar-se, enviar atrativos/negócios (status <code>rascunho</code>), acompanhar status de validação do selo.</li>
+                        <li><strong><code>turista</code>:</strong> Role padrão atribuída no registro (<code>default('turista')</code>). Acesso ao PWA público, chat IA, mapa interativo, consentimentos LGPD. Sem acesso ao painel admin.</li>
                     </ul>
                 </div>
             </div>
@@ -1315,15 +1604,39 @@
                     <h3 class="doc-subsection__title">9.3. Conformidade de Dados (LGPD/GDPR)</h3>
                 </div>
                 <div class="doc-subsection__body">
-                    <p>Mapeamento de onde dados sensíveis e PII são armazenados e como são tratados.</p>
+                    <p>Mapeamento completo de dados sensíveis e PII. Implementação de conformidade via <code>LGPDController</code> em <code>app/Http/Controllers/Api/LGPDController.php</code>.</p>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">📝 Dados Pessoais Coletados</p>
                     <ul>
-                        <li><strong>Dados Pessoais Coletados:</strong> Nome, e-mail, senha (hash bcrypt), telefone (se informado), coordenadas de acesso.</li>
-                        <li><strong>Armazenamento:</strong> Tabela <code>users</code> e <code>prestadores</code> no PostgreSQL — dados em repouso sem criptografia adicional (recomendado implementar encryption-at-rest).</li>
+                        <li><strong>Tabela <code>users</code>:</strong> Nome, e-mail, senha (hash bcrypt cost 12), role, idioma, consentimentos (JSON), 2fa_secret. <strong>Soft delete habilitado.</strong></li>
+                        <li><strong>Tabela <code>prestadores</code>:</strong> Dados do negócio (JSONB), documentos (JSONB), telefone, endereço. Vinculado a <code>user_id</code>.</li>
+                        <li><strong>Tabela <code>consentimentos</code>:</strong> Registro de cada aceite/revogação, com finalidade, versão do termo e timestamps.</li>
+                        <li><strong>Tabela <code>analytic_events</code>:</strong> Podem conter dados de geolocalização (JSON) e metadados do dispositivo. Considerar anonimização após período de retenção.</li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">⚙️ Endpoints LGPD Implementados</p>
+                    <ul>
+                        <li><strong><code>POST /api/v1/lgpd/consentimentos</code></strong> (público) — Salva preferências de privacidade do usuário: <code>{gps: bool, alertas: bool, metricas: bool}</code>. Salva na coluna <code>users.consentimentos</code> (JSON) com timestamp <code>atualizado_em</code>.</li>
+                        <li><strong><code>POST /api/v1/lgpd/exportar</code></strong> (auth:sanctum) — <strong>Portabilidade de dados:</strong> Exporta perfil do usuário + todas as avaliações associadas em JSON. Retorno: <code>{perfil: {...}, avaliacoes: [...]}</code>.</li>
+                        <li><strong><code>POST /api/v1/lgpd/excluir</code></strong> (auth:sanctum) — <strong>Direito ao esquecimento:</strong>
+                            <ul>
+                                <li>Requer confirmação de senha (<code>Hash::check</code>). Retorna HTTP 403 se incorreta.</li>
+                                <li><strong>Anonimização:</strong> Avaliações do usuário têm <code>user_id</code> setado para <code>NULL</code> (preserva dados estatísticos).</li>
+                                <li><strong>Soft delete:</strong> Usuário é soft-deletado (coluna <code>deleted_at</code>).</li>
+                                <li><strong>Revogação:</strong> Todos os tokens Sanctum do usuário são deletados (<code>$user->tokens()->delete()</code>).</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <p style="color: var(--doc-accent); font-weight: 700; margin: 16px 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">🛡️ Medidas de Proteção</p>
+                    <ul>
                         <li><strong>Senhas:</strong> Hash bcrypt com cost 12 (padrão Laravel) — nunca armazenadas em texto plano.</li>
-                        <li><strong>Direito de Exclusão:</strong> Funcionalidade de deleção de conta disponível via <code>/profile</code> (ProfileController@destroy).</li>
-                        <li><strong>Política de Privacidade:</strong> Página pública em <code>/privacidade</code> — revisar para adequação à LGPD.</li>
-                        <li><strong>Cookies:</strong> Session cookies (necessários) — verificar necessidade de banner de consentimento para analytics.</li>
-                        <li><strong>Logs de Analytics:</strong> <code>analytic_events</code> podem conter IP e user-agent — considerar anonimização após período de retenção.</li>
+                        <li><strong>Sanitização IA:</strong> E-mails são substituídos por <code>[EMAIL]</code> antes de enviar dados ao Gemini API.</li>
+                        <li><strong>Heatmap:</strong> Método <code>heatmapData()</code> não expoe dados pessoais — apenas coordenadas de atrativos com intensidade agregada.</li>
+                        <li><strong>Relatório CSV:</strong> <code>RelatorioController@exportCsv</code> inclui disclaimer: "Dados apoiam planejamento governamental" + eventos analíticos sem PII.</li>
+                        <li><strong>Auditoria:</strong> Todas as alterações em models <code>Auditable</code> são registradas automaticamente (<code>owen-it/laravel-auditing</code>) com old/new values, usuário e timestamp.</li>
+                        <li><strong>Cookies:</strong> Session cookies (necessários) — considerar banner de consentimento para analytics.</li>
+                        <li><strong>Política de Privacidade:</strong> Página pública em <code>/privacidade</code>.</li>
                     </ul>
                 </div>
             </div>
@@ -1343,6 +1656,28 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+
+<!-- Mermaid.js para renderização de diagramas -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: {
+            primaryColor: '#667eea',
+            primaryTextColor: '#e2e8f0',
+            primaryBorderColor: '#667eea',
+            lineColor: '#94a3b8',
+            secondaryColor: '#764ba2',
+            tertiaryColor: 'rgba(102, 126, 234, 0.1)',
+            fontFamily: 'Plus Jakarta Sans, sans-serif',
+            fontSize: '13px'
+        },
+        flowchart: { curve: 'basis', padding: 15 },
+        sequence: { actorMargin: 50, messageMargin: 40 },
+        er: { fontSize: 12 }
+    });
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
