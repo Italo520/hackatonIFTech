@@ -112,9 +112,16 @@
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm d-lg-none mt-2">
-                    Aplicar Filtros
-                </button>
+                <div class="d-flex flex-column gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm py-2">
+                        <i class="bi bi-funnel me-1"></i> Aplicar Filtros
+                    </button>
+                    @if(request('q') || request('cat') || request('acess') || (request('orcamento') && request('orcamento') != 300))
+                        <a href="{{ route('pwa.explorar') }}" class="btn btn-outline-secondary w-100 rounded-pill fw-semibold py-2">
+                            <i class="bi bi-x-circle me-1"></i> Limpar Filtros
+                        </a>
+                    @endif
+                </div>
                 </form>
             </div>
         </aside>
@@ -271,6 +278,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('explorar-search-form');
     const orcamentoInput = document.getElementById('filtro-orcamento');
     const orcamentoDisplay = document.getElementById('valor-orcamento-display');
 
@@ -284,12 +292,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (orcamentoInput && orcamentoDisplay) {
-        // Define o background inicial baseado no valor preenchido
         updateRangeBackground();
 
         orcamentoInput.addEventListener('input', function() {
             orcamentoDisplay.textContent = `Até R$ ${this.value}`;
             updateRangeBackground();
+        });
+
+        // Auto-submit ao soltar o slider (desktop)
+        orcamentoInput.addEventListener('change', function() {
+            if (window.innerWidth >= 992 && form) {
+                form.submit();
+            }
+        });
+    }
+
+    // Auto-submit ao alterar checkboxes de categoria e acessibilidade (desktop)
+    if (form) {
+        const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                if (window.innerWidth >= 992) {
+                    form.submit();
+                }
+            });
         });
     }
 });

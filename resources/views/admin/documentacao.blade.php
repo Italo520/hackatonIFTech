@@ -452,9 +452,10 @@
     }
 
     /* ─── Utility ─── */
+    /* .doc-reveal: estado inicial é VISÍVEL (progressive enhancement).
+       O GSAP aplica opacity:0 via JS — se o CDN falhar, conteúdo aparece normalmente. */
     .doc-reveal {
-        opacity: 0;
-        transform: translateY(30px);
+        /* Sem opacity:0 aqui — definido pelo GSAP via gsap.set() */
     }
 
     /* Progress indicator for TOC cards */
@@ -1355,54 +1356,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (prefersReducedMotion) {
         // Show everything immediately without animation
-        document.querySelectorAll('.doc-reveal').forEach(el => {
-            el.style.opacity = '1';
-            el.style.transform = 'none';
-        });
-        // Still enable smooth scroll navigation
         initNavigation();
         initBackToTop();
-        // Show progress bars
         initProgressBars();
-        // Set counter values immediately
         document.querySelectorAll('[data-counter]').forEach(el => {
             el.textContent = el.dataset.counter;
         });
         return;
     }
 
+    // ─── Set initial hidden state via GSAP (progressive enhancement) ───
+    // If GSAP loaded, hide elements first then animate them in.
+    // If GSAP never loaded, elements stay visible (CSS has no opacity:0).
+    gsap.set('.doc-hero__badge, .doc-hero__title, .doc-hero__subtitle, .doc-hero__meta', {
+        opacity: 0, y: 20
+    });
+    gsap.set('.doc-stat', { opacity: 0, y: 20, scale: 0.9 });
+    gsap.set('.doc-toc__card', { opacity: 0, y: 30 });
+    gsap.set('.doc-toc__title, .doc-toc__subtitle', { opacity: 0, y: 20 });
+
     // ─── Hero Animations ───
     const heroTimeline = gsap.timeline({ delay: 0.2 });
 
     heroTimeline
-        .from('.doc-hero__badge', {
-            opacity: 0,
-            y: 20,
+        .to('.doc-hero__badge', {
+            opacity: 1,
+            y: 0,
             duration: 0.6,
             ease: 'power3.out'
         })
-        .from('.doc-hero__title', {
-            opacity: 0,
-            y: 30,
+        .to('.doc-hero__title', {
+            opacity: 1,
+            y: 0,
             duration: 0.7,
             ease: 'power3.out'
         }, '-=0.3')
-        .from('.doc-hero__subtitle', {
-            opacity: 0,
-            y: 20,
+        .to('.doc-hero__subtitle', {
+            opacity: 1,
+            y: 0,
             duration: 0.6,
             ease: 'power3.out'
         }, '-=0.4')
-        .from('.doc-hero__meta', {
-            opacity: 0,
-            y: 15,
+        .to('.doc-hero__meta', {
+            opacity: 1,
+            y: 0,
             duration: 0.5,
             ease: 'power3.out'
         }, '-=0.3')
-        .from('.doc-stat', {
-            opacity: 0,
-            y: 20,
-            scale: 0.9,
+        .to('.doc-stat', {
+            opacity: 1,
+            y: 0,
+            scale: 1,
             duration: 0.5,
             stagger: 0.1,
             ease: 'back.out(1.7)'
@@ -1425,10 +1429,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // ─── TOC Title Animation ───
+    gsap.to('.doc-toc__title, .doc-toc__subtitle', {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: {
+            trigger: '#docToc',
+            start: 'top 90%',
+            once: true
+        }
+    });
+
     // ─── TOC Cards Stagger Animation ───
-    gsap.from('.doc-toc__card', {
-        opacity: 0,
-        y: 30,
+    gsap.to('.doc-toc__card', {
+        opacity: 1,
+        y: 0,
         duration: 0.5,
         stagger: 0.06,
         ease: 'power3.out',
@@ -1441,27 +1459,53 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ─── Section Reveal Animations ───
     document.querySelectorAll('.doc-section').forEach(section => {
+        const header = section.querySelector('.doc-section__header');
+        const desc = section.querySelector('.doc-section__desc');
+        const subsections = section.querySelectorAll('.doc-subsection');
+
+        // Set initial states via GSAP
+        if (header) gsap.set(header, { opacity: 0, x: -30 });
+        if (desc) gsap.set(desc, { opacity: 0, y: 15 });
+        if (subsections.length) gsap.set(subsections, { opacity: 0, y: 25 });
+
         // Section header
-        gsap.from(section.querySelector('.doc-section__header'), {
-            opacity: 0,
-            x: -30,
-            duration: 0.6,
-            ease: 'power3.out',
-            scrollTrigger: {
-                trigger: section,
-                start: 'top 80%',
-                once: true
-            }
-        });
+        if (header) {
+            gsap.to(header, {
+                opacity: 1,
+                x: 0,
+                duration: 0.6,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: section,
+                    start: 'top 85%',
+                    once: true
+                }
+            });
+        }
 
         // Section description
-        const desc = section.querySelector('.doc-section__desc');
         if (desc) {
-            gsap.from(desc, {
-                opacity: 0,
-                y: 15,
+            gsap.to(desc, {
+                opacity: 1,
+                y: 0,
                 duration: 0.5,
-                delay: 0.1,
+                delay: 0.15,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: section,
+                    start: 'top 85%',
+                    once: true
+                }
+            });
+        }
+
+        // Subsection cards staggered
+        if (subsections.length) {
+            gsap.to(subsections, {
+                opacity: 1,
+                y: 0,
+                duration: 0.5,
+                stagger: 0.1,
                 ease: 'power3.out',
                 scrollTrigger: {
                     trigger: section,
@@ -1470,21 +1514,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
-
-        // Subsection cards staggered
-        const subsections = section.querySelectorAll('.doc-subsection');
-        gsap.from(subsections, {
-            opacity: 0,
-            y: 25,
-            duration: 0.5,
-            stagger: 0.1,
-            ease: 'power3.out',
-            scrollTrigger: {
-                trigger: section,
-                start: 'top 75%',
-                once: true
-            }
-        });
     });
 
     // ─── Parallax on Background Orbs ───
