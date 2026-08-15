@@ -7,7 +7,7 @@
 ## 📌 Visão Geral do Projeto
 
 O **Destino Inteligente** é um ecossistema digital integrado desenvolvido em conformidade com as diretrizes do Desafio Destino Turístico Municipal. O sistema conecta em uma única plataforma:
-1. **O Turista:** Através de um Progressive Web App (PWA) moderno, responsivo e intuitivo, com busca por linguagem natural, mapas interativos (Leaflet + OpenStreetMap), roteirização real ponto a ponto (OSRM) e Assistente Virtual com IA Generativa e RAG (Retrieval-Augmented Generation) contextualizado com dados oficiais e salvaguardas LGPD.
+1. **O Turista:** Através de um Progressive Web App (PWA) moderno, responsivo e intuitivo, com busca por linguagem natural, mapas interativos (Leaflet + OpenStreetMap), roteirização real ponto a ponto (OSRM), **Modo Offline com mapas interativos cacheados** e Assistente Virtual com IA Generativa e RAG (Retrieval-Augmented Generation) contextualizado com dados oficiais e salvaguardas LGPD.
 2. **Os Empreendedores Locais:** Área dedicada para credenciamento de pousadas, restaurantes, artesãos e guias turísticos, estimulando a economia criativa e a obtenção do Selo Oficial Municipal.
 3. **A Gestão Pública (Prefeito, Secretário de Turismo e Equipes Técnicas):** Painel administrativo completo com indicadores em tempo real, mapas de calor analíticos, gestão de alertas de defesa civil, fila de homologação de prestadores, relatórios para captação de recursos e trilha de auditoria governamental imutável.
 
@@ -20,7 +20,7 @@ O projeto foi concebido seguindo estritamente as tecnologias e padrões estabele
 - **Backend & Framework:** PHP 8.2+ e Laravel 11 (Padrão MVC, Eloquent ORM, Migrations & Seeders estruturados).
 - **Banco de Dados:** PostgreSQL 16 (com suporte a GIN Indexes, busca vetorial/textual e relacionamentos 100% normalizados) / SQLite para testes locais rápidos.
 - **Frontend & Interface:** Bootstrap 5.3 (Mobile-First, Design System consistente com tokens de cores e componentes acessíveis), Blade Templates, JavaScript ES6+ e Bootstrap Icons.
-- **Mapas & Roteirização:** Leaflet.js, OpenStreetMap (OSM Nominatim) e OSRM (Open Source Routing Machine) para rotas reais (carro, caminhada, bicicleta).
+- **Mapas & Roteirização:** Leaflet.js, OpenStreetMap (OSM Nominatim) e OSRM (Open Source Routing Machine) para rotas reais (carro, caminhada, bicicleta), com suporte avançado a renderização de mapas georreferenciados offline.
 - **Inteligência Artificial:** Google Gemini 3.5-flash com arquitetura RAG (Retrieval-Augmented Generation), guardrails rígidos anti-alucinação, anonimização LGPD de PII (Personally Identifiable Information) e streaming SSE em tempo real.
 - **Segurança & Auditoria:** Controle de acesso baseado em papéis (RBAC com 8 perfis), senhas com hash Bcrypt, proteção contra CSRF/XSS/SQL Injection, Headers de Segurança com Content Security Policy (CSP), soft deletes e trilha de auditoria completa via `owen-it/laravel-auditing`.
 
@@ -108,7 +108,7 @@ php artisan test tests/Feature/IAApiTest.php
 | # | Critério de Avaliação | Pontos | Como o Projeto Atende |
 |---|---|---|---|
 | **1** | **Funcionamento do Protótipo** | **10 pts** | PWA 100% operacional com busca de atrativos, mapas interativos, roteiros com IA, agenda de eventos, cadastro de empreendedores e painel administrativo CRUD completo. |
-| **2** | **Inovação e Criatividade** | **30 pts** | RAG Real com dados do PostgreSQL, roteamento OSRM real com polyline, geocodificação OSM Nominatim com cache inteligente de 24h e integração de alertas da Defesa Civil no mapa. |
+| **2** | **Inovação e Criatividade** | **30 pts** | RAG Real com dados do PostgreSQL, roteamento OSRM real, **PWA com resiliência Offline (Service Worker interceptando quedas de rede e renderizando GeoJSON em mapas salvos na memória local)** e integração de alertas de Defesa Civil. |
 | **3** | **Experiência do Usuário (UX)** | **10 pts** | Design System Bootstrap 5 mobile-first, bottom navigation no PWA, cards com chips de categorias, loading states e painel admin com visual executivo premium. |
 | **4** | **Segurança & LGPD** | **10 pts** | Middleware RBAC com 8 roles, CSP e Security Headers, sanitização de PII antes do envio à IA, página dedicada de privacidade (`/privacidade`) com consentimentos e API de exportação/exclusão. |
 | **5** | **Uso da Inteligência Artificial** | **20 pts** | Gemini 3.5-flash com RAG oficial de dados do município, guardrails anti-alucinação, fallback resiliente baseado em atrativos locais e registro auditável de todas as consultas em `assistant_logs`. |

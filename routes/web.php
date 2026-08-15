@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Route;
 | PWA Turista (Público)
 |--------------------------------------------------------------------------
 */
+// Offline PWA Fallback
+Route::view('/offline', 'pwa.offline')->name('pwa.offline');
+
 Route::get('/', [HomeController::class, 'index'])->name('pwa.home');
 
 Route::get('/explorar', [ExplorarController::class, 'index'])->name('pwa.explorar');

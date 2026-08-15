@@ -420,10 +420,10 @@
 {{-- FAB: Adicionar ao Roteiro --}}
 <div class="position-fixed start-50 translate-middle-x w-100 px-4 z-3 d-flex justify-content-center"
      style="bottom: 80px; max-width: 400px; pointer-events: none;">
-    <button class="btn fw-bold py-3 px-4 rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2 text-white w-100"
-            style="background-color: rgba(0, 95, 115, 0.95); font-size: 1.1rem; backdrop-filter: blur(10px); pointer-events: auto; border: 2px solid rgba(255,255,255,0.1);">
-        <i class="bi bi-plus-circle-fill fs-4 text-warning"></i>
-        <span>Adicionar ao Roteiro</span>
+    <button id="btn-add-roteiro" class="btn fw-bold py-3 px-4 rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2 text-white w-100"
+            style="background-color: rgba(0, 95, 115, 0.95); font-size: 1.1rem; backdrop-filter: blur(10px); pointer-events: auto; border: 2px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">
+        <i class="bi bi-plus-circle-fill fs-4 text-warning" id="icon-add-roteiro"></i>
+        <span id="text-add-roteiro">Adicionar ao Roteiro</span>
     </button>
 </div>
 
@@ -582,6 +582,67 @@ document.addEventListener('DOMContentLoaded', function () {
             btnAudio.classList.add('btn-danger');
         }
     });
+
+    // =========================================================================
+    // ADICIONAR AO ROTEIRO PERSONALIZADO (LOCALSTORAGE)
+    // =========================================================================
+    const btnAddRoteiro = document.getElementById('btn-add-roteiro');
+    const textAddRoteiro = document.getElementById('text-add-roteiro');
+    const iconAddRoteiro = document.getElementById('icon-add-roteiro');
+
+    if (btnAddRoteiro) {
+        const atrativoData = {
+            id: {{ $atrativo->id }},
+            nome: @json($atrativo->nome),
+            categoria: @json($atrativo->categoria?->nome ?? 'Atrativo'),
+            imagem: @json($imagemPrincipal ?? $heroImg ?? ''),
+            lat: {{ $atrativo->lat ?? 'null' }},
+            lng: {{ $atrativo->lng ?? 'null' }}
+        };
+
+        // Verifica se já está no roteiro
+        let roteiroArray = JSON.parse(localStorage.getItem('meu_roteiro_customizado') || '[]');
+        const isAdded = roteiroArray.some(item => item.id === atrativoData.id);
+
+        if (isAdded) {
+            textAddRoteiro.textContent = 'Adicionado ao Roteiro';
+            iconAddRoteiro.className = 'bi bi-check-circle-fill fs-4 text-success';
+            btnAddRoteiro.style.backgroundColor = 'rgba(10, 147, 150, 0.95)'; // Verde secundário
+        }
+
+        btnAddRoteiro.addEventListener('click', function() {
+            roteiroArray = JSON.parse(localStorage.getItem('meu_roteiro_customizado') || '[]');
+            const exists = roteiroArray.findIndex(item => item.id === atrativoData.id);
+
+            if (exists >= 0) {
+                // Remover do roteiro
+                roteiroArray.splice(exists, 1);
+                localStorage.setItem('meu_roteiro_customizado', JSON.stringify(roteiroArray));
+                
+                textAddRoteiro.textContent = 'Adicionar ao Roteiro';
+                iconAddRoteiro.className = 'bi bi-plus-circle-fill fs-4 text-warning';
+                btnAddRoteiro.style.backgroundColor = 'rgba(0, 95, 115, 0.95)'; // Azul primário
+                
+                // Disparar evento para outras abas/componentes
+                window.dispatchEvent(new Event('turismo:roteiro-updated'));
+            } else {
+                // Adicionar ao roteiro
+                roteiroArray.push(atrativoData);
+                localStorage.setItem('meu_roteiro_customizado', JSON.stringify(roteiroArray));
+                
+                textAddRoteiro.textContent = 'Adicionado ao Roteiro';
+                iconAddRoteiro.className = 'bi bi-check-circle-fill fs-4 text-success';
+                btnAddRoteiro.style.backgroundColor = 'rgba(10, 147, 150, 0.95)'; // Verde secundário
+                
+                // Efeito visual rápido
+                btnAddRoteiro.style.transform = 'scale(1.05)';
+                setTimeout(() => btnAddRoteiro.style.transform = 'scale(1)', 200);
+
+                // Disparar evento para outras abas/componentes
+                window.dispatchEvent(new Event('turismo:roteiro-updated'));
+            }
+        });
+    }
 });
 </script>
 @endpush

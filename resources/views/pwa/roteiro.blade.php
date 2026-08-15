@@ -339,6 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(res => res.json())
             .then(data => {
                 if (data && data.success && data.geojson) {
+                    window.lastRouteGeoJSON = data.geojson; // Salva para o modo offline
                     routeLayer = L.geoJSON(data.geojson, {
                         style: {
                             color: '#0a9396',
@@ -406,6 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 saved[roteiroId] = {
                     ...roteiroData,
+                    geojson: window.lastRouteGeoJSON || null,
                     saved_at: new Date().toISOString()
                 };
                 localStorage.setItem('saved_offline_roteiros', JSON.stringify(saved));
