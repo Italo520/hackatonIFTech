@@ -26,7 +26,7 @@ class RoteiroWebController extends Controller
             }
         }
 
-        $roteiros = $query->orderBy('id', 'desc')->get();
+        $roteiros = $query->orderBy('id', 'desc')->paginate(9);
 
         return view('pwa.roteiros', compact('roteiros'));
     }

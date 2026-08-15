@@ -132,7 +132,7 @@
                     </span>
                 </div>
 
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-xl-3 g-3">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-3 g-3">
                     @forelse ($principais_lugares ?? [] as $lugar)
                         <div class="col">
                             <article class="card border-0 rounded-4 overflow-hidden shadow-sm h-100 place-hover-card bg-white" aria-labelledby="lugar-title-{{ $lugar->id }}">
@@ -178,6 +178,12 @@
                         </div>
                     @endforelse
                 </div>
+
+                @if(isset($principais_lugares) && method_exists($principais_lugares, 'hasPages') && $principais_lugares->hasPages())
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $principais_lugares->appends(request()->query())->links('pagination::bootstrap-5') }}
+                    </div>
+                @endif
             </section>
 
             @if(!isset($is_search) || !$is_search)

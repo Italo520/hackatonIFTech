@@ -59,36 +59,14 @@ class ExplorarController extends Controller
             $orcamento = (float) $request->orcamento;
         }
 
-        // Se houver busca, trazemos mais resultados e omitimos os blocos extras
+        // Se houver busca ou listagem de lugares
         if ($is_search) {
-            $principais_lugares = $query->inRandomOrder()->limit(12)->get();
-            
-            // Aplica o filtro de orçamento em memória (Collection) 
-            // Visto que os preços estão num array JSON e o MySQL dificulta filtrar intervalo numérico dentro de array
-            if ($orcamento !== null) {
-                $principais_lugares = $principais_lugares->filter(function ($atrativo) use ($orcamento) {
-                    if (empty($atrativo->precos)) {
-                        return true; // Considera gratuito se não houver preço
-                    }
-                    
-                    $menorPreco = null;
-                    foreach ($atrativo->precos as $preco) {
-                        // Verifica se é array ["valor" => X] ou um número solto
-                        $v = is_array($preco) ? ($preco['valor'] ?? 0) : (is_numeric($preco) ? $preco : 0);
-                        if ($menorPreco === null || $v < $menorPreco) {
-                            $menorPreco = (float) $v;
-                        }
-                    }
-                    
-                    return $menorPreco === null || $menorPreco <= $orcamento;
-                })->values();
-            }
-
+            $principais_lugares = $query->orderBy('nome', 'asc')->paginate(9);
             $atividades_gratuitas = collect();
             $eventos = collect();
         } else {
-            // Comportamento original da home de explorar
-            $principais_lugares = (clone $query)->inRandomOrder()->limit(4)->get();
+            // Comportamento da tela de explorar: todos os atrativos paginados em 9 por página
+            $principais_lugares = (clone $query)->orderBy('id', 'asc')->paginate(9);
             
             $atividades_gratuitas = \App\Models\Atrativo::with('categoria')->inRandomOrder()->limit(4)->get();
             

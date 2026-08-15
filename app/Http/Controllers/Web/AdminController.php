@@ -24,8 +24,14 @@ class AdminController extends Controller
     {
         $atrativosTotal = Atrativo::count();
         $atrativosAcessiveis = Atrativo::whereNotNull('acessibilidade')
-            ->where('acessibilidade', '!=', '[]')
-            ->where('acessibilidade', '!=', '')
+            ->get()
+            ->filter(function($a) {
+                $acess = $a->acessibilidade;
+                if (is_string($acess)) {
+                    $acess = json_decode($acess, true);
+                }
+                return !empty($acess) && is_array($acess) && count($acess) > 0;
+            })
             ->count();
 
         $qrScansTotal = \App\Models\QrCode::sum('scans') ?: 14;
@@ -54,8 +60,8 @@ class AdminController extends Controller
         // Interações com IA nos últimos 7 dias
         $iaLogsPorDia = AssistantLog::selectRaw("DATE(created_at) as data, count(*) as total")
             ->where('created_at', '>=', now()->subDays(7))
-            ->groupBy('data')
-            ->orderBy('data', 'asc')
+            ->groupByRaw('DATE(created_at)')
+            ->orderByRaw('DATE(created_at) asc')
             ->get();
 
         $ultimosAtrativos = Atrativo::with(['categoria', 'municipio'])

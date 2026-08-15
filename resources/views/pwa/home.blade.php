@@ -204,8 +204,8 @@
             </button>
         </div>
 
-        <!-- Grid de Atrações Dinâmicas -->
-        <div id="home-attractions-grid" class="row row-cols-1 row-cols-sm-2 g-3 home-transition-fade">
+        <!-- Grid de Atrações Dinâmicas (3 colunas na web) -->
+        <div id="home-attractions-grid" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 g-3 home-transition-fade">
             <!-- Renderizado dinamicamente via JS de acordo com a cidade e filtros -->
         </div>
     </div>
