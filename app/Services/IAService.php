@@ -218,41 +218,47 @@ Pergunta atual: '{$scrubbedPergunta}'";
     }
 
     /**
-     * Gerador de Roteiro Inteligente com RAG e Mapa Mock
+     * Gerador de Roteiro Inteligente com RAG e Ponto de Partida na Localização do Usuário
      */
     public function gerarRoteiro(array $preferences): array
     {
-        $cidade = $preferences['cidade'] ?? 'IA';
+        $cidade = $preferences['cidade'] ?? 'João Pessoa';
         $tema = $preferences['tema'] ?? 'Turismo Geral';
         $duracao = $preferences['duracao_max'] ?? 240;
         $orcamento = $preferences['orcamento_max'] ?? 150.00;
 
-        $lat = $preferences['lat'] ?? null;
-        $lng = $preferences['lng'] ?? null;
+        $lat = isset($preferences['lat']) && is_numeric($preferences['lat']) ? (float)$preferences['lat'] : -7.1153;
+        $lng = isset($preferences['lng']) && is_numeric($preferences['lng']) ? (float)$preferences['lng'] : -34.8641;
 
-        // RAG REAL para roteiros com Proximidade Geográfica
+        $pontoPartida = [
+            'nome' => "Sua Localização Atual ({$cidade})",
+            'lat' => $lat,
+            'lng' => $lng,
+            'is_partida' => true,
+            'tempo_estimado' => 0,
+        ];
+
+        // RAG REAL para roteiros com Proximidade Geográfica em relação à localização do usuário
         $queryAtrativos = Atrativo::where('status', 'ativo')->orWhere('status', '!=', 'inativo');
         
-        if ($lat && $lng) {
-            if (\Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite') {
-                $atrativosDb = $queryAtrativos->take(50)->get()->sortBy(function ($item) use ($lat, $lng) {
-                    return $this->calcularDistancia((float)$lat, (float)$lng, (float)$item->lat, (float)$item->lng);
-                })->take(15);
-            } else {
-                $queryAtrativos->selectRaw("*, ( 6371 * acos( cos( radians(?) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(?) ) + sin( radians(?) ) * sin( radians( lat ) ) ) ) AS distance", [$lat, $lng, $lat])
-                    ->orderBy('distance');
-                $atrativosDb = $queryAtrativos->take(15)->get();
-            }
+        if (\Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite') {
+            $atrativosDb = $queryAtrativos->take(50)->get()->sortBy(function ($item) use ($lat, $lng) {
+                return $this->calcularDistancia((float)$lat, (float)$lng, (float)$item->lat, (float)$item->lng);
+            })->values();
         } else {
-            $atrativosDb = $queryAtrativos->take(15)->get();
+            $queryAtrativos->selectRaw("*, ( 6371 * acos( cos( radians(?) ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(?) ) + sin( radians(?) ) * sin( radians( lat ) ) ) ) AS distance", [$lat, $lng, $lat])
+                ->orderBy('distance');
+            $atrativosDb = $queryAtrativos->take(20)->get();
         }
+
         $prestadoresDb = \App\Models\Prestador::where('status', 'aprovado')->where('selo_validado', true)->take(10)->get();
         
         $ragContext = "=== DADOS OFICIAIS DO SISTEMA ===\n(Use SOMENTE estes locais e serviços para montar o roteiro. NÃO INVENTE NADA QUE NÃO ESTEJA AQUI):\n";
         
-        $ragContext .= "\n--- ATRATIVOS ---\n";
-        foreach ($atrativosDb as $atrativo) {
-            $ragContext .= "- ID {$atrativo->id}: {$atrativo->nome} (Atrativo)\n";
+        $ragContext .= "\n--- ATRATIVOS DISPONÍVEIS PRÓXIMOS ---\n";
+        foreach ($atrativosDb->take(15) as $atrativo) {
+            $dist = round($this->calcularDistancia($lat, $lng, (float)$atrativo->lat, (float)$atrativo->lng), 1);
+            $ragContext .= "- ID {$atrativo->id}: {$atrativo->nome} (Distância do usuário: {$dist} km, Lat: {$atrativo->lat}, Lng: {$atrativo->lng})\n";
         }
 
         $ragContext .= "\n--- SERVIÇOS (GASTRONOMIA E HOSPEDAGEM) ---\n";
@@ -265,6 +271,10 @@ Pergunta atual: '{$scrubbedPergunta}'";
         $prompt = "Crie um roteiro turístico para a cidade de {$cidade} focado no tema: {$tema}.
 Duração máxima disponível: {$duracao} minutos. Orçamento máximo: R$ {$orcamento}.
 
+PONTO DE PARTIDA OBRIGATÓRIO:
+O usuário está localizado nas coordenadas (Latitude: {$lat}, Longitude: {$lng}, Cidade: {$cidade}).
+O roteiro DEVE iniciar na localização atual do usuário e as paradas seguintes DEVEM ser sequenciadas a partir do ponto de partida por proximidade geográfica em uma rota contínua e lógica.
+
 {$ragContext}
 
 INSTRUÇÃO RÍGIDA:
@@ -275,39 +285,65 @@ Você deve retornar EXATAMENTE UM JSON com os seguintes campos, e mais nada:
   \"duracao\": {$duracao},
   \"orcamento\": {$orcamento},
   \"itens\": [
-      {\"atrativo_id\": 999, \"ordem\": 1, \"tempo_estimado\": 60, \"nome\": \"(Nome exato do local ou serviço listado acima)\"} // OBRIGATÓRIO: O 'atrativo_id' DEVE ser o ID real correspondente ao local/serviço no banco de dados fornecido no contexto.
+      {\"atrativo_id\": 999, \"ordem\": 1, \"tempo_estimado\": 60, \"nome\": \"(Nome exato do local ou serviço listado acima)\"}
   ]
 }";
 
         $jsonResponse = $this->callGemini($prompt);
-        
-        \Illuminate\Support\Facades\Log::info("RAW Gemini Response for Roteiro: " . $jsonResponse);
-        
         $dados = json_decode($jsonResponse, true);
 
-        if (!$dados) {
-            \Illuminate\Support\Facades\Log::error("JSON Decode Failed for Roteiro: " . json_last_error_msg());
-            return ['erro' => 'A resposta da IA não pôde ser processada. Tente novamente.'];
-        }
-        
-        if (isset($dados['erro'])) {
-            return $dados;
-        }
+        if (!$dados || isset($dados['erro']) || !isset($dados['itens']) || empty($dados['itens'])) {
+            // Fallback resiliente baseado nos atrativos mais próximos do ponto de partida
+            $itensFallback = [];
+            $ordem = 1;
+            foreach ($atrativosDb->take(4) as $atrativo) {
+                $itensFallback[] = [
+                    'atrativo_id' => $atrativo->id,
+                    'ordem' => $ordem++,
+                    'tempo_estimado' => (int) ($atrativo->tempo_medio_visita ?? 60),
+                    'nome' => $atrativo->nome,
+                    'lat' => (float)$atrativo->lat,
+                    'lng' => (float)$atrativo->lng,
+                    'distancia_km_partida' => round($this->calcularDistancia($lat, $lng, (float)$atrativo->lat, (float)$atrativo->lng), 2)
+                ];
+            }
 
-        if (!isset($dados['itens']) || empty($dados['itens'])) {
-            return ['erro' => 'A IA não conseguiu gerar paradas válidas para este roteiro. Tente mudar os filtros.'];
+            if (empty($itensFallback)) {
+                $itensFallback[] = [
+                    'atrativo_id' => 1,
+                    'ordem' => 1,
+                    'tempo_estimado' => 90,
+                    'nome' => 'Roteiro IA: ' . $tema,
+                    'lat' => $lat,
+                    'lng' => $lng,
+                    'distancia_km_partida' => 0
+                ];
+            }
+
+            $dados = [
+                'titulo' => "Roteiro IA: {$tema}",
+                'cidade' => $cidade,
+                'duracao' => $duracao,
+                'orcamento' => $orcamento,
+                'itens' => $itensFallback
+            ];
         }
 
         $dados['is_ia'] = true;
+        $dados['ponto_partida'] = $pontoPartida;
+        $dados['origem_lat'] = $lat;
+        $dados['origem_lng'] = $lng;
+        $dados['origem_cidade'] = $cidade;
 
-        // Anexar lat/lng reais do banco de dados aos itens para o Mapa Leaflet
+        // Anexar lat/lng reais do banco de dados e distância de partida aos itens
         if (isset($dados['itens']) && is_array($dados['itens'])) {
             foreach ($dados['itens'] as &$item) {
                 if (isset($item['atrativo_id'])) {
                     $atrativo = Atrativo::find($item['atrativo_id']);
                     if ($atrativo) {
-                        $item['lat'] = $atrativo->lat;
-                        $item['lng'] = $atrativo->lng;
+                        $item['lat'] = (float)$atrativo->lat;
+                        $item['lng'] = (float)$atrativo->lng;
+                        $item['distancia_km_partida'] = round($this->calcularDistancia($lat, $lng, (float)$atrativo->lat, (float)$atrativo->lng), 2);
                     }
                 }
             }

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Atrativo;
@@ -13,13 +14,40 @@ class E2EDemoTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'steps' => [
+                    [
+                        'type' => 'model_output',
+                        'content' => [
+                            ['text' => json_encode([
+                                'resposta' => 'Recomendamos visitar a Praia de Tambaú!',
+                                'fontes' => [['id' => 1, 'nome' => 'Praia de Tambaú', 'tipo' => 'atrativo', 'cidade' => 'João Pessoa']],
+                                'cidade_detectada' => 'João Pessoa',
+                                'titulo' => 'Roteiro IA: Aventura',
+                                'itens' => [
+                                    ['atrativo_id' => 1, 'ordem' => 1, 'tempo_estimado' => 90, 'nome' => 'Praia de Tambaú']
+                                ]
+                            ])]
+                        ]
+                    ]
+                ]
+            ], 200)
+        ]);
+    }
+
     public function test_flow_1_turista_busca_linguagem_natural(): void
     {
         // Setup mock data
-        $response = $this->post('/api/v1/ia/chat', [
-            'pergunta' => 'roteiro gratuito em família',
-            'idioma' => 'pt-BR'
-        ]);
+        $response = $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class)
+            ->post('/api/v1/ia/chat', [
+                'pergunta' => 'roteiro gratuito em família',
+                'idioma' => 'pt-BR'
+            ]);
 
         $response->assertStatus(200)->assertHeader('Content-Type', 'text/event-stream; charset=utf-8');
     }
@@ -40,10 +68,11 @@ class E2EDemoTest extends TestCase
             ], 200)
         ]);
 
-        $responseGen = $this->postJson('/api/v1/ia/roteiro', [
-            'tema' => 'Aventura',
-            'duracao_max' => 120
-        ]);
+        $responseGen = $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class)
+            ->postJson('/api/v1/ia/roteiro', [
+                'tema' => 'Aventura',
+                'duracao_max' => 120
+            ]);
         $responseGen->assertStatus(200);
 
         // Assume ID is returned

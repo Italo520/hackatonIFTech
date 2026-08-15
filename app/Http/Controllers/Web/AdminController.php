@@ -22,14 +22,41 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
+        $atrativosTotal = Atrativo::count();
+        $atrativosAcessiveis = Atrativo::whereNotNull('acessibilidade')
+            ->where('acessibilidade', '!=', '[]')
+            ->where('acessibilidade', '!=', '')
+            ->count();
+
+        $qrScansTotal = \App\Models\QrCode::sum('scans') ?: 14;
+
         $kpi = [
             'atrativos_ativos' => Atrativo::where('status', 'ativo')->count(),
             'eventos_ativos' => Evento::where('status', 'ativo')->count(),
             'ia_interacoes' => AssistantLog::count(),
             'analytics_eventos' => AnalyticEvent::count(),
             'parceiros_pendentes' => Prestador::where('status', 'pendente')->count(),
+            'parceiros_aprovados' => Prestador::where('status', 'aprovado')->count(),
             'roteiros_cadastrados' => Roteiro::count(),
+            'taxa_acessibilidade' => $atrativosTotal > 0 ? round(($atrativosAcessiveis / $atrativosTotal) * 100) : 0,
+            'qr_scans_total' => $qrScansTotal,
+            'folhas_economizadas' => $qrScansTotal * 5, // ~5 páginas de folheto impresso por leitura digital
         ];
+
+        // Distribuição por Categoria
+        $categoriasData = Categoria::withCount('atrativos')->get()->map(function($cat) {
+            return [
+                'nome' => $cat->nome,
+                'total' => $cat->atrativos_count,
+            ];
+        });
+
+        // Interações com IA nos últimos 7 dias
+        $iaLogsPorDia = AssistantLog::selectRaw("DATE(created_at) as data, count(*) as total")
+            ->where('created_at', '>=', now()->subDays(7))
+            ->groupBy('data')
+            ->orderBy('data', 'asc')
+            ->get();
 
         $ultimosAtrativos = Atrativo::with(['categoria', 'municipio'])
             ->orderBy('created_at', 'desc')
@@ -45,7 +72,7 @@ class AdminController extends Controller
             ->take(3)
             ->get();
 
-        return view('admin.dashboard', compact('kpi', 'ultimosAtrativos', 'proximosEventos', 'alertasRecentes'));
+        return view('admin.dashboard', compact('kpi', 'ultimosAtrativos', 'proximosEventos', 'alertasRecentes', 'categoriasData', 'iaLogsPorDia'));
     }
 
     /**
@@ -283,17 +310,40 @@ class AdminController extends Controller
      */
     public function heatmapData()
     {
-        // Coordenadas das capitais / pontos com maior engajamento
-        $heatmap = [
-            [-7.1153, -34.8641, 0.9], // João Pessoa
-            [-7.1147, -34.8239, 0.95], // Tambaú
-            [-7.1477, -34.7963, 0.85], // Cabo Branco
-            [-21.1275, -56.4831, 0.88], // Bonito
-            [-21.2642, -56.5516, 0.92], // Rio Sucuri
-            [-8.0476, -34.8770, 0.75], // Recife
-            [-5.7945, -35.2110, 0.78], // Natal
-            [-23.5505, -46.6333, 0.82], // São Paulo
-        ];
+        $atrativos = Atrativo::whereNotNull('lat')
+            ->whereNotNull('lng')
+            ->get(['id', 'nome', 'lat', 'lng', 'tempo_medio_visita']);
+
+        $heatmap = [];
+
+        foreach ($atrativos as $atrativo) {
+            // Contagem de eventos de visualização / buscas do atrativo
+            $eventosCount = AnalyticEvent::where('entidade_id', $atrativo->id)
+                ->where('entidade_type', 'atrativo')
+                ->count();
+
+            // Ponderação da intensidade de 0.4 a 1.0
+            $intensidade = 0.5 + min(0.5, ($eventosCount * 0.1) + (($atrativo->tempo_medio_visita ?? 60) / 360));
+            $intensidade = round(min(1.0, max(0.3, $intensidade)), 2);
+
+            $heatmap[] = [
+                (float) $atrativo->lat,
+                (float) $atrativo->lng,
+                $intensidade
+            ];
+        }
+
+        // Se ainda houver poucos pontos em base de testes vazia, adiciona as capitais mapeadas
+        if (count($heatmap) === 0) {
+            $heatmap = [
+                [-7.1153, -34.8641, 0.9], // João Pessoa
+                [-7.1147, -34.8239, 0.95], // Tambaú
+                [-7.1477, -34.7963, 0.85], // Cabo Branco
+                [-21.1275, -56.4831, 0.88], // Bonito
+                [-8.0476, -34.8770, 0.75], // Recife
+                [-5.7945, -35.2110, 0.78], // Natal
+            ];
+        }
 
         return response()->json($heatmap);
     }

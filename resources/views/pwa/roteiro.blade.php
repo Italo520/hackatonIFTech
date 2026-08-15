@@ -218,7 +218,30 @@
     </div>
 
     <!-- Timeline das Paradas -->
-    <h2 class="fs-6 fw-bold mb-3"><i class="bi bi-list-ol text-primary me-1"></i> Itinerário Passo a Passo</h2>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fs-6 fw-bold mb-0"><i class="bi bi-list-ol text-primary me-1"></i> Itinerário Passo a Passo</h2>
+        <span class="badge bg-light text-success border rounded-pill px-2.5 py-1 small">
+            <i class="bi bi-cursor-fill me-1"></i> Inicia na sua localização
+        </span>
+    </div>
+
+    <!-- Card Ponto de Partida -->
+    <div class="card border-0 rounded-4 shadow-sm p-3 bg-white mb-3" style="border-left: 4px solid #198754 !important;">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px;">
+                <i class="bi bi-cursor-fill"></i>
+            </div>
+            <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-0.5 fw-semibold" style="font-size: 0.68rem;">Ponto de Partida</span>
+                    <span class="text-muted small" style="font-size: 0.72rem;">0 km • Início</span>
+                </div>
+                <h3 class="fs-6 fw-bold text-dark mt-1 mb-0" id="label-partida-roteiro">Sua Localização Atual ({{ $item['cidade'] }})</h3>
+                <span class="text-muted" style="font-size: 0.75rem;">Origem da rota personalizada calculada pelo sistema</span>
+            </div>
+        </div>
+    </div>
+
     <div class="d-flex flex-column gap-3 mb-4">
         @foreach($item['paradas'] as $index => $p)
         <div class="card border-0 rounded-4 shadow-sm p-3 bg-white position-relative">
@@ -257,6 +280,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const paradas = @json($item['paradas']);
     const roteiroId = {{ $item['id'] }};
     const roteiroData = @json($item);
+    const savedLoc = window.LocationService ? window.LocationService.getSavedLocation() : null;
+
+    // Determina o ponto de partida do usuário
+    const startLat = savedLoc?.lat || (paradas.length > 0 ? (paradas[0].lat + 0.008) : -7.1153);
+    const startLng = savedLoc?.lng || (paradas.length > 0 ? (paradas[0].lng - 0.008) : -34.8641);
+    const startPos = [startLat, startLng];
 
     // 1. Inicializa o Mapa Leaflet
     const mapEl = document.getElementById('mapa-roteiro');
@@ -264,17 +293,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const map = L.map('mapa-roteiro', {
             zoomControl: false,
             scrollWheelZoom: false
-        }).setView([paradas[0].lat, paradas[0].lng], 13);
+        }).setView(startPos, 13);
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
             attribution: '© OSM'
         }).addTo(map);
 
-        const latlngs = [];
-        paradas.forEach((p, idx) => {
+        const allPoints = [startPos];
+
+        // Marcador do Ponto de Partida (Verde)
+        const startIcon = L.divIcon({
+            className: 'custom-marker-start',
+            html: `<div class="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center shadow" style="width: 30px; height: 30px; font-size: 0.8rem; border: 2px solid #fff;"><i class="bi bi-cursor-fill"></i></div>`,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+
+        L.marker(startPos, { icon: startIcon })
+         .addTo(map)
+         .bindPopup(`<strong>📍 Ponto de Partida</strong><br><small>Sua localização de início</small>`);
+
+        // Marcadores das Paradas
+        paradas.forEach((p) => {
             const pos = [p.lat, p.lng];
-            latlngs.push(pos);
+            allPoints.push(pos);
 
             const customIcon = L.divIcon({
                 className: 'custom-marker',
@@ -288,52 +331,50 @@ document.addEventListener('DOMContentLoaded', function() {
              .bindPopup(`<strong>${p.ordem}. ${p.nome}</strong><br><small>${p.tempo}</small>`);
         });
 
-        // 2. Traçado de Rota Real via OSRM
-        if (paradas.length > 1) {
-            const coordsStr = paradas.map(p => `${p.lng},${p.lat}`).join(';');
-            let routeLayer = null;
+        // 2. Traçado de Rota Real via OSRM partindo do Ponto de Partida do usuário
+        const coordsStr = allPoints.map(p => `${p[1]},${p[0]}`).join(';');
+        let routeLayer = null;
 
-            fetch(`/api/v1/routes/directions?coordinates=${encodeURIComponent(coordsStr)}&mode=driving`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.success && data.geojson) {
-                        routeLayer = L.geoJSON(data.geojson, {
-                            style: {
-                                color: '#0a9396',
-                                weight: 5,
-                                opacity: 0.88,
-                                lineJoin: 'round'
-                            }
-                        }).addTo(map);
-
-                        map.fitBounds(routeLayer.getBounds(), { padding: [35, 35] });
-
-                        const badgeEl = document.getElementById('route-meta-badge');
-                        if (badgeEl && data.distance_km) {
-                            badgeEl.innerHTML = `
-                                <span class="badge bg-primary text-white rounded-pill px-2.5 py-1 small fw-bold">
-                                    <i class="bi bi-signpost-split me-1 text-warning"></i>${data.distance_km} km • ~${data.duration_minutes} min
-                                </span>
-                            `;
+        fetch(`/api/v1/routes/directions?coordinates=${encodeURIComponent(coordsStr)}&mode=driving`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success && data.geojson) {
+                    routeLayer = L.geoJSON(data.geojson, {
+                        style: {
+                            color: '#0a9396',
+                            weight: 5,
+                            opacity: 0.88,
+                            lineJoin: 'round'
                         }
-                    } else {
-                        fallbackPolyline();
-                    }
-                })
-                .catch(() => {
-                    fallbackPolyline();
-                });
-
-            function fallbackPolyline() {
-                if (latlngs.length > 1 && !routeLayer) {
-                    L.polyline(latlngs, {
-                        color: '#005f73',
-                        weight: 4,
-                        opacity: 0.8,
-                        dashArray: '6, 6'
                     }).addTo(map);
-                    map.fitBounds(L.latLngBounds(latlngs), { padding: [30, 30] });
+
+                    map.fitBounds(routeLayer.getBounds(), { padding: [35, 35] });
+
+                    const badgeEl = document.getElementById('route-meta-badge');
+                    if (badgeEl && data.distance_km) {
+                        badgeEl.innerHTML = `
+                            <span class="badge bg-primary text-white rounded-pill px-2.5 py-1 small fw-bold">
+                                <i class="bi bi-signpost-split me-1 text-warning"></i>${data.distance_km} km da sua localização
+                            </span>
+                        `;
+                    }
+                } else {
+                    fallbackPolyline();
                 }
+            })
+            .catch(() => {
+                fallbackPolyline();
+            });
+
+        function fallbackPolyline() {
+            if (allPoints.length > 1 && !routeLayer) {
+                L.polyline(allPoints, {
+                    color: '#005f73',
+                    weight: 4,
+                    opacity: 0.8,
+                    dashArray: '6, 6'
+                }).addTo(map);
+                map.fitBounds(L.latLngBounds(allPoints), { padding: [30, 30] });
             }
         }
     }
