@@ -408,6 +408,23 @@
                 const box = document.getElementById('roteiro-resultado-box');
                 box.classList.remove('d-none');
 
+                if (!res.ok) {
+                    let erroMsg = `Erro ao gerar roteiro. Tente novamente mais tarde. (Status: ${res.status})`;
+                    try {
+                        const errorData = await res.json();
+                        if (errorData.message) erroMsg = errorData.message;
+                    } catch(e) {}
+                    
+                    box.innerHTML = `
+                        <div class="alert alert-warning rounded-4 border-0 shadow-sm p-4 text-center mt-3" style="background-color: #fff3cd;">
+                            <i class="bi bi-hourglass-split text-warning fs-1 mb-2 d-block"></i>
+                            <h6 class="fw-bold mb-2 text-dark">Serviço da IA Ocupado</h6>
+                            <p class="small text-secondary mb-0">${erroMsg}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
                 if (res.ok) {
                     const data = await res.json();
                     let itensHtml = '';
@@ -427,6 +444,27 @@
                         itensHtml = '<div class="alert alert-warning py-2 small">Nenhum local específico foi encontrado, mas você pode explorar a região livremente!</div>';
                     }
 
+                    // Salvar o roteiro IA no localStorage (apenas para este usuário)
+                    try {
+                        const savedIA = JSON.parse(localStorage.getItem('meus_roteiros_ia') || '[]');
+                        const idx = savedIA.findIndex(r => r.id === data.id);
+                        if (idx === -1) {
+                            savedIA.unshift({ // Coloca no topo da lista
+                                id: data.id,
+                                titulo: data.titulo,
+                                cidade: data.cidade,
+                                duracao: data.duracao + ' min',
+                                descricao: 'Roteiro exclusivo gerado por IA para você.',
+                                imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+                                paradas: data.itens,
+                                is_ia: true
+                            });
+                            localStorage.setItem('meus_roteiros_ia', JSON.stringify(savedIA));
+                        }
+                    } catch(e) {
+                        console.error("Erro ao salvar roteiro IA no localStorage:", e);
+                    }
+
                     box.innerHTML = `
                         <div class="alert alert-success rounded-4 border-0 shadow-sm p-3" style="background-color: #f8f9fa;">
                             <h4 class="fw-bold fs-6 mb-1 text-dark"><i class="bi bi-map-fill text-primary me-1"></i> ${data.titulo}</h4>
@@ -439,7 +477,7 @@
                             <div class="d-flex flex-column gap-2 mt-2">
                                 ${itensHtml}
                             </div>
-                            <a href="/roteiros" class="btn btn-primary w-100 rounded-pill btn-sm mt-3 fw-bold shadow-sm">Salvar e Iniciar Roteiro</a>
+                            <a href="/roteiro/${data.id}" class="btn btn-primary w-100 rounded-pill btn-sm mt-3 fw-bold shadow-sm">Salvar e Iniciar Roteiro</a>
                         </div>
                     `;
 

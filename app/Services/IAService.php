@@ -40,38 +40,66 @@ class IAService
         // Aumenta o tempo limite de execução do PHP para evitar timeout de 30s
         set_time_limit(120);
 
-        $response = Http::withoutVerifying()
-            ->timeout(60)
-            ->withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post($this->apiUrl . '?key=' . $this->apiKey, [
-            'model' => 'gemini-3.5-flash',
-            'input' => $inputTexto,
-        ]);
+        $maxRetries = 3;
+        $attempt = 0;
+        $response = null;
 
-        if ($response->successful()) {
-            $data = $response->json();
-            $text = '{}';
-            if (isset($data['steps'])) {
-                foreach ($data['steps'] as $step) {
-                    if (isset($step['type']) && $step['type'] === 'model_output' && isset($step['content'])) {
-                        $text = $step['content'][0]['text'] ?? '{}';
-                        break;
+        while ($attempt < $maxRetries) {
+            $response = Http::withoutVerifying()
+                ->timeout(60)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])->post($this->apiUrl . '?key=' . $this->apiKey, [
+                'model' => 'gemini-3.5-flash',
+                'input' => $inputTexto,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $text = '{}';
+                if (isset($data['steps'])) {
+                    foreach ($data['steps'] as $step) {
+                        if (isset($step['type']) && $step['type'] === 'model_output' && isset($step['content'])) {
+                            $text = $step['content'][0]['text'] ?? '{}';
+                            break;
+                        }
                     }
                 }
+                
+                // Extrai o JSON de forma mais robusta caso tenha texto adicional
+                if (preg_match('/\{[\s\S]*\}/', $text, $matches)) {
+                    $text = $matches[0];
+                }
+                
+                return trim($text);
             }
-            
-            // Remove blocos markdown caso o Gemini retorne ` ```json `
-            $text = preg_replace('/```json\s*/', '', $text);
-            $text = preg_replace('/```\s*/', '', $text);
-            
-            return trim($text);
+
+            if ($response->status() === 429) {
+                // Rate limit atingido. Espera 2 segundos antes de tentar novamente.
+                $attempt++;
+                sleep(2);
+                continue;
+            }
+
+            // Se for outro erro, sai do loop
+            break;
         }
 
-        $errorBody = $response->body();
+        if ($response && $response->status() === 429) {
+            $body = $response->body();
+            if (preg_match('/Please retry in ([\d\.]+)s/', $body, $m)) {
+                $wait = ceil((float)$m[1]);
+                return json_encode(['erro' => "Limite de requisições por minuto atingido. Por favor, aguarde $wait segundos antes de tentar novamente."]);
+            } else {
+                // Se não tem tempo de espera específico, significa que esgotou a cota global/diária
+                return json_encode(['erro' => "A cota global (diária) de uso da Inteligência Artificial foi esgotada para esta chave de API. Tente novamente amanhã ou configure uma nova chave."]);
+            }
+        }
+
+        $errorBody = $response ? $response->body() : 'Nenhuma resposta';
         Log::error("Erro na API do Gemini: " . $errorBody);
         
-        return '{}';
+        return json_encode(['erro' => 'Erro na comunicação com a IA. Tente novamente mais tarde.']);
     }
 
     /**
@@ -252,19 +280,22 @@ Você deve retornar EXATAMENTE UM JSON com os seguintes campos, e mais nada:
 }";
 
         $jsonResponse = $this->callGemini($prompt);
+        
+        \Illuminate\Support\Facades\Log::info("RAW Gemini Response for Roteiro: " . $jsonResponse);
+        
         $dados = json_decode($jsonResponse, true);
 
-        if (!$dados || !isset($dados['itens'])) {
-            // Fallback
-            $dados = [
-                'titulo' => "Roteiro {$cidade}: {$tema}",
-                'cidade' => $cidade,
-                'duracao' => $duracao,
-                'orcamento' => $orcamento,
-                'itens' => [
-                    ['atrativo_id' => 1, 'ordem' => 1, 'tempo_estimado' => 90, 'nome' => 'Erro na IA: Usando Roteiro Padrão']
-                ]
-            ];
+        if (!$dados) {
+            \Illuminate\Support\Facades\Log::error("JSON Decode Failed for Roteiro: " . json_last_error_msg());
+            return ['erro' => 'A resposta da IA não pôde ser processada. Tente novamente.'];
+        }
+        
+        if (isset($dados['erro'])) {
+            return $dados;
+        }
+
+        if (!isset($dados['itens']) || empty($dados['itens'])) {
+            return ['erro' => 'A IA não conseguiu gerar paradas válidas para este roteiro. Tente mudar os filtros.'];
         }
 
         $dados['is_ia'] = true;

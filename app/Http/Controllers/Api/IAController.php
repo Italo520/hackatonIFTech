@@ -96,6 +96,30 @@ class IAController extends Controller
 
         $roteiro = $this->iaService->gerarRoteiro($request->all());
 
+        if (isset($roteiro['erro'])) {
+            return response()->json(['message' => $roteiro['erro']], 429);
+        }
+
+        if (isset($roteiro['itens']) && !empty($roteiro['itens'])) {
+            $novoRoteiro = \App\Models\Roteiro::create([
+                'titulo' => $roteiro['titulo'] ?? 'Roteiro IA',
+                'descricao' => 'Roteiro exclusivo gerado por IA para ' . ($roteiro['cidade'] ?? 'sua viagem') . '.',
+                'duracao' => (string)($roteiro['duracao'] ?? '120'),
+                'orcamento' => (string)($roteiro['orcamento'] ?? '0'),
+                'publico' => false,
+            ]);
+
+            foreach ($roteiro['itens'] as $idx => $item) {
+                \App\Models\RoteiroItem::create([
+                    'roteiro_id' => $novoRoteiro->id,
+                    'atrativo_id' => $item['atrativo_id'] ?? 1,
+                    'ordem' => $item['ordem'] ?? ($idx + 1),
+                    'tempo_estimado' => $item['tempo_estimado'] ?? 60,
+                ]);
+            }
+            $roteiro['id'] = $novoRoteiro->id;
+        }
+
         return response()->json($roteiro);
     }
 
