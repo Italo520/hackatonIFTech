@@ -1,0 +1,580 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Destino Inteligente API",
+    "description": "API RESTful do Sistema de Gestão e Inteligência Turística Municipal (Destino Inteligente). Permite integração de aplicativos PWA, totens, parceiros e sistemas governamentais.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Suporte Técnico - Destino Inteligente",
+      "email": "suporte@destinointeligente.gov.br"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "Servidor Atual (v1)"
+    },
+    {
+      "url": "http://localhost:8000/api/v1",
+      "description": "Ambiente Local de Desenvolvimento"
+    }
+  ],
+  "tags": [
+    { "name": "Atrativos", "description": "Consulta de pontos turísticos, história, acessibilidade e horários" },
+    { "name": "Eventos", "description": "Calendário oficial de eventos, feiras e festividades municipais" },
+    { "name": "Roteiros", "description": "Roteiros turísticos guiados e personalizados" },
+    { "name": "Inteligência Artificial", "description": "Chatbot conversacional com RAG e gerador de roteiros inteligentes (Gemini)" },
+    { "name": "Geolocalização & Rotas", "description": "Busca reversa, geocoding e cálculo de trajetos" },
+    { "name": "Utilidades Públicas", "description": "Hospitais, delegacias, bombeiros e serviços essenciais" },
+    { "name": "Ocorrências", "description": "Canal de reporte de problemas urbanos e zeladoria por turistas" },
+    { "name": "QR Code", "description": "Leitura e resolução de placas turísticas inteligentes" },
+    { "name": "Sincronização Offline", "description": "Envio em lote de dados gerados em modo offline" },
+    { "name": "Analytics & Telemetria", "description": "Coleta anônima de métricas para mapa de calor e fluxo turístico" },
+    { "name": "Privacidade & LGPD", "description": "Consentimentos, portabilidade e direito ao esquecimento" }
+  ],
+  "paths": {
+    "/atrativos": {
+      "get": {
+        "tags": ["Atrativos"],
+        "summary": "Listar atrativos turísticos",
+        "description": "Retorna lista paginada de atrativos com suporte a filtros por categoria, município, busca textual e proximidade geográfica (Haversine).",
+        "parameters": [
+          { "name": "q", "in": "query", "description": "Busca textual por nome ou descrição", "schema": { "type": "string" } },
+          { "name": "categoria_id", "in": "query", "description": "Filtrar por ID da categoria", "schema": { "type": "integer" } },
+          { "name": "municipio_id", "in": "query", "description": "Filtrar por ID do município", "schema": { "type": "integer" } },
+          { "name": "lat", "in": "query", "description": "Latitude do usuário para cálculo de distância", "schema": { "type": "number", "format": "float" } },
+          { "name": "lng", "in": "query", "description": "Longitude do usuário para cálculo de distância", "schema": { "type": "number", "format": "float" } },
+          { "name": "acessibilidade", "in": "query", "description": "Filtrar apenas atrativos com recursos de acessibilidade", "schema": { "type": "boolean" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de atrativos recuperada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "array", "items": { "$ref": "#/components/schemas/Atrativo" } },
+                    "current_page": { "type": "integer", "example": 1 },
+                    "total": { "type": "integer", "example": 25 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/atrativos/{id}": {
+      "get": {
+        "tags": ["Atrativos"],
+        "summary": "Detalhes de um atrativo",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes completos do atrativo",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Atrativo" }
+              }
+            }
+          },
+          "404": { "description": "Atrativo não encontrado" }
+        }
+      }
+    },
+    "/eventos": {
+      "get": {
+        "tags": ["Eventos"],
+        "summary": "Listar eventos do calendário oficial",
+        "parameters": [
+          { "name": "data_inicio", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "gratuito", "in": "query", "schema": { "type": "boolean" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de eventos cadastrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Evento" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/eventos/{id}": {
+      "get": {
+        "tags": ["Eventos"],
+        "summary": "Detalhes de um evento",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes do evento",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Evento" }
+              }
+            }
+          },
+          "404": { "description": "Evento não encontrado" }
+        }
+      }
+    },
+    "/roteiros": {
+      "get": {
+        "tags": ["Roteiros"],
+        "summary": "Listar roteiros turísticos disponíveis",
+        "responses": {
+          "200": {
+            "description": "Lista de roteiros com atrativos vinculados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Roteiro" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/roteiros/{id}": {
+      "get": {
+        "tags": ["Roteiros"],
+        "summary": "Obter detalhes e pontos de um roteiro",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes do roteiro com itens ordenados",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Roteiro" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/roteiros/{id}/export": {
+      "get": {
+        "tags": ["Roteiros"],
+        "summary": "Exportar roteiro estruturado",
+        "description": "Exporta a rota em formato GeoJSON/JSON para download e uso offline no PWA.",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Pacote do roteiro exportado com sucesso" }
+        }
+      }
+    },
+    "/ia/chat": {
+      "post": {
+        "tags": ["Inteligência Artificial"],
+        "summary": "Conversar com o Assistente Turístico Inteligente",
+        "description": "Envia uma pergunta do turista para a IA (Google Gemini) com contexto oficial RAG (atrativos, eventos e prestadores locais) e guardrails anti-alucinação.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["pergunta"],
+                "properties": {
+                  "pergunta": { "type": "string", "example": "Quais são as melhores praias e restaurantes com frutos do mar?" },
+                  "idioma": { "type": "string", "example": "pt-BR" },
+                  "userLocation": {
+                    "type": "object",
+                    "properties": {
+                      "lat": { "type": "number", "example": -7.1153 },
+                      "lng": { "type": "number", "example": -34.8641 }
+                    }
+                  },
+                  "historico": {
+                    "type": "array",
+                    "items": { "type": "object" },
+                    "description": "Histórico das últimas interações na sessão"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resposta gerada pela IA com citações oficiais",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resposta": { "type": "string", "example": "Recomendo visitar a Praia de Tambaú..." },
+                    "fontes": { "type": "array", "items": { "type": "string" } },
+                    "status": { "type": "string", "example": "success" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ia/roteiro": {
+      "post": {
+        "tags": ["Inteligência Artificial"],
+        "summary": "Gerar roteiro inteligente personalizado por IA",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cidade": { "type": "string", "example": "João Pessoa" },
+                  "tema": { "type": "string", "example": "Histórico e Gastronômico" },
+                  "duracao_max": { "type": "integer", "description": "Duração em horas", "example": 4 },
+                  "orcamento_max": { "type": "number", "example": 150.0 },
+                  "lat": { "type": "number", "example": -7.1153 },
+                  "lng": { "type": "number", "example": -34.8641 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Roteiro sequenciado gerado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Roteiro" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/location/search": {
+      "get": {
+        "tags": ["Geolocalização & Rotas"],
+        "summary": "Busca de coordenadas (Geocodificação)",
+        "parameters": [
+          { "name": "q", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Lista de endereços e coordenadas encontradas" }
+        }
+      }
+    },
+    "/location/reverse": {
+      "get": {
+        "tags": ["Geolocalização & Rotas"],
+        "summary": "Geocodificação reversa (Coordenadas -> Endereço)",
+        "parameters": [
+          { "name": "lat", "in": "query", "required": true, "schema": { "type": "number" } },
+          { "name": "lng", "in": "query", "required": true, "schema": { "type": "number" } }
+        ],
+        "responses": {
+          "200": { "description": "Endereço estruturado" }
+        }
+      }
+    },
+    "/routes/directions": {
+      "get": {
+        "tags": ["Geolocalização & Rotas"],
+        "summary": "Calcular rota de navegação entre pontos",
+        "parameters": [
+          { "name": "points", "in": "query", "required": true, "description": "Pontos lat,lng;lat,lng", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Geometria da rota, tempo estimado e instruções de navegação" }
+        }
+      }
+    },
+    "/utilidades-publicas": {
+      "get": {
+        "tags": ["Utilidades Públicas"],
+        "summary": "Listar utilidades públicas e serviços de emergência",
+        "responses": {
+          "200": { "description": "Lista de telefones úteis, hospitais e delegacias" }
+        }
+      }
+    },
+    "/ocorrencias": {
+      "post": {
+        "tags": ["Ocorrências"],
+        "summary": "Registrar nova ocorrência ou problema no destino",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["tipo", "descricao"],
+                "properties": {
+                  "tipo": { "type": "string", "example": "iluminacao_publica" },
+                  "gravidade": { "type": "string", "enum": ["baixa", "media", "alta"], "example": "media" },
+                  "descricao": { "type": "string", "example": "Poste de iluminação apagado próximo à orla." },
+                  "local_texto": { "type": "string", "example": "Av. Cabo Branco, altura do número 1200" },
+                  "geo": { "type": "object", "properties": { "lat": { "type": "number" }, "lng": { "type": "number" } } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ocorrência registrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Ocorrência registrada com sucesso" },
+                    "protocolo": { "type": "string", "example": "OCO-2026-8941" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/qr/{hash}": {
+      "get": {
+        "tags": ["QR Code"],
+        "summary": "Processar scan de placa física inteligente",
+        "parameters": [
+          { "name": "hash", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Dados do atrativo correspondente e incremento da métrica ESG" },
+          "404": { "description": "QR Code inválido" }
+        }
+      }
+    },
+    "/sync/avaliacoes": {
+      "post": {
+        "tags": ["Sincronização Offline"],
+        "summary": "Sincronizar avaliações coletadas offline",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "avaliacoes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "entidade_type": { "type": "string", "example": "atrativo" },
+                        "entidade_id": { "type": "integer", "example": 1 },
+                        "nota": { "type": "integer", "example": 5 },
+                        "comentario": { "type": "string", "example": "Lugar incrível!" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Avaliações sincronizadas com sucesso" }
+        }
+      }
+    },
+    "/analytics": {
+      "post": {
+        "tags": ["Analytics & Telemetria"],
+        "summary": "Registrar evento de telemetria anônima",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["tipo"],
+                "properties": {
+                  "tipo": { "type": "string", "example": "atrativo_view" },
+                  "entidade_type": { "type": "string", "example": "atrativo" },
+                  "entidade_id": { "type": "integer", "example": 1 },
+                  "geo": { "type": "object", "properties": { "lat": { "type": "number" }, "lng": { "type": "number" } } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Evento computado com sucesso" }
+        }
+      }
+    },
+    "/lgpd/consentimentos": {
+      "post": {
+        "tags": ["Privacidade & LGPD"],
+        "summary": "Salvar preferências de consentimento",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "gps": { "type": "boolean", "example": true },
+                  "alertas": { "type": "boolean", "example": true },
+                  "metricas": { "type": "boolean", "example": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Preferências salvas com sucesso" }
+        }
+      }
+    },
+    "/lgpd/exportar": {
+      "post": {
+        "tags": ["Privacidade & LGPD"],
+        "summary": "Exportar dados pessoais (Portabilidade)",
+        "security": [{ "sanctumAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Pacote JSON com todos os dados pessoais e avaliações do titular",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "perfil": { "$ref": "#/components/schemas/User" },
+                    "avaliacoes": { "type": "array", "items": { "type": "object" } }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/lgpd/excluir": {
+      "post": {
+        "tags": ["Privacidade & LGPD"],
+        "summary": "Excluir conta e anonimizar dados (Direito ao Esquecimento)",
+        "security": [{ "sanctumAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["password"],
+                "properties": {
+                  "password": { "type": "string", "example": "minhasenha123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Conta excluída e dados anonimizados com sucesso" },
+          "403": { "description": "Senha incorreta" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": ["Privacidade & LGPD"],
+        "summary": "Obter perfil do usuário autenticado",
+        "security": [{ "sanctumAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Dados do usuário autenticado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sanctumAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Sanctum Token",
+        "description": "Token de acesso Sanctum enviado no header Authorization: Bearer {token}"
+      }
+    },
+    "schemas": {
+      "Atrativo": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "nome": { "type": "string", "example": "Farol do Cabo Branco" },
+          "descricao": { "type": "string", "example": "Ponto mais oriental das Américas..." },
+          "historia": { "type": "string", "example": "Inaugurado em 1972..." },
+          "endereco": { "type": "string", "example": "Av. Cabo Branco, s/n" },
+          "lat": { "type": "number", "example": -7.1477 },
+          "lng": { "type": "number", "example": -34.7963 },
+          "tempo_medio_visita": { "type": "integer", "example": 60 },
+          "acessibilidade": { "type": "object", "example": { "rampas": true, "piso_tatil": true } },
+          "status": { "type": "string", "example": "ativo" }
+        }
+      },
+      "Evento": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "nome": { "type": "string", "example": "Festival de Inverno & Gastronomia" },
+          "descricao": { "type": "string", "example": "Shows ao vivo e feira gastronômica..." },
+          "inicio": { "type": "string", "format": "date-time", "example": "2026-09-10T19:00:00Z" },
+          "fim": { "type": "string", "format": "date-time", "example": "2026-09-14T23:00:00Z" },
+          "local": { "type": "string", "example": "Praça Central" },
+          "gratuito": { "type": "boolean", "example": true },
+          "status": { "type": "string", "example": "ativo" }
+        }
+      },
+      "Roteiro": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "titulo": { "type": "string", "example": "Circuito Sol & Cultura" },
+          "tema": { "type": "string", "example": "Histórico" },
+          "duracao": { "type": "integer", "example": 180 },
+          "dificuldade": { "type": "string", "example": "facil" },
+          "transporte": { "type": "string", "example": "A pé / Bicicleta" },
+          "orcamento": { "type": "number", "example": 50.0 },
+          "origem": { "type": "string", "example": "oficial" }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "João Silva" },
+          "email": { "type": "string", "example": "turista@demo.com" },
+          "role": { "type": "string", "example": "turista" },
+          "idioma": { "type": "string", "example": "pt-BR" }
+        }
+      }
+    }
+  }
+}
