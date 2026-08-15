@@ -58,4 +58,74 @@ class RbacMiddlewareTest extends TestCase
         $response = $this->actingAs($tourist)->get('/parceiro/painel');
         $response->assertStatus(403);
     }
+
+    public function test_prefeito_permissions(): void
+    {
+        $prefeito = User::factory()->create(['role' => 'prefeito']);
+
+        // Acessos permitidos
+        $this->actingAs($prefeito)->get('/admin/dashboard')->assertStatus(200);
+        $this->actingAs($prefeito)->get('/admin/alertas')->assertStatus(200);
+        $this->actingAs($prefeito)->get('/admin/relatorios/exportar')->assertStatus(200);
+
+        // Acessos negados
+        $this->actingAs($prefeito)->get('/admin/atrativos')->assertStatus(403);
+        $this->actingAs($prefeito)->get('/admin/eventos')->assertStatus(403);
+        $this->actingAs($prefeito)->get('/admin/roteiros')->assertStatus(403);
+        $this->actingAs($prefeito)->get('/admin/prestadores')->assertStatus(403);
+        $this->actingAs($prefeito)->get('/admin/auditoria')->assertStatus(403);
+        $this->actingAs($prefeito)->get('/admin/documentacao')->assertStatus(403);
+    }
+
+    public function test_secretario_permissions(): void
+    {
+        $secretario = User::factory()->create(['role' => 'secretario']);
+
+        // Acessos permitidos
+        $this->actingAs($secretario)->get('/admin/dashboard')->assertStatus(200);
+        $this->actingAs($secretario)->get('/admin/atrativos')->assertStatus(200);
+        $this->actingAs($secretario)->get('/admin/eventos')->assertStatus(200);
+        $this->actingAs($secretario)->get('/admin/roteiros')->assertStatus(200);
+        $this->actingAs($secretario)->get('/admin/prestadores')->assertStatus(200);
+        $this->actingAs($secretario)->get('/admin/alertas')->assertStatus(200);
+        $this->actingAs($secretario)->get('/admin/relatorios/exportar')->assertStatus(200);
+
+        // Acessos negados
+        $this->actingAs($secretario)->get('/admin/auditoria')->assertStatus(403);
+        $this->actingAs($secretario)->get('/admin/documentacao')->assertStatus(403);
+    }
+
+    public function test_gestor_conteudo_permissions(): void
+    {
+        $gestor = User::factory()->create(['role' => 'gestor_conteudo']);
+
+        // Acessos permitidos
+        $this->actingAs($gestor)->get('/admin/dashboard')->assertStatus(200);
+        $this->actingAs($gestor)->get('/admin/atrativos')->assertStatus(200);
+        $this->actingAs($gestor)->get('/admin/eventos')->assertStatus(200);
+        $this->actingAs($gestor)->get('/admin/roteiros')->assertStatus(200);
+
+        // Acessos negados
+        $this->actingAs($gestor)->get('/admin/prestadores')->assertStatus(403);
+        $this->actingAs($gestor)->get('/admin/alertas')->assertStatus(403);
+        $this->actingAs($gestor)->get('/admin/auditoria')->assertStatus(403);
+        $this->actingAs($gestor)->get('/admin/documentacao')->assertStatus(403);
+    }
+
+    public function test_gestor_cadastros_permissions(): void
+    {
+        $gestor = User::factory()->create(['role' => 'gestor_cadastros']);
+
+        // Acessos permitidos
+        $this->actingAs($gestor)->get('/admin/dashboard')->assertStatus(200);
+        $this->actingAs($gestor)->get('/admin/prestadores')->assertStatus(200);
+
+        // Acessos negados
+        $this->actingAs($gestor)->get('/admin/atrativos')->assertStatus(403);
+        $this->actingAs($gestor)->get('/admin/eventos')->assertStatus(403);
+        $this->actingAs($gestor)->get('/admin/roteiros')->assertStatus(403);
+        $this->actingAs($gestor)->get('/admin/alertas')->assertStatus(403);
+        $this->actingAs($gestor)->get('/admin/auditoria')->assertStatus(403);
+        $this->actingAs($gestor)->get('/admin/documentacao')->assertStatus(403);
+    }
 }

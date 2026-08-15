@@ -40,8 +40,14 @@
             background: #003844;
             color: #ffffff;
             min-height: 100vh;
-            transition: all 0.3s ease;
+            transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1), left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1040;
+            flex-shrink: 0;
+        }
+        @media (min-width: 992px) {
+            .admin-sidebar.collapsed {
+                margin-left: -260px;
+            }
         }
         .admin-sidebar .nav-link {
             color: rgba(255, 255, 255, 0.75);
@@ -138,6 +144,33 @@
             </button>
         </div>
 
+        @php
+            $user = auth()->user();
+            $role = $user?->role;
+            $roleLabels = [
+                'super_admin' => 'Super Administrador',
+                'prefeito' => 'Prefeito Municipal',
+                'secretario' => 'Secretário de Turismo',
+                'gestor_conteudo' => 'Gestor de Conteúdo',
+                'gestor_cadastros' => 'Gestor de Cadastros',
+                'atendente' => 'Atendente',
+                'empreendedor' => 'Empreendedor / Parceiro',
+                'turista' => 'Turista',
+            ];
+            $roleName = $roleLabels[$role] ?? ucfirst($role ?? 'Administrador');
+
+            $canVerAtrativosEventosRoteiros = in_array($role, ['super_admin', 'secretario', 'gestor_conteudo']);
+            $canVerPrestadores = in_array($role, ['super_admin', 'secretario', 'gestor_cadastros']);
+            $canVerGestaoTuristica = $canVerAtrativosEventosRoteiros || $canVerPrestadores;
+
+            $canVerAlertas = in_array($role, ['super_admin', 'prefeito', 'secretario']);
+            $canVerAuditoria = in_array($role, ['super_admin']);
+            $canVerRelatorios = in_array($role, ['super_admin', 'prefeito', 'secretario']);
+            $canVerSegurancaOperacao = $canVerAlertas || $canVerAuditoria || $canVerRelatorios;
+
+            $canVerDocumentacao = in_array($role, ['super_admin']);
+        @endphp
+
         <!-- Links de Navegação -->
         <div class="flex-grow-1 overflow-auto py-2">
             <div class="sidebar-heading">Visão Geral</div>
@@ -150,55 +183,69 @@
                 </li>
             </ul>
 
-            <div class="sidebar-heading mt-2">Gestão Turística</div>
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                    <a href="{{ route('admin.atrativos.index') }}" class="nav-link {{ request()->is('admin/atrativos*') ? 'active' : '' }}">
-                        <i class="bi bi-geo-alt-fill text-info"></i>
-                        <span>Atrativos</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.eventos.index') }}" class="nav-link {{ request()->is('admin/eventos*') ? 'active' : '' }}">
-                        <i class="bi bi-calendar-event text-warning"></i>
-                        <span>Eventos</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.roteiros.index') }}" class="nav-link {{ request()->is('admin/roteiros*') ? 'active' : '' }}">
-                        <i class="bi bi-map-fill text-success"></i>
-                        <span>Roteiros</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url('/admin/prestadores') }}" class="nav-link {{ request()->is('admin/prestadores*') ? 'active' : '' }}">
-                        <i class="bi bi-shop text-primary-subtle"></i>
-                        <span>Validação Parceiros</span>
-                    </a>
-                </li>
-            </ul>
+            @if($canVerGestaoTuristica)
+                <div class="sidebar-heading mt-2">Gestão Turística</div>
+                <ul class="nav nav-pills flex-column">
+                    @if($canVerAtrativosEventosRoteiros)
+                        <li class="nav-item">
+                            <a href="{{ route('admin.atrativos.index') }}" class="nav-link {{ request()->is('admin/atrativos*') ? 'active' : '' }}">
+                                <i class="bi bi-geo-alt-fill text-info"></i>
+                                <span>Atrativos</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.eventos.index') }}" class="nav-link {{ request()->is('admin/eventos*') ? 'active' : '' }}">
+                                <i class="bi bi-calendar-event text-warning"></i>
+                                <span>Eventos</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.roteiros.index') }}" class="nav-link {{ request()->is('admin/roteiros*') ? 'active' : '' }}">
+                                <i class="bi bi-map-fill text-success"></i>
+                                <span>Roteiros</span>
+                            </a>
+                        </li>
+                    @endif
+                    @if($canVerPrestadores)
+                        <li class="nav-item">
+                            <a href="{{ url('/admin/prestadores') }}" class="nav-link {{ request()->is('admin/prestadores*') ? 'active' : '' }}">
+                                <i class="bi bi-shop text-primary-subtle"></i>
+                                <span>Validação Parceiros</span>
+                            </a>
+                        </li>
+                    @endif
+                </ul>
+            @endif
 
-            <div class="sidebar-heading mt-2">Segurança & Operação</div>
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                    <a href="{{ route('admin.alertas.index') }}" class="nav-link {{ request()->is('admin/alertas*') ? 'active' : '' }}">
-                        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
-                        <span>Alertas & Defesa Civil</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.auditoria.index') }}" class="nav-link {{ request()->is('admin/auditoria*') ? 'active' : '' }}">
-                        <i class="bi bi-shield-lock"></i>
-                        <span>Auditoria & Logs</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.relatorios.export') }}" class="nav-link">
-                        <i class="bi bi-file-earmark-arrow-down text-light"></i>
-                        <span>Exportar Relatórios</span>
-                    </a>
-                </li>
-            </ul>
+            @if($canVerSegurancaOperacao)
+                <div class="sidebar-heading mt-2">Segurança & Operação</div>
+                <ul class="nav nav-pills flex-column">
+                    @if($canVerAlertas)
+                        <li class="nav-item">
+                            <a href="{{ route('admin.alertas.index') }}" class="nav-link {{ request()->is('admin/alertas*') ? 'active' : '' }}">
+                                <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                                <span>Alertas & Defesa Civil</span>
+                            </a>
+                        </li>
+                    @endif
+                    @if($canVerAuditoria)
+                        <li class="nav-item">
+                            <a href="{{ route('admin.auditoria.index') }}" class="nav-link {{ request()->is('admin/auditoria*') ? 'active' : '' }}">
+                                <i class="bi bi-shield-lock"></i>
+                                <span>Auditoria & Logs</span>
+                            </a>
+                        </li>
+                    @endif
+                    @if($canVerRelatorios)
+                        <li class="nav-item">
+                            <a href="{{ route('admin.relatorios.export') }}" class="nav-link">
+                                <i class="bi bi-file-earmark-arrow-down text-light"></i>
+                                <span>Exportar Relatórios</span>
+                            </a>
+                        </li>
+                    @endif
+                </ul>
+            @endif
         </div>
 
         <!-- Rodapé do Sidebar -->
@@ -207,10 +254,12 @@
                 <i class="bi bi-phone"></i>
                 <span>Ver App do Turista</span>
             </a>
-            <a href="{{ route('admin.documentacao') }}" class="btn btn-outline-info btn-sm w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 {{ request()->is('admin/documentacao*') ? 'active bg-info text-white border-info' : '' }}">
-                <i class="bi bi-journal-bookmark-fill"></i>
-                <span>Documentação</span>
-            </a>
+            @if($canVerDocumentacao)
+                <a href="{{ route('admin.documentacao') }}" class="btn btn-outline-info btn-sm w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 {{ request()->is('admin/documentacao*') ? 'active bg-info text-white border-info' : '' }}">
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                    <span>Documentação</span>
+                </a>
+            @endif
             <form method="POST" action="{{ route('logout') }}" class="w-100 m-0">
                 @csrf
                 <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-pill py-1.5 fw-semibold d-flex align-items-center justify-content-center gap-2">
@@ -226,8 +275,8 @@
         <!-- Topbar -->
         <header class="admin-topbar d-flex align-items-center justify-content-between px-3 px-lg-4 sticky-top">
             <div class="d-flex align-items-center gap-3">
-                <button type="button" class="btn btn-light d-lg-none rounded-circle p-2" id="btnToggleSidebarOpen">
-                    <i class="bi bi-list fs-5"></i>
+                <button type="button" class="btn btn-light rounded-circle p-2 shadow-sm d-flex align-items-center justify-content-center" id="btnToggleSidebar" title="Recolher / Expandir Menu" style="width: 38px; height: 38px; border: 1px solid rgba(0,0,0,0.08);">
+                    <i class="bi bi-layout-sidebar-inset fs-5 text-dark"></i>
                 </button>
                 <h5 class="fw-bold mb-0 text-dark d-none d-sm-block">@yield('title', 'Painel de Gestão')</h5>
             </div>
@@ -243,19 +292,20 @@
                 <div class="dropdown">
                     <button class="btn btn-light border-0 rounded-pill px-3 py-1.5 d-flex align-items-center gap-2 bg-light" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold small" style="width: 32px; height: 32px;">
-                            {{ strtoupper(substr(auth()->user()?->name ?? 'A', 0, 1)) }}
+                            {{ strtoupper(substr($user?->name ?? 'A', 0, 1)) }}
                         </div>
                         <div class="d-none d-sm-flex flex-column text-start">
-                            <span class="fw-bold small text-dark lh-1">{{ auth()->user()?->name ?? 'Gestor Público' }}</span>
-                            <span class="text-muted" style="font-size: 0.68rem;">{{ auth()->user()?->role ?? 'Administrador' }}</span>
+                            <span class="fw-bold small text-dark lh-1">{{ $user?->name ?? 'Gestor Público' }}</span>
+                            <span class="text-primary fw-semibold" style="font-size: 0.68rem;">{{ $roleName }}</span>
                         </div>
                         <i class="bi bi-chevron-down small text-muted"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2">
                         <li>
                             <div class="px-3 py-2 border-bottom">
-                                <div class="fw-bold small">{{ auth()->user()?->name ?? 'Gestor' }}</div>
-                                <div class="text-muted small" style="font-size: 0.72rem;">{{ auth()->user()?->email ?? 'gestor@demo.com' }}</div>
+                                <div class="fw-bold small">{{ $user?->name ?? 'Gestor' }}</div>
+                                <div class="text-muted small" style="font-size: 0.72rem;">{{ $user?->email ?? 'gestor@demo.com' }}</div>
+                                <div class="badge bg-primary-subtle text-primary mt-1" style="font-size: 0.68rem;">{{ $roleName }}</div>
                             </div>
                         </li>
                         <li>
@@ -308,27 +358,49 @@
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Sidebar Toggle Script -->
+    <!-- Sidebar Toggle Script (Desktop & Mobile) -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('adminSidebar');
             const backdrop = document.getElementById('sidebarBackdrop');
-            const btnOpen = document.getElementById('btnToggleSidebarOpen');
+            const btnToggle = document.getElementById('btnToggleSidebar');
             const btnClose = document.getElementById('btnToggleSidebarClose');
 
-            function toggleSidebar(open) {
-                if (open) {
-                    sidebar.classList.add('show');
-                    backdrop.classList.add('show');
-                } else {
-                    sidebar.classList.remove('show');
-                    backdrop.classList.remove('show');
+            // Carregar preferência salva no Desktop
+            if (window.innerWidth >= 992) {
+                const isCollapsed = localStorage.getItem('admin_sidebar_collapsed') === 'true';
+                if (isCollapsed) {
+                    sidebar.classList.add('collapsed');
                 }
             }
 
-            btnOpen?.addEventListener('click', () => toggleSidebar(true));
-            btnClose?.addEventListener('click', () => toggleSidebar(false));
-            backdrop?.addEventListener('click', () => toggleSidebar(false));
+            function toggleSidebar() {
+                if (window.innerWidth < 992) {
+                    // Mobile: abre/fecha como offcanvas
+                    const isOpen = sidebar.classList.contains('show');
+                    if (isOpen) {
+                        sidebar.classList.remove('show');
+                        backdrop.classList.remove('show');
+                    } else {
+                        sidebar.classList.add('show');
+                        backdrop.classList.add('show');
+                    }
+                } else {
+                    // Desktop: recolhe/expande
+                    sidebar.classList.toggle('collapsed');
+                    localStorage.setItem('admin_sidebar_collapsed', sidebar.classList.contains('collapsed'));
+                }
+            }
+
+            btnToggle?.addEventListener('click', toggleSidebar);
+            btnClose?.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                backdrop.classList.remove('show');
+            });
+            backdrop?.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                backdrop.classList.remove('show');
+            });
         });
     </script>
 

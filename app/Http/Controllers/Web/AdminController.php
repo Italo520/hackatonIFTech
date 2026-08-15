@@ -361,4 +361,12 @@ class AdminController extends Controller
     {
         return view('admin.documentacao');
     }
+
+    /**
+     * Swagger UI Interativo da API REST
+     */
+    public function swagger()
+    {
+        return view('admin.swagger');
+    }
 }

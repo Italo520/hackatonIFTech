@@ -409,5 +409,8 @@ class DatabaseSeeder extends Seeder
                 ]
             );
         }
+
+        // 9. Carga Massiva de Atrações e Eventos de João Pessoa
+        $this->call(JoaoPessoaAtrativosEventosSeeder::class);
     }
 }

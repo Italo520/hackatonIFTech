@@ -157,11 +157,13 @@
             <div style="height: 280px; position: relative;">
                 <canvas id="chartCategorias"></canvas>
             </div>
-            <div class="mt-3 text-center">
-                <a href="{{ route('admin.relatorios.export') }}" class="btn btn-outline-primary rounded-pill btn-sm w-100 fw-semibold">
-                    <i class="bi bi-file-earmark-arrow-down me-1"></i> Exportar Dados (CSV)
-                </a>
-            </div>
+            @if(in_array(auth()->user()?->role, ['super_admin', 'prefeito', 'secretario']))
+                <div class="mt-3 text-center">
+                    <a href="{{ route('admin.relatorios.export') }}" class="btn btn-outline-primary rounded-pill btn-sm w-100 fw-semibold">
+                        <i class="bi bi-file-earmark-arrow-down me-1"></i> Exportar Dados (CSV)
+                    </a>
+                </div>
+            @endif
         </div>
     </div>
 </div>
@@ -175,9 +177,11 @@
                     <h5 class="fw-bold text-dark mb-0">Últimos Atrativos no Catálogo</h5>
                     <p class="text-muted small mb-0" style="font-size: 0.78rem;">Pontos turísticos cadastrados recentemente com status de publicação</p>
                 </div>
-                <a href="{{ route('admin.atrativos.index') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                    Gerenciar Todos <i class="bi bi-chevron-right ms-1"></i>
-                </a>
+                @if(in_array(auth()->user()?->role, ['super_admin', 'secretario', 'gestor_conteudo']))
+                    <a href="{{ route('admin.atrativos.index') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        Gerenciar Todos <i class="bi bi-chevron-right ms-1"></i>
+                    </a>
+                @endif
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
