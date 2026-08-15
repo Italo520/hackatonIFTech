@@ -353,4 +353,12 @@ class AdminController extends Controller
 
         return response()->json($heatmap);
     }
+
+    /**
+     * Documentação do Projeto (Dossiê de Entrega / Handover Documentation)
+     */
+    public function documentacao()
+    {
+        return view('admin.documentacao');
+    }
 }

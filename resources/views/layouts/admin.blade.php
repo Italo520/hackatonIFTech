@@ -207,6 +207,10 @@
                 <i class="bi bi-phone"></i>
                 <span>Ver App do Turista</span>
             </a>
+            <a href="{{ route('admin.documentacao') }}" class="btn btn-outline-info btn-sm w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 {{ request()->is('admin/documentacao*') ? 'active bg-info text-white border-info' : '' }}">
+                <i class="bi bi-journal-bookmark-fill"></i>
+                <span>Documentação</span>
+            </a>
             <form method="POST" action="{{ route('logout') }}" class="w-100 m-0">
                 @csrf
                 <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-pill py-1.5 fw-semibold d-flex align-items-center justify-content-center gap-2">
@@ -293,8 +297,11 @@
         </main>
 
         <!-- Footer -->
-        <footer class="bg-white border-top py-3 px-4 text-center text-muted small">
-            Destino Inteligente &copy; {{ date('Y') }} — Plataforma de Gestão e Inteligência Turística Municipal
+        <footer class="bg-white border-top py-3 px-4 text-muted small d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <span>Destino Inteligente &copy; {{ date('Y') }} — Plataforma de Gestão e Inteligência Turística Municipal</span>
+            <a href="{{ route('admin.documentacao') }}" class="text-decoration-none text-primary fw-semibold d-inline-flex align-items-center gap-1">
+                <i class="bi bi-journal-bookmark-fill"></i> Documentação do Projeto
+            </a>
         </footer>
     </div>
 

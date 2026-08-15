@@ -103,6 +103,9 @@ Route::middleware(['auth', 'role:super_admin,prefeito,secretario,gestor_conteudo
     // Relatórios & Heatmap
     Route::get('/admin/heatmap-data', [AdminController::class, 'heatmapData'])->name('admin.heatmap');
     Route::get('/admin/relatorios/exportar', [RelatorioController::class, 'exportCsv'])->name('admin.relatorios.export');
+
+    // Documentação do Projeto (Dossiê de Entrega)
+    Route::get('/admin/documentacao', [AdminController::class, 'documentacao'])->name('admin.documentacao');
 });
 
 /*
