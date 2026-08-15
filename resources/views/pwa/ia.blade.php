@@ -71,9 +71,25 @@
     <!-- View Gerar Roteiro -->
     <div id="view-roteiro" class="d-none px-3 py-4">
         <div class="card border-0 rounded-4 shadow-sm p-4 bg-white">
-            <h3 class="fs-6 fw-bold mb-3">Gerador Automático de Roteiro</h3>
-            <p class="small text-secondary mb-3">A IA montará uma sequência inteligente de paradas otimizada por proximidade geográfica.</p>
+            <h3 class="fs-6 fw-bold mb-2">Gerador Automático de Roteiro</h3>
+            <p class="small text-secondary mb-3">A IA montará um itinerário otimizado iniciando <strong>a partir da sua localização atual</strong>.</p>
             
+            <!-- Ponto de Partida Indicador -->
+            <div class="d-flex align-items-center justify-content-between p-2.5 px-3 rounded-4 bg-primary-subtle border border-primary-subtle mb-3">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
+                        <i class="bi bi-cursor-fill" style="font-size: 0.85rem;"></i>
+                    </div>
+                    <div>
+                        <div class="text-uppercase fw-bold text-primary" style="font-size: 0.68rem; letter-spacing: 0.5px;">Ponto de Partida</div>
+                        <div class="fw-semibold text-dark small" id="ponto-partida-label">Sua Localização (<span class="current-city-name">João Pessoa</span>)</div>
+                    </div>
+                </div>
+                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                    <i class="bi bi-geo-alt-fill me-1"></i>GPS Ativo
+                </span>
+            </div>
+
             <div class="mb-3">
                 <label class="form-label small fw-bold">Estilo de Viagem</label>
                 <select id="roteiro-tema" class="form-select rounded-pill">
@@ -427,21 +443,41 @@
 
                 if (res.ok) {
                     const data = await res.json();
-                    let itensHtml = '';
+                    const pontoPartida = data.ponto_partida || {
+                        nome: `Sua Localização Atual (${cidade})`,
+                        lat: savedLoc?.lat || -7.1153,
+                        lng: savedLoc?.lng || -34.8641
+                    };
+
+                    let itensHtml = `
+                        <!-- Ponto de Partida -->
+                        <div class="bg-white p-3 rounded-3 small shadow-sm border-start border-4 border-success">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-success"><i class="bi bi-cursor-fill me-1"></i> PONTO DE PARTIDA (Você)</strong>
+                                <span class="badge bg-success-subtle text-success">Início</span>
+                            </div>
+                            <div class="fw-semibold text-dark">${pontoPartida.nome}</div>
+                            <span class="text-muted" style="font-size: 0.72rem;">Sua localização atual no momento da geração</span>
+                        </div>
+                    `;
+
                     if (data.itens && data.itens.length > 0) {
-                        data.itens.forEach(item => {
+                        data.itens.forEach((item, idx) => {
                             itensHtml += `
                                 <div class="bg-white p-3 rounded-3 small shadow-sm border-start border-4 border-primary">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <strong class="text-dark"><i class="bi bi-geo-alt text-primary me-1"></i> ${item.nome}</strong>
+                                        <strong class="text-dark"><i class="bi bi-geo-alt-fill text-primary me-1"></i> Parada ${idx + 1}: ${item.nome}</strong>
                                         <span class="badge bg-light text-secondary"><i class="bi bi-clock me-1"></i> ${item.tempo_estimado} min</span>
                                     </div>
-                                    <span class="text-muted" style="font-size: 0.75rem;">Recomendado pela IA</span>
+                                    <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 0.75rem;">
+                                        <span>Recomendado pela IA</span>
+                                        ${item.distancia_km_partida ? `<span><i class="bi bi-signpost me-1"></i> ${item.distancia_km_partida} km da partida</span>` : ''}
+                                    </div>
                                 </div>
                             `;
                         });
                     } else {
-                        itensHtml = '<div class="alert alert-warning py-2 small">Nenhum local específico foi encontrado, mas você pode explorar a região livremente!</div>';
+                        itensHtml += '<div class="alert alert-warning py-2 small">Nenhum local específico foi encontrado, mas você pode explorar a região livremente!</div>';
                     }
 
                     // Salvar o roteiro IA no localStorage (apenas para este usuário)
@@ -454,9 +490,10 @@
                                 titulo: data.titulo,
                                 cidade: data.cidade,
                                 duracao: data.duracao + ' min',
-                                descricao: 'Roteiro exclusivo gerado por IA para você.',
+                                descricao: 'Roteiro exclusivo gerado a partir da sua localização.',
                                 imagem: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
                                 paradas: data.itens,
+                                ponto_partida: pontoPartida,
                                 is_ia: true
                             });
                             localStorage.setItem('meus_roteiros_ia', JSON.stringify(savedIA));
@@ -477,47 +514,64 @@
                             <div class="d-flex flex-column gap-2 mt-2">
                                 ${itensHtml}
                             </div>
-                            <a href="/roteiro/${data.id}" class="btn btn-primary w-100 rounded-pill btn-sm mt-3 fw-bold shadow-sm">Salvar e Iniciar Roteiro</a>
+                            <a href="/roteiro/${data.id}" class="btn btn-primary w-100 rounded-pill btn-sm mt-3 fw-bold shadow-sm">
+                                <i class="bi bi-play-circle-fill me-1"></i> Iniciar Trajeto da Minha Localização
+                            </a>
                         </div>
                     `;
 
-                    // Inicializar o Leaflet Map se houver coordenadas
+                    // Inicializar o Leaflet Map incluindo o ponto de partida
                     setTimeout(() => {
                         const mapContainer = document.getElementById('mapa-roteiro-ia');
-                        if (mapContainer && data.itens && data.itens.length > 0) {
-                            // Encontra a primeira coordenada válida
-                            const firstItem = data.itens.find(i => i.lat && i.lng);
-                            const center = firstItem ? [firstItem.lat, firstItem.lng] : [-7.1153, -34.8641];
-                            
-                            const map = L.map('mapa-roteiro-ia').setView(center, 13);
+                        if (mapContainer) {
+                            const center = [pontoPartida.lat, pontoPartida.lng];
+                            const map = L.map('mapa-roteiro-ia', { zoomControl: false }).setView(center, 13);
                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                 maxZoom: 19,
                                 attribution: '© OpenStreetMap'
                             }).addTo(map);
 
-                            // Adicionar Marcadores
-                            const bounds = [];
-                            data.itens.forEach((item, index) => {
-                                if (item.lat && item.lng) {
-                                    bounds.push([item.lat, item.lng]);
-                                    L.marker([item.lat, item.lng])
-                                     .bindPopup(`<b>${index + 1}. ${item.nome}</b><br>${item.tempo_estimado} min`)
-                                     .addTo(map);
-                                }
+                            const bounds = [center];
+
+                            // Marcador do Ponto de Partida (Verde)
+                            const startIcon = L.divIcon({
+                                className: 'custom-marker-start',
+                                html: `<div class="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center shadow" style="width: 28px; height: 28px; font-size: 0.75rem; border: 2px solid #fff;"><i class="bi bi-cursor-fill"></i></div>`,
+                                iconSize: [28, 28],
+                                iconAnchor: [14, 14]
                             });
+
+                            L.marker(center, { icon: startIcon })
+                             .bindPopup(`<b>Ponto de Partida</b><br>${pontoPartida.nome}`)
+                             .addTo(map);
+
+                            // Adicionar Marcadores das Paradas
+                            if (data.itens && data.itens.length > 0) {
+                                data.itens.forEach((item, index) => {
+                                    if (item.lat && item.lng) {
+                                        bounds.push([item.lat, item.lng]);
+                                        L.marker([item.lat, item.lng])
+                                         .bindPopup(`<b>${index + 1}. ${item.nome}</b><br>${item.tempo_estimado} min`)
+                                         .addTo(map);
+                                    }
+                                });
+
+                                // Traçar polyline simples conectando ponto de partida às paradas
+                                L.polyline(bounds, { color: '#0a9396', weight: 4, opacity: 0.85, dashArray: '5, 5' }).addTo(map);
+                            }
                             
                             if (bounds.length > 1) {
-                                map.fitBounds(bounds, { padding: [20, 20] });
+                                map.fitBounds(bounds, { padding: [25, 25] });
                             }
                         }
-                    }, 200);
+                    }, 250);
                 }
             } catch (err) {
+                console.error("Erro na requisição de roteiro:", err);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-stars me-1"></i> Gerar Roteiro com IA';
+                btn.innerHTML = '<i class="bi bi-stars me-1"></i> Tentar Novamente';
             }
         });
     });
 </script>
 @endpush
-

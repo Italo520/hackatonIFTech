@@ -24,6 +24,7 @@ class User extends Authenticatable implements Auditable
         'email',
         'password',
         'role',
+        'consentimentos',
     ];
 
     /**
@@ -46,6 +47,7 @@ class User extends Authenticatable implements Auditable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'consentimentos' => 'array',
         ];
     }
 }

@@ -47,4 +47,32 @@ class LGPDController extends Controller
 
         return response()->json(['message' => 'Dados excluídos e anonimizados com sucesso']);
     }
+
+    public function salvarConsentimentos(Request $request)
+    {
+        $data = $request->validate([
+            'gps' => 'nullable|boolean',
+            'alertas' => 'nullable|boolean',
+            'metricas' => 'nullable|boolean',
+        ]);
+
+        $consentimentos = [
+            'gps' => (bool)($data['gps'] ?? true),
+            'alertas' => (bool)($data['alertas'] ?? true),
+            'metricas' => (bool)($data['metricas'] ?? true),
+            'atualizado_em' => now()->toIso8601String(),
+        ];
+
+        if (auth()->check()) {
+            $user = auth()->user();
+            $user->consentimentos = $consentimentos;
+            $user->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Consentimentos atualizados e salvos com sucesso no sistema.',
+            'consentimentos' => $consentimentos
+        ]);
+    }
 }

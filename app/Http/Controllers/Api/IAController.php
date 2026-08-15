@@ -101,21 +101,32 @@ class IAController extends Controller
         }
 
         if (isset($roteiro['itens']) && !empty($roteiro['itens'])) {
+            $pontoPartida = $roteiro['ponto_partida'] ?? [
+                'lat' => $request->input('lat', -7.1153),
+                'lng' => $request->input('lng', -34.8641),
+                'cidade' => $request->input('cidade', 'João Pessoa')
+            ];
+
             $novoRoteiro = \App\Models\Roteiro::create([
                 'titulo' => $roteiro['titulo'] ?? 'Roteiro IA',
-                'descricao' => 'Roteiro exclusivo gerado por IA para ' . ($roteiro['cidade'] ?? 'sua viagem') . '.',
-                'duracao' => (string)($roteiro['duracao'] ?? '120'),
-                'orcamento' => (string)($roteiro['orcamento'] ?? '0'),
+                'tema' => $request->input('tema', 'Turismo Geral'),
+                'duracao' => (float)($roteiro['duracao'] ?? 2),
+                'orcamento' => (float)($roteiro['orcamento'] ?? 0),
                 'publico' => false,
+                'origem' => 'ia',
+                'geo' => json_encode(['ponto_partida' => $pontoPartida]),
             ]);
 
             foreach ($roteiro['itens'] as $idx => $item) {
-                \App\Models\RoteiroItem::create([
-                    'roteiro_id' => $novoRoteiro->id,
-                    'atrativo_id' => $item['atrativo_id'] ?? 1,
-                    'ordem' => $item['ordem'] ?? ($idx + 1),
-                    'tempo_estimado' => $item['tempo_estimado'] ?? 60,
-                ]);
+                $atrativoId = $item['atrativo_id'] ?? null;
+                if ($atrativoId && \App\Models\Atrativo::where('id', $atrativoId)->exists()) {
+                    \App\Models\RoteiroItem::create([
+                        'roteiro_id' => $novoRoteiro->id,
+                        'atrativo_id' => $atrativoId,
+                        'ordem' => $item['ordem'] ?? ($idx + 1),
+                        'tempo_estimado' => $item['tempo_estimado'] ?? 60,
+                    ]);
+                }
             }
             $roteiro['id'] = $novoRoteiro->id;
         }

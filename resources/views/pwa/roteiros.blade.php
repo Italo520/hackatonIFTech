@@ -22,144 +22,126 @@
 
     <!-- Chips de Filtro de Duração -->
     <div class="d-flex gap-2 overflow-auto no-scrollbar pb-1 pt-1" id="chips-roteiros-container">
-        <button class="btn btn-primary rounded-pill btn-sm px-3 fw-medium flex-shrink-0 chip-duracao active" data-duracao="todos">
+        <a href="{{ route('pwa.roteiros') }}" class="btn {{ !request('duracao') ? 'btn-primary' : 'btn-outline-secondary bg-white' }} rounded-pill btn-sm px-3 fw-medium flex-shrink-0">
             Todos os Roteiros
-        </button>
-        <button class="btn btn-outline-secondary rounded-pill btn-sm px-3 fw-medium flex-shrink-0 bg-white chip-duracao" data-duracao="curto">
+        </a>
+        <a href="{{ route('pwa.roteiros', ['duracao' => 'curto']) }}" class="btn {{ request('duracao') === 'curto' ? 'btn-primary' : 'btn-outline-secondary bg-white' }} rounded-pill btn-sm px-3 fw-medium flex-shrink-0">
             <i class="bi bi-clock me-1"></i> Até 4 Horas
-        </button>
-        <button class="btn btn-outline-secondary rounded-pill btn-sm px-3 fw-medium flex-shrink-0 bg-white chip-duracao" data-duracao="dia">
+        </a>
+        <a href="{{ route('pwa.roteiros', ['duracao' => 'dia']) }}" class="btn {{ request('duracao') === 'dia' ? 'btn-primary' : 'btn-outline-secondary bg-white' }} rounded-pill btn-sm px-3 fw-medium flex-shrink-0">
             <i class="bi bi-sun me-1"></i> 1 Dia Completo
-        </button>
-        <button class="btn btn-outline-secondary rounded-pill btn-sm px-3 fw-medium flex-shrink-0 bg-white chip-duracao" data-duracao="fimdesemana">
+        </a>
+        <a href="{{ route('pwa.roteiros', ['duracao' => 'fimdesemana']) }}" class="btn {{ request('duracao') === 'fimdesemana' ? 'btn-primary' : 'btn-outline-secondary bg-white' }} rounded-pill btn-sm px-3 fw-medium flex-shrink-0">
             <i class="bi bi-calendar-range me-1"></i> Fim de Semana
-        </button>
+        </a>
     </div>
 </div>
 
 <div class="container-fluid px-3 py-3 mb-5">
     <div class="d-flex flex-column gap-3" id="container-lista-roteiros">
-        <!-- Renderizado dinamicamente via JS -->
+        @if(isset($roteiros) && $roteiros->count() > 0)
+            @foreach($roteiros as $r)
+                @php
+                    $primeiroAtrativo = $r->itens->first()?->atrativo;
+                    $foto = $primeiroAtrativo?->midias?->first()?->url ?? 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';
+                @endphp
+                <div class="position-relative mb-2">
+                    <a href="{{ route('pwa.roteiro', $r->id) }}" class="card border-0 rounded-4 overflow-hidden shadow-sm text-decoration-none text-dark card-hover-shadow transition-all bg-white d-block">
+                        <div class="position-relative" style="height: 170px;">
+                            <img src="{{ $foto }}" class="w-100 h-100 object-fit-cover" alt="{{ $r->titulo }}" loading="lazy" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';">
+                            @if($r->origem === 'ia')
+                                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2 shadow-sm rounded-pill fw-bold" style="font-size: 0.75rem;"><i class="bi bi-stars"></i> Roteiro IA</span>
+                            @else
+                                <span class="badge bg-success text-white position-absolute top-0 start-0 m-2 shadow-sm rounded-pill fw-bold" style="font-size: 0.75rem;"><i class="bi bi-shield-check"></i> Roteiro Oficial</span>
+                            @endif
+                            
+                            <div class="position-absolute bottom-0 start-0 w-100 p-3" style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);">
+                                <span class="badge bg-primary rounded-pill px-2 py-0.5 text-white small">{{ $r->tema ?? 'Turismo Geral' }}</span>
+                                <h2 class="text-white fw-bold fs-5 mb-0 mt-1">{{ $r->titulo }}</h2>
+                            </div>
+                        </div>
+                        <div class="card-body p-3">
+                            <p class="small text-secondary mb-3" style="line-height: 1.35;">{{ $r->descricao ?? 'Roteiro elaborado para otimizar sua visitação turística com segurança e conforto.' }}</p>
+                            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                                <div class="small text-secondary d-flex align-items-center gap-2">
+                                    <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> <strong>{{ $r->itens->count() }} paradas</strong></span>
+                                    <span><i class="bi bi-clock-fill text-warning me-1"></i> {{ $r->duracao ? ($r->duracao > 60 ? round($r->duracao/60, 1) . ' horas' : $r->duracao . ' min') : '1 Dia' }}</span>
+                                    @if($r->orcamento)
+                                        <span><i class="bi bi-cash-coin text-success me-1"></i> R$ {{ number_format((float)$r->orcamento, 2, ',', '.') }}</span>
+                                    @endif
+                                </div>
+                                <span class="fw-bold text-primary small">Ver Rota <i class="bi bi-chevron-right"></i></span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+        @endif
+
+        <div id="dynamic-ia-roteiros-container"></div>
     </div>
 </div>
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let filtroDuracao = 'todos';
-    const containerRoteiros = document.getElementById('container-lista-roteiros');
-    const chipsContainer = document.getElementById('chips-roteiros-container');
-
-    function renderRoteiros() {
-        if (!window.LocationService || !window.LocationService.getRoteirosByCity) {
-            setTimeout(renderRoteiros, 100);
-            return;
-        }
-
-        const savedLoc = window.LocationService.getSavedLocation() || { city: 'João Pessoa' };
-        let roteirosPadrao = window.LocationService.getRoteirosByCity(savedLoc.city) || [];
-        
+    const dynamicContainer = document.getElementById('dynamic-ia-roteiros-container');
+    
+    function renderSavedIARoteiros() {
+        if (!dynamicContainer) return;
         let meusRoteiros = [];
         try {
             meusRoteiros = JSON.parse(localStorage.getItem('meus_roteiros_ia') || '[]');
         } catch(e) {}
-        
-        let roteirosIA = meusRoteiros.filter(r => r.cidade === savedLoc.city);
-        
-        let roteiros = [...roteirosIA, ...roteirosPadrao];
-        const city = { name: savedLoc.city };
 
-        // Filtro de duração
-        if (filtroDuracao === 'curto') {
-            roteiros = roteiros.filter(r => (r.duracao || '').toLowerCase().includes('4') || (r.duracao || '').toLowerCase().includes('meio') || (r.duracao || '').toLowerCase().includes('2'));
-        } else if (filtroDuracao === 'dia') {
-            roteiros = roteiros.filter(r => (r.duracao || '').toLowerCase().includes('1 dia') || (r.duracao || '').toLowerCase().includes('6 a 8'));
-        } else if (filtroDuracao === 'fimdesemana') {
-            roteiros = roteiros.filter(r => (r.duracao || '').toLowerCase().includes('2 dias') || (r.duracao || '').toLowerCase().includes('fim de semana'));
-        }
+        if (meusRoteiros.length === 0) return;
 
-        if (roteiros.length === 0) {
-            containerRoteiros.innerHTML = `
-                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 text-center">
-                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 bg-light text-primary mx-auto mb-2" style="width: 56px; height: 56px;">
-                        <i class="bi bi-compass fs-3"></i>
-                    </div>
-                    <h6 class="fw-bold text-dark mb-1">Nenhum roteiro específico para este filtro</h6>
-                    <p class="text-muted small mb-3">Você pode gerar um roteiro personalizado com inteligência artificial.</p>
-                    <div>
-                        <a href="/ia" class="btn btn-primary rounded-pill px-4 btn-sm fw-bold">
-                            <i class="bi bi-stars me-1"></i> Gerar com IA
-                        </a>
-                    </div>
-                </div>
-            `;
-            return;
-        }
-
-        containerRoteiros.innerHTML = roteiros.map(r => `
+        dynamicContainer.innerHTML = meusRoteiros.map(r => `
             <div class="position-relative mb-3">
                 <a href="/roteiro/${r.id}" class="card border-0 rounded-4 overflow-hidden shadow-sm text-decoration-none text-dark card-hover-shadow transition-all bg-white d-block">
                     <div class="position-relative" style="height: 170px;">
-                        <img src="${r.imagem || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80'}" class="w-100 h-100 object-fit-cover" alt="${r.titulo}" loading="lazy">
-                        ${r.is_ia ? `<span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2 shadow-sm rounded-pill fw-bold" style="font-size: 0.75rem;"><i class="bi bi-stars"></i> Roteiro IA</span>` : ''}
-                        
+                        <img src="${r.imagem || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80'}" class="w-100 h-100 object-fit-cover" alt="${r.titulo}">
+                        <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2 shadow-sm rounded-pill fw-bold" style="font-size: 0.75rem;"><i class="bi bi-stars"></i> Roteiro IA (Salvo)</span>
                         <div class="position-absolute bottom-0 start-0 w-100 p-3" style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);">
-                            <span class="badge bg-primary rounded-pill px-2 py-0.5 text-white small">${r.cidade || city.name}</span>
+                            <span class="badge bg-primary rounded-pill px-2 py-0.5 text-white small">${r.cidade || 'Seu Destino'}</span>
                             <h2 class="text-white fw-bold fs-5 mb-0 mt-1">${r.titulo}</h2>
                         </div>
                     </div>
                     <div class="card-body p-3">
-                        <p class="small text-secondary mb-3" style="line-height: 1.35;">${r.descricao}</p>
+                        <p class="small text-secondary mb-3">${r.descricao || 'Roteiro gerado pelo assistente de Inteligência Artificial.'}</p>
                         <div class="d-flex align-items-center justify-content-between pt-2 border-top">
                             <div class="small text-secondary d-flex align-items-center gap-2">
                                 <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> <strong>${r.paradas ? r.paradas.length : 3} paradas</strong></span>
-                                <span><i class="bi bi-clock-fill text-warning me-1"></i> ${r.duracao}</span>
+                                <span><i class="bi bi-clock-fill text-warning me-1"></i> ${r.duracao || '2 horas'}</span>
                             </div>
-                            <span class="fw-bold text-primary small">Ver <i class="bi bi-chevron-right"></i></span>
+                            <span class="fw-bold text-primary small">Ver Rota <i class="bi bi-chevron-right"></i></span>
                         </div>
                     </div>
                 </a>
-                ${r.is_ia ? `
-                    <button class="btn btn-danger btn-sm position-absolute rounded-circle shadow-sm btn-delete-ia" data-id="${r.id}" style="top: 8px; right: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;" title="Excluir Roteiro">
-                        <i class="bi bi-trash-fill"></i>
-                    </button>
-                ` : ''}
+                <button class="btn btn-danger btn-sm position-absolute rounded-circle shadow-sm btn-delete-ia" data-id="${r.id}" style="top: 8px; right: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;" title="Excluir Roteiro">
+                    <i class="bi bi-trash-fill"></i>
+                </button>
             </div>
         `).join('');
 
-        // Eventos para deletar
-        containerRoteiros.querySelectorAll('.btn-delete-ia').forEach(btn => {
+        dynamicContainer.querySelectorAll('.btn-delete-ia').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                if(confirm('Deseja realmente apagar este roteiro da IA da sua lista?')) {
+                if (confirm('Deseja excluir este roteiro da IA salvo no seu navegador?')) {
                     const idToRemove = parseInt(this.getAttribute('data-id'));
                     try {
                         let saved = JSON.parse(localStorage.getItem('meus_roteiros_ia') || '[]');
                         saved = saved.filter(r => parseInt(r.id) !== idToRemove);
                         localStorage.setItem('meus_roteiros_ia', JSON.stringify(saved));
-                        renderRoteiros();
+                        renderSavedIARoteiros();
                     } catch(err) {}
                 }
             });
         });
     }
 
-    chipsContainer?.querySelectorAll('.chip-duracao').forEach(btn => {
-        btn.addEventListener('click', function() {
-            chipsContainer.querySelectorAll('.chip-duracao').forEach(b => {
-                b.classList.remove('btn-primary', 'active');
-                b.classList.add('btn-outline-secondary', 'bg-white');
-            });
-            this.classList.remove('btn-outline-secondary', 'bg-white');
-            this.classList.add('btn-primary', 'active');
-            filtroDuracao = this.getAttribute('data-duracao');
-            renderRoteiros();
-        });
-    });
-
-    window.addEventListener('turismo:location-changed', renderRoteiros);
-    renderRoteiros();
+    renderSavedIARoteiros();
 });
 </script>
 @endpush

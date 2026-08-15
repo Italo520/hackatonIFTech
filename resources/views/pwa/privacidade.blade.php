@@ -63,14 +63,17 @@
             </div>
         </div>
 
-        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill mt-3 w-100 fw-semibold" onclick="alert('Preferências de privacidade atualizadas com sucesso!')">
-            Salvar Preferências
+        <button type="button" class="btn btn-primary btn-sm rounded-pill mt-3 w-100 fw-semibold shadow-sm" id="btn-salvar-consentimentos" onclick="saveConsents()">
+            <i class="bi bi-check2-circle me-1"></i> Salvar Preferências
         </button>
+        <div id="consent-feedback" class="mt-2 text-center text-success small fw-medium d-none">
+            <i class="bi bi-shield-fill-check"></i> Suas preferências foram salvas com sucesso no sistema.
+        </div>
     </div>
 
     <!-- Direitos do Titular (Exportação e Exclusão) -->
     <div class="card border-0 rounded-4 shadow-sm p-4 bg-white mb-4">
-        <h5 class="fw-bold text-dark mb-3">Direitos do Titular</h5>
+        <h5 class="fw-bold text-dark mb-3">Direitos do Titular (LGPD)</h5>
         
         <div class="d-flex flex-column gap-2">
             <button class="btn btn-light border rounded-3 p-3 d-flex align-items-center justify-content-between text-start" onclick="exportUserData()">
@@ -78,7 +81,7 @@
                     <i class="bi bi-download text-primary fs-4"></i>
                     <div>
                         <div class="fw-bold small text-dark">Exportar Meus Dados (JSON)</div>
-                        <div class="text-muted" style="font-size: 0.75rem;">Baixe uma cópia dos seus favoritos e histórico local</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">Baixe uma cópia dos seus favoritos, preferências e histórico</div>
                     </div>
                 </div>
                 <i class="bi bi-chevron-right text-muted small"></i>
@@ -88,7 +91,7 @@
                 <div class="d-flex align-items-center gap-3">
                     <i class="bi bi-trash text-danger fs-4"></i>
                     <div>
-                        <div class="fw-bold small text-danger">Excluir e Anonimizar Dados Locais</div>
+                        <div class="fw-bold small text-danger">Excluir e Anonimizar Dados</div>
                         <div class="text-muted" style="font-size: 0.75rem;">Limpa cache, favoritos salvos e redefinição de identificadores</div>
                     </div>
                 </div>
@@ -100,6 +103,38 @@
 
 @push('scripts')
 <script>
+async function saveConsents() {
+    const btn = document.getElementById('btn-salvar-consentimentos');
+    const feedback = document.getElementById('consent-feedback');
+    const payload = {
+        gps: document.getElementById('consent-gps').checked,
+        alertas: document.getElementById('consent-alerts').checked,
+        metricas: document.getElementById('consent-analytics').checked
+    };
+
+    localStorage.setItem('turismo_lgpd_consents', JSON.stringify(payload));
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Salvando...';
+
+    try {
+        await fetch('/api/v1/lgpd/consentimentos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(payload)
+        });
+        feedback.classList.remove('d-none');
+        setTimeout(() => feedback.classList.add('d-none'), 4000);
+    } catch(err) {
+        console.error('Erro ao sincronizar consentimentos:', err);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Salvar Preferências';
+    }
+}
+
 function exportUserData() {
     const data = {
         app: "Destino Inteligente",
@@ -121,10 +156,12 @@ function exportUserData() {
 }
 
 function clearUserData() {
-    if (confirm('Tem certeza que deseja limpar seus dados locais salvos?')) {
+    if (confirm('Tem certeza que deseja limpar seus dados locais e anonimizar seu uso?')) {
         localStorage.removeItem('saved_offline_roteiros');
         localStorage.removeItem('turismo_user_location');
-        alert('Todos os dados locais foram excluídos.');
+        localStorage.removeItem('turismo_lgpd_consents');
+        localStorage.removeItem('meus_roteiros_ia');
+        alert('Todos os dados locais foram excluídos e anonimizados.');
         window.location.reload();
     }
 }

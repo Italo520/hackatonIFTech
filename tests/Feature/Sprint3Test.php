@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\User;
 use App\Models\Prestador;
 use App\Models\Ocorrencia;
 use App\Models\Alerta;
@@ -49,7 +50,9 @@ class Sprint3Test extends TestCase
 
     public function test_admin_can_create_alerta(): void
     {
-        $response = $this->post('/admin/alertas', [
+        $admin = User::factory()->create(['role' => 'super_admin']);
+
+        $response = $this->actingAs($admin)->post('/admin/alertas', [
             'titulo' => 'Alerta de Chuva',
             'corpo' => 'Cuidado com enchentes',
             'urgencia' => 'aviso'

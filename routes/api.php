@@ -35,6 +35,9 @@ Route::prefix('v1')->group(function () {
 });
 Route::prefix('v1')->group(function () {
     Route::post('analytics', [App\Http\Controllers\Api\AnalyticsController::class, 'store']);
+    Route::post('lgpd/consentimentos', [App\Http\Controllers\Api\LGPDController::class, 'salvarConsentimentos']);
+    Route::post('lgpd/exportar', [App\Http\Controllers\Api\LGPDController::class, 'exportData'])->middleware('auth:sanctum');
+    Route::post('lgpd/excluir', [App\Http\Controllers\Api\LGPDController::class, 'deleteData'])->middleware('auth:sanctum');
 });
 Route::prefix('v1/location')->group(function () {
     Route::get('/reverse', [App\Http\Controllers\Api\LocationController::class, 'reverse']);
